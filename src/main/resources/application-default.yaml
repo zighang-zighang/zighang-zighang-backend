@@ -1,0 +1,13 @@
+spring:
+  config:
+    import:
+      - classpath:application.yaml
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/test}
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      username: ${REDIS_USERNAME:default}
+      password: ${REDIS_PASSWORD:default}
+      database: ${REDIS_DATABASE:0}

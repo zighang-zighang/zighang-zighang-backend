@@ -1,0 +1,11 @@
+server:
+  forward-headers-strategy: NATIVE
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  mvc:
+    log-resolved-exception: false
