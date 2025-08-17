@@ -28,4 +28,4 @@ COPY --from=builder --chown=nonroot:nonroot /application/application/ ./
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:+UseG1GC", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-Duser.timezone=Asia/Seoul", "org.springframework.boot.loader.JarLauncher"]
+ENTRYPOINT ["java", "-XX:+UseG1GC", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=production", "org.springframework.boot.loader.launch.JarLauncher"]
