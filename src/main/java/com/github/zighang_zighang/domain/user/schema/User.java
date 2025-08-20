@@ -36,6 +36,7 @@ public class User extends BaseSchema {
     @Getter
     @ToString
     @AllArgsConstructor(staticName = "of")
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class CareerRange {
 
         int start;
@@ -45,6 +46,7 @@ public class User extends BaseSchema {
     @Getter
     @ToString
     @AllArgsConstructor(staticName = "of")
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class OauthProvider {
 
         OauthProviderType type;
