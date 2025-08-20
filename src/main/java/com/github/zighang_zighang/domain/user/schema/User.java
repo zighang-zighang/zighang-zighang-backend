@@ -4,7 +4,7 @@ import com.github.zighang_zighang.domain.recruitment.constant.규모;
 import com.github.zighang_zighang.domain.recruitment.constant.직군.직군;
 import com.github.zighang_zighang.domain.recruitment.constant.직무;
 import com.github.zighang_zighang.domain.recruitment.constant.학력_조건;
-import com.github.zighang_zighang.domain.user.constant.OauthProviderType;
+import com.github.zighang_zighang.domain.user.constant.OAuthProviderType;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -80,7 +80,7 @@ public class User extends BaseSchema {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class OAuthProvider {
 
-        OauthProviderType type;
+        OAuthProviderType type;
         String providerId;
     }
 }
