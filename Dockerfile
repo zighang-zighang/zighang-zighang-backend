@@ -5,12 +5,11 @@ FROM gradle:8.14.3-jdk21-alpine AS builder
 
 WORKDIR /application
 
-COPY gradle gradle
-COPY build.gradle.kts gradlew ./
-RUN ./gradlew dependencies --no-daemon --quiet
+COPY build.gradle.kts ./
+RUN gradle dependencies --no-daemon --quiet
 
 COPY src src
-RUN ./gradlew bootJar -x test --no-daemon --quiet \
+RUN gradle bootJar -x test --no-daemon --quiet \
     && java -Djarmode=layertools -jar build/libs/*.jar extract
 
 ########################
