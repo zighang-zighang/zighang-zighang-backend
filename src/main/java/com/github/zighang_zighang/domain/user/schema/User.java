@@ -8,6 +8,7 @@ import com.github.zighang_zighang.domain.user.constant.OauthProviderType;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -20,34 +21,55 @@ import java.util.List;
 public class User extends BaseSchema {
 
     String name;
+
+    @Indexed(unique = true)
     String email;
+
     String profileImage;
+
     String nickname;
 
-    List<OauthProvider> oauthProvider;
+    @Builder.Default
+    List<OAuthProvider> oauthProviders = List.of();
 
     직무 jobCategory;
-    List<직군> jobPosition;
-    List<규모> companyScale;
-    List<학력_조건> educationRequirement;
+
+    @Builder.Default
+    List<직군> jobPosition = List.of();
+
+    @Builder.Default
+    List<규모> companyScale = List.of();
+
+    @Builder.Default
+    List<학력_조건> educationRequirement = List.of();
+
     CareerRange careerRange;
+
     String receiptEmail;
 
     @Getter
     @ToString
-    @AllArgsConstructor(staticName = "of")
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class CareerRange {
 
         int start;
         int end;
+
+        public static CareerRange of(int start, int end) {
+
+            if (start < 0 || end < 0) throw new IllegalArgumentException("start/end must be ≥ 0");
+            if (start > end) throw new IllegalArgumentException("start must be ≤ end");
+
+            return new CareerRange(start, end);
+        }
     }
 
     @Getter
     @ToString
     @AllArgsConstructor(staticName = "of")
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class OauthProvider {
+    public static class OAuthProvider {
 
         OauthProviderType type;
 
