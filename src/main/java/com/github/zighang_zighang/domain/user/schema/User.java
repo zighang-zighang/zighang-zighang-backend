@@ -6,10 +6,7 @@ import com.github.zighang_zighang.domain.recruitment.constant.직무;
 import com.github.zighang_zighang.domain.recruitment.constant.학력_조건;
 import com.github.zighang_zighang.domain.user.constant.OauthProviderType;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -38,7 +35,7 @@ public class User extends BaseSchema {
 
     @Getter
     @ToString
-    @AllArgsConstructor
+    @AllArgsConstructor(staticName = "of")
     public static class CareerRange {
 
         int start;
@@ -47,7 +44,7 @@ public class User extends BaseSchema {
 
     @Getter
     @ToString
-    @AllArgsConstructor
+    @AllArgsConstructor(staticName = "of")
     public static class OauthProvider {
 
         OauthProviderType type;
