@@ -50,6 +50,8 @@ public class User extends BaseSchema {
     public static class OauthProvider {
 
         OauthProviderType type;
+
+        @ToString.Exclude
         String providerId;
     }
 }
