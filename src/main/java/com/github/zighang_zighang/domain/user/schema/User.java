@@ -8,6 +8,8 @@ import com.github.zighang_zighang.domain.user.constant.OauthProviderType;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,6 +20,13 @@ import java.util.List;
 @ToString
 @Document
 @SuperBuilder(toBuilder = true)
+@CompoundIndexes({
+    @CompoundIndex(
+        name = "uniq_oauth_provider",
+        def = "{'oauthProvider.type': 1, 'oauthProvider.providerId': 1}",
+        unique = true
+    )
+})
 public class User extends BaseSchema {
 
     String name;
@@ -72,8 +81,6 @@ public class User extends BaseSchema {
     public static class OAuthProvider {
 
         OauthProviderType type;
-
-        @ToString.Exclude
         String providerId;
     }
 }
