@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @ToString
 @SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class BaseSchema {
 
     @Id
