@@ -2,3 +2,7 @@ spring:
   config:
     import:
       - classpath:application-default.yaml
+
+logging:
+  level:
+    org.mongodb.driver.protocol.command: info
