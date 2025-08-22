@@ -56,7 +56,7 @@ public class User extends BaseSchema {
 
     String receiptEmail;
 
-    @DBRef
+    @DBRef(lazy = true)
     @Builder.Default
     List<Recruitment> bookmarks = List.of();
 
