@@ -20,7 +20,7 @@ public class Recruitment extends BaseSchema {
     String applicationUrl;
     Company company;
     Metadata metadata;
-    Integer viewCount;
+    int viewCount;
 
     @Getter
     @ToString
