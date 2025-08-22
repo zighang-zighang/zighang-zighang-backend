@@ -58,7 +58,7 @@ public class Recruitment extends BaseSchema {
 
         채용_유형 recruitmentType;
         학력_조건 educations;
-        CareerRange careers;
+        CareerRange careerRange;
         지역 region;
         마감_유형 deadlineType;
     }
