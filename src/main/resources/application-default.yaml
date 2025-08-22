@@ -11,3 +11,7 @@ spring:
       username: ${REDIS_USERNAME:default}
       password: ${REDIS_PASSWORD:default}
       database: ${REDIS_DATABASE:0}
+
+logging:
+  level:
+    org.mongodb.driver.protocol.command: info
