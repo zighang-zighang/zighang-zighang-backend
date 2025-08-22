@@ -8,7 +8,6 @@ import com.github.zighang_zighang.domain.recruitment.schema.Recruitment;
 import com.github.zighang_zighang.domain.user.constant.OAuthProviderType;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -19,9 +18,8 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
+@Builder(toBuilder = true)
 @Document
-@SuperBuilder(toBuilder = true)
 @CompoundIndexes({
     @CompoundIndex(
         name = "uniq_oauth_provider",
@@ -46,20 +44,21 @@ public class User extends BaseSchema {
     직무 jobCategory;
 
     @Builder.Default
-    List<직군> jobPosition = List.of();
+    List<직군> jobPositions = List.of();
 
     @Builder.Default
-    List<규모> companyScale = List.of();
+    List<규모> companyScales = List.of();
 
     @Builder.Default
-    List<학력_조건> educationRequirement = List.of();
+    List<학력_조건> educationRequirements = List.of();
 
     Recruitment.CareerRange careerRange;
 
     String receiptEmail;
 
     @DBRef
-    List<Recruitment> bookmark;
+    @Builder.Default
+    List<Recruitment> bookmarks = List.of();
 
     @Getter
     @ToString

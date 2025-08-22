@@ -3,16 +3,14 @@ package com.github.zighang_zighang.domain.recruitment.schema;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString
+@Builder(toBuilder = true)
 @Document
-@SuperBuilder(toBuilder = true)
 public class Recruitment extends BaseSchema {
 
     플랫폼 platform;
