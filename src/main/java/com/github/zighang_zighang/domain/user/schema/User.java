@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -39,18 +40,18 @@ public class User extends BaseSchema {
     String nickname;
 
     @Builder.Default
-    List<OAuthProvider> oauthProviders = List.of();
+    List<OAuthProvider> oauthProviders = new ArrayList<>();
 
     직무 jobCategory;
 
     @Builder.Default
-    List<직군> jobPositions = List.of();
+    List<직군> jobPositions = new ArrayList<>();
 
     @Builder.Default
-    List<규모> companyScales = List.of();
+    List<규모> companyScales = new ArrayList<>();
 
     @Builder.Default
-    List<학력_조건> educationRequirements = List.of();
+    List<학력_조건> educationRequirements = new ArrayList<>();
 
     Recruitment.CareerRange careerRange;
 
@@ -58,7 +59,7 @@ public class User extends BaseSchema {
 
     @DBRef(lazy = true)
     @Builder.Default
-    List<Recruitment> bookmarks = List.of();
+    List<Recruitment> bookmarks = new ArrayList<>();
 
     @Getter
     @ToString
