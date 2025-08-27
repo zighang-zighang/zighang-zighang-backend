@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.7"
+    id("io.sentry.jvm.gradle") version "5.9.0"
 }
 
 group = "com.github.zighang_zighang"
@@ -42,4 +43,12 @@ dependencies {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+sentry {
+    includeSourceContext = true
+
+    org = System.getenv("SENTRY_ORG")
+    projectName = System.getenv("SENTRY_PROJECT")
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
