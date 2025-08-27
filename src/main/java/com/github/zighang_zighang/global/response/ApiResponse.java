@@ -1,10 +1,12 @@
 package com.github.zighang_zighang.global.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ApiResponse<T> {
 
