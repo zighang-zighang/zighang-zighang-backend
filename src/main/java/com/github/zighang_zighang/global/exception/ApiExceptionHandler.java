@@ -11,8 +11,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @RestControllerAdvice
@@ -82,20 +83,27 @@ public class ApiExceptionHandler {
 //                        scope.setUser(sentryUser);
 //                    }
 
+                    if (throwable instanceof ApiException ae) {
+                        scope.setTag("error.code", ae.getCode().getCode());
+                    }
+
                     Request sentryRequest = scope.getRequest();
-                    if (sentryRequest != null) {
-                        try {
-                            String body = new String(
-                                    request.getInputStream().readAllBytes(),
-                                    request.getCharacterEncoding()
-                            );
 
-                            sentryRequest.setBodySize((long) body.length());
+                    if (Objects.isNull(sentryRequest)) {
+                        sentryRequest = new Request();
+                    }
+
+                    if (request instanceof ContentCachingRequestWrapper wrapper) {
+                        byte[] content = wrapper.getContentAsByteArray();
+
+                        if (content.length > 0) {
+                            String body = new String(content, StandardCharsets.UTF_8);
+
+                            sentryRequest.setBodySize((long) content.length);
                             sentryRequest.setData(body);
-
-                            scope.setRequest(sentryRequest);
-                        } catch (IOException ignored) {
                         }
+
+                        scope.setRequest(sentryRequest);
                     }
                 }
         );
