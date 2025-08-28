@@ -56,7 +56,7 @@ public class ApiExceptionHandler {
     public ApiResponse<?> apiException(ApiException e, HttpServletRequest request) {
 
         sentry(e, request);
-        return ApiResponse.error(GlobalExceptionCode.EXCEPTION.getCode(), e.getMessage());
+        return e.getCode().toResponse();
     }
 
     @ExceptionHandler(Exception.class)
