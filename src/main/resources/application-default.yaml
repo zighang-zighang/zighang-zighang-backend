@@ -2,9 +2,15 @@ spring:
   config:
     import:
       - classpath:application.yaml
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:zighang_zighang}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:root}
   data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/test}
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
@@ -17,7 +23,3 @@ spring:
     port: ${OPENSEARCH_PORT:9200}
     username: ${OPENSEARCH_USERNAME:admin}
     password: ${OPENSEARCH_PASSWORD:admin}
-
-logging:
-  level:
-    org.mongodb.driver.protocol.command: info

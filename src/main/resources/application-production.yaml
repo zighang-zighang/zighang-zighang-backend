@@ -2,13 +2,13 @@ spring:
   config:
     import:
       - classpath:application-default.yaml
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
 
 sentry:
   dsn: ${SENTRY_DSN}
   max-request-body-size: always
   send-default-pii: true
   traces-sample-rate: 1.0
-
-logging:
-  level:
-    org.mongodb.driver.protocol.command: info

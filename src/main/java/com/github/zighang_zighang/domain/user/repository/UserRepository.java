@@ -1,7 +1,9 @@
 package com.github.zighang_zighang.domain.user.repository;
 
-import com.github.zighang_zighang.domain.user.schema.User;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import com.github.zighang_zighang.domain.user.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends MongoRepository<User, String> {
+import java.util.UUID;
+
+public interface UserRepository extends JpaRepository<User, UUID> {
 }
