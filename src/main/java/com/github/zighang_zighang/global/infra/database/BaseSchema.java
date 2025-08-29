@@ -42,13 +42,14 @@ public abstract class BaseSchema {
 
         if (this == obj) return true;
         if (!(obj instanceof BaseSchema that)) return false;
+        if (this.id == null || that.id == null) return false;
 
-        return Objects.equals(id, that.id);
+        return this.id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
 
-        return id.hashCode();
+        return Objects.hashCode(id);
     }
 }
