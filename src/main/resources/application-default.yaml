@@ -12,6 +12,7 @@ spring:
       password: ${REDIS_PASSWORD:default}
       database: ${REDIS_DATABASE:0}
   opensearch:
+    scheme: ${OPENSEARCH_SCHEME:http}
     host: ${OPENSEARCH_HOST:localhost}
     port: ${OPENSEARCH_PORT:9200}
     username: ${OPENSEARCH_USERNAME:admin}

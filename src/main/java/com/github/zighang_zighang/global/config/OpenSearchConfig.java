@@ -9,7 +9,6 @@ import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.URIScheme;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.transport.httpclient5.ApacheHttpClient5Transport;
@@ -33,7 +32,7 @@ public class OpenSearchConfig {
     public OpenSearchClient openSearchClient() {
 
         HttpHost host = new HttpHost(
-                URIScheme.HTTPS.getId(),
+                openSearchProperty.getScheme().getId(),
                 openSearchProperty.getHost(),
                 openSearchProperty.getPort()
         );
@@ -59,7 +58,11 @@ public class OpenSearchConfig {
     @Bean
     public BasicCredentialsProvider basicCredentialsProvider() {
 
-        HttpHost host = new HttpHost(URIScheme.HTTPS.getId(), openSearchProperty.getHost(), openSearchProperty.getPort());
+        HttpHost host = new HttpHost(
+                openSearchProperty.getScheme().getId(),
+                openSearchProperty.getHost(),
+                openSearchProperty.getPort()
+        );
 
         BasicCredentialsProvider credentials = new BasicCredentialsProvider();
 
