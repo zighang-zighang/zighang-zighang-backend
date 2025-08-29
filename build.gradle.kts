@@ -20,6 +20,10 @@ configurations {
     }
 }
 
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
+}
+
 springBoot {
     buildInfo()
 }
@@ -38,7 +42,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
     implementation("org.opensearch.client:opensearch-java:3.2.0")
-    implementation("org.opensearch.client:opensearch-rest-client:3.2.0")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.5")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
