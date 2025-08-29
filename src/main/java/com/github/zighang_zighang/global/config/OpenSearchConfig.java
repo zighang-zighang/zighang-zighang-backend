@@ -31,13 +31,19 @@ public class OpenSearchConfig {
     @SneakyThrows
     public OpenSearchClient openSearchClient() {
 
+        return new OpenSearchClient(httpClient5Transport());
+    }
+
+    @Bean(destroyMethod = "close")
+    public ApacheHttpClient5Transport httpClient5Transport() {
+
         HttpHost host = new HttpHost(
                 openSearchProperty.getScheme().getId(),
                 openSearchProperty.getHost(),
                 openSearchProperty.getPort()
         );
 
-        ApacheHttpClient5Transport transport = ApacheHttpClient5TransportBuilder.builder(host)
+        return ApacheHttpClient5TransportBuilder.builder(host)
                 .setHttpClientConfigCallback(builder -> builder
                         .setDefaultCredentialsProvider(basicCredentialsProvider())
                         .setConnectionManager(
@@ -51,8 +57,6 @@ public class OpenSearchConfig {
                         )
                 )
                 .build();
-
-        return new OpenSearchClient(transport);
     }
 
     @Bean
