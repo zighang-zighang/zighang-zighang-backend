@@ -9,3 +9,8 @@ server:
 spring:
   mvc:
     log-resolved-exception: false
+  jpa:
+    open-in-view: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
