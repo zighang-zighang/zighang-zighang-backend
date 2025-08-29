@@ -28,7 +28,6 @@ public class OpenSearchConfig {
     private final OpenSearchProperty openSearchProperty;
 
     @Bean
-    @SneakyThrows
     public OpenSearchClient openSearchClient() {
 
         return new OpenSearchClient(httpClient5Transport());
