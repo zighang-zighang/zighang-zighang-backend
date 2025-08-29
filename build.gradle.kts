@@ -20,6 +20,10 @@ configurations {
     }
 }
 
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
+}
+
 springBoot {
     buildInfo()
 }
@@ -37,6 +41,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
     runtimeOnly("com.mysql:mysql-connector-j")
+
+    implementation("org.opensearch.client:opensearch-java:3.2.0")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.5")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
