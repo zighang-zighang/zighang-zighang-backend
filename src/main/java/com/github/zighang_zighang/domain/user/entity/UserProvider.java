@@ -8,7 +8,7 @@ import lombok.*;
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(name = "unique_user_provider_type_provider_id", columnNames = {"type", "providerId"}),
-        @UniqueConstraint(name = "unique_user_provider_user_type", columnNames = {"user", "type"})
+        @UniqueConstraint(name = "unique_user_provider_user_type", columnNames = {"user_id", "type"})
 })
 @Getter
 @Setter
@@ -17,7 +17,7 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserProvider extends BaseSchema {
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
