@@ -35,10 +35,4 @@ public class UserController {
 
         return ApiResponse.ok(profile);
     }
-
-    @GetMapping("/{userId}")
-    public ApiResponse<User> getUserById(@PathVariable Long userId) {
-        // 실제 구현에서는 사용자 조회 로직 추가
-        return ApiResponse.ok(null);
-    }
 }
