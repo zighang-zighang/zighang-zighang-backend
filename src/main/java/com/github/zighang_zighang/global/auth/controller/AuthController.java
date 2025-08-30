@@ -70,6 +70,23 @@ public class AuthController {
 
     // OAuth2 제공자별 이메일 추출
     private String getEmailFromPrincipal(OAuth2User principal) {
+        // 네이버의 경우 response.email에서 이메일 추출
+        Object response = principal.getAttribute("response");
+        log.info("네이버 response 속성: {}", response);
+        
+        if (response instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> resp = (java.util.Map<String, Object>) response;
+            log.info("네이버 response 맵: {}", resp);
+            
+            String email = (String) resp.get("email");
+            log.info("네이버에서 추출한 이메일: {}", email);
+            
+            if (email != null) {
+                return email;
+            }
+        }
+        
         // 카카오의 경우 kakao_account.email에서 이메일 추출
         Object kakaoAccount = principal.getAttribute("kakao_account");
         if (kakaoAccount instanceof java.util.Map) {
@@ -93,6 +110,17 @@ public class AuthController {
 
     // OAuth2 제공자별 이름 추출
     private String getNameFromPrincipal(OAuth2User principal) {
+        // 네이버의 경우 response.name에서 이름 추출
+        Object response = principal.getAttribute("response");
+        if (response instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> resp = (java.util.Map<String, Object>) response;
+            String name = (String) resp.get("name");
+            if (name != null) {
+                return name;
+            }
+        }
+        
         // 카카오의 경우 properties.nickname에서 이름 추출
         Object properties = principal.getAttribute("properties");
         if (properties instanceof java.util.Map) {
@@ -147,12 +175,25 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String login() {
-        return """
-            <h1>로그인 페이지</h1>
-            <p>소셜 로그인으로 로그인하세요</p>
-            <p><a href="/oauth2/authorization/google" style="background: #4285f4; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 5px;">Google로 로그인</a></p>
-            <p><a href="/oauth2/authorization/kakao" style="background: #FEE500; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 5px;">카카오로 로그인</a></p>
-            """;
+    public String login(@RequestParam(value = "error", required = false) String error, 
+                       @RequestParam(value = "details", required = false) String details) {
+        StringBuilder html = new StringBuilder();
+        html.append("<h1>로그인 페이지</h1>");
+        
+        if (error != null) {
+            html.append("<div style='background: #ffebee; color: #c62828; padding: 10px; border-radius: 4px; margin: 10px 0;'>");
+            html.append("<strong>로그인 오류:</strong> ").append(error);
+            if (details != null) {
+                html.append("<br><strong>오류 상세:</strong> ").append(details);
+            }
+            html.append("</div>");
+        }
+        
+        html.append("<p>소셜 로그인으로 로그인하세요</p>");
+        html.append("<p><a href=\"/oauth2/authorization/google\" style=\"background: #4285f4; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 5px;\">Google로 로그인</a></p>");
+        html.append("<p><a href=\"/oauth2/authorization/kakao\" style=\"background: #FEE500; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 5px;\">카카오로 로그인</a></p>");
+        html.append("<p><a href=\"/oauth2/authorization/naver\" style=\"background: #03C75A; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 5px;\">네이버로 로그인</a></p>");
+        
+        return html.toString();
     }
 }

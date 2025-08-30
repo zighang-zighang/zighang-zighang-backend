@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.global.config;
 
 import com.github.zighang_zighang.global.auth.filter.JwtAuthenticationFilter;
+import com.github.zighang_zighang.global.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -34,6 +36,15 @@ public class SecurityConfig {
                 .redirectionEndpoint(redirection -> redirection
                     .baseUri("/login/oauth2/code/*")
                 )
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .failureUrl("/login?error=oauth2")
+                .failureHandler((request, response, exception) -> {
+                    System.err.println("OAuth2 로그인 실패: " + exception.getMessage());
+                    exception.printStackTrace();
+                    response.sendRedirect("/login?error=oauth2&details=" + exception.getClass().getSimpleName());
+                })
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
