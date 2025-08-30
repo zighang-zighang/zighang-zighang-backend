@@ -15,6 +15,8 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import org.springframework.security.core.AuthenticationException;
+import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -29,6 +31,13 @@ public class ApiExceptionHandler {
     public ApiResponse<?> authorizationDeniedException(AuthorizationDeniedException ignored) {
 
         return GlobalExceptionCode.NOT_PERMITTED.toResponse();
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ApiResponse<?> authenticationException(AuthenticationException e, HttpServletRequest request) {
+        
+        sentry(e, request);
+        return AuthExceptionCode.OAUTH2_FAILURE.toResponse();
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
