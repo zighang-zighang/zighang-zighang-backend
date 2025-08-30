@@ -46,6 +46,47 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
         }
         
+        // 카카오의 경우
+        if ("kakao".equals(userRequest.getClientRegistration().getRegistrationId())) {
+            Long providerId = oauth2User.getAttribute("id");  // Long으로 직접 캐스팅
+            
+            String email = null;
+            Object kakaoAccount = oauth2User.getAttribute("kakao_account");
+            if (kakaoAccount instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> account = (Map<String, Object>) kakaoAccount;
+                email = (String) account.get("email");
+            }
+            String name = null;
+            Object properties = oauth2User.getAttribute("properties");
+            if (properties instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> props = (Map<String, Object>) properties;
+                name = (String) props.get("nickname");
+            }
+            
+            log.info("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", providerId, email, name);
+            
+            // nameAttributeKey를 "id"로 설정 (application.yaml의 user-name-attribute와 일치)
+            return new DefaultOAuth2User(
+                oauth2User.getAuthorities(),
+                oauth2User.getAttributes(),  // 원본 속성 그대로 유지
+                "id"  // nameAttributeKey를 "id"로 설정
+            );
+        }
+        
+        // 구글의 경우
+        if ("google".equals(userRequest.getClientRegistration().getRegistrationId())) {
+            String providerId = oauth2User.getAttribute("sub");
+            String email = oauth2User.getAttribute("email");
+            String name = oauth2User.getAttribute("name");
+            
+            log.info("구글 사용자 정보 - ID: {}, Email: {}, Name: {}", providerId, email, name);
+        }
+        
+        // 모든 제공자에 대해 로깅
+        log.info("OAuth2 사용자 정보 로드 완료 - Provider: {}", userRequest.getClientRegistration().getRegistrationId());
+        
         // 다른 제공자들은 그대로 반환
         return oauth2User;
     }

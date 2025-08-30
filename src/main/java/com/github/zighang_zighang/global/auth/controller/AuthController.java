@@ -6,6 +6,7 @@ import com.github.zighang_zighang.global.auth.service.TokenStorageService;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.exception.ApiException;
 import com.github.zighang_zighang.global.response.ApiResponse;
+import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,12 +40,15 @@ public class AuthController {
         
         String email = getEmailFromPrincipal(principal);
         String name = getNameFromPrincipal(principal);
+        Object providerId = getProviderIdFromPrincipal(principal);
+        ProviderType providerType = getProviderTypeFromPrincipal(principal);
         
-        log.info("추출된 이메일: {}, 이름: {}", email, name);
+        log.info("추출된 이메일: {}, 이름: {}, 제공자 ID: {}, 제공자 타입: {}", 
+                email, name, providerId, providerType);
         
         try {
-            // OAuth2 사용자 정보로 JWT 토큰 발급
-            LoginResponse tokenResponse = authService.oauth2Login(email, name);
+            // OAuth2 사용자 정보로 JWT 토큰 발급 (제공자 정보 포함)
+            LoginResponse tokenResponse = authService.oauth2Login(email, name, providerType, providerId);
             
             // 토큰을 Redis에 개별적으로 임시 저장 (프론트엔드에서 조회할 수 있도록)
             String tempTokenId = java.util.UUID.randomUUID().toString();
@@ -140,6 +144,54 @@ public class AuthController {
         
         // 이름이 없는 경우 기본값 반환 (이름은 선택적)
         return "Unknown User";
+    }
+
+    // OAuth2 제공자별 제공자 ID 추출
+    private Object getProviderIdFromPrincipal(OAuth2User principal) {
+        // 네이버의 경우 response.id에서 제공자 ID 추출 (String)
+        Object response = principal.getAttribute("response");
+        if (response instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> resp = (java.util.Map<String, Object>) response;
+            String id = (String) resp.get("id");
+            if (id != null) {
+                return id;
+            }
+        }
+        
+        // 카카오의 경우 id에서 제공자 ID 추출 (Long)
+        Long id = principal.getAttribute("id");
+        if (id != null) {
+            return id;
+        }
+        
+        // Google의 경우 sub에서 제공자 ID 추출 (String)
+        String sub = principal.getAttribute("sub");
+        if (sub != null) {
+            return sub;
+        }
+        
+        throw new ApiException(AuthExceptionCode.EMAIL_NOT_PROVIDED);
+    }
+
+    // OAuth2 제공자 타입 추출
+    private ProviderType getProviderTypeFromPrincipal(OAuth2User principal) {
+        // 네이버의 경우 response 속성이 있으면 NAVER
+        if (principal.getAttribute("response") != null) {
+            return ProviderType.NAVER;
+        }
+        
+        // 카카오의 경우 kakao_account 속성이 있으면 KAKAO
+        if (principal.getAttribute("kakao_account") != null) {
+            return ProviderType.KAKAO;
+        }
+        
+        // Google의 경우 sub 속성이 있으면 GOOGLE
+        if (principal.getAttribute("sub") != null) {
+            return ProviderType.GOOGLE;
+        }
+        
+        throw new ApiException(AuthExceptionCode.EMAIL_NOT_PROVIDED);
     }
 
     // 임시 토큰 ID로 JWT 토큰 조회 (프론트엔드에서 호출)
