@@ -1,5 +1,8 @@
 package com.github.zighang_zighang.domain.recruitment.constant;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum CompanySize {
     대기업,
     유니콘,

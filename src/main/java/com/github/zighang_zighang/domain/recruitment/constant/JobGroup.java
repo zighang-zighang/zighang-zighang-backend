@@ -1,5 +1,8 @@
 package com.github.zighang_zighang.domain.recruitment.constant;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum JobGroup {
     서버_백엔드,
     프론트엔드,
@@ -69,7 +72,7 @@ public enum JobGroup {
     패키지,
     광고_콘텐츠,
     영상_모션,
-    _3D_VFX,
+    THREE_D_VFX,
     출판_편집,
     건축_공공_조경디자인,
     패션_텍스타일,
