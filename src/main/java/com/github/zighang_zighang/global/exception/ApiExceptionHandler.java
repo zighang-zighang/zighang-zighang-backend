@@ -17,9 +17,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.springframework.security.core.AuthenticationException;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
     @ExceptionHandler({NoResourceFoundException.class, HttpRequestMethodNotSupportedException.class})
     public ApiResponse<?> noResourceFoundException(Exception ignored) {
@@ -35,6 +39,10 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ApiResponse<?> authenticationException(AuthenticationException e, HttpServletRequest request) {
+        
+        log.error("OAuth2 인증 실패 상세 정보:", e);
+        log.error("요청 URL: {}", request.getRequestURL());
+        log.error("요청 파라미터: {}", request.getQueryString());
         
         sentry(e, request);
         return AuthExceptionCode.OAUTH2_FAILURE.toResponse();

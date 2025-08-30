@@ -11,10 +11,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final AuthService authService;
     private final TokenStorageService tokenStorageService;
@@ -27,8 +31,14 @@ public class AuthController {
             return;
         }
 
-        String email = principal.getAttribute("email");
-        String name = principal.getAttribute("name");
+        // 디버깅을 위한 로깅 추가
+        log.info("OAuth2 로그인 성공 - Principal: {}", principal);
+        log.info("OAuth2 사용자 속성들: {}", principal.getAttributes());
+        
+        String email = getEmailFromPrincipal(principal);
+        String name = getNameFromPrincipal(principal);
+        
+        log.info("추출된 이메일: {}, 이름: {}", email, name);
         
         try {
             // OAuth2 사용자 정보로 JWT 토큰 발급
@@ -54,6 +64,28 @@ public class AuthController {
             response.sendRedirect("https://zighang-zighang-frontend.vercel.app/auth/error?message=" + 
                                java.net.URLEncoder.encode(errorMessage, java.nio.charset.StandardCharsets.UTF_8));
         }
+    }
+
+    // OAuth2 제공자별 이메일 추출
+    private String getEmailFromPrincipal(OAuth2User principal) {
+        // 카카오의 경우 account_email에서 이메일 추출
+        String email = principal.getAttribute("account_email");
+        if (email == null) {
+            // Google의 경우 email에서 추출
+            email = principal.getAttribute("email");
+        }
+        return email != null ? email : "unknown@example.com";
+    }
+
+    // OAuth2 제공자별 이름 추출
+    private String getNameFromPrincipal(OAuth2User principal) {
+        // 카카오의 경우 profile_nickname에서 이름 추출
+        String name = principal.getAttribute("profile_nickname");
+        if (name == null) {
+            // Google의 경우 name에서 추출
+            name = principal.getAttribute("name");
+        }
+        return name != null ? name : "Unknown User";
     }
 
     // 임시 토큰 ID로 JWT 토큰 조회 (프론트엔드에서 호출)
@@ -92,8 +124,9 @@ public class AuthController {
     public String login() {
         return """
             <h1>로그인 페이지</h1>
-            <p>Google OAuth2로 로그인하세요</p>
-            <p><a href="/oauth2/authorization/google">Google로 로그인</a></p>
+            <p>소셜 로그인으로 로그인하세요</p>
+            <p><a href="/oauth2/authorization/google" style="background: #4285f4; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 5px;">Google로 로그인</a></p>
+            <p><a href="/oauth2/authorization/kakao" style="background: #FEE500; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 5px;">카카오로 로그인</a></p>
             """;
     }
 }
