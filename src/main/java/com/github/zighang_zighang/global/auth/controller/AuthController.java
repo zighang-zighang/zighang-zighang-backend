@@ -3,6 +3,8 @@ package com.github.zighang_zighang.global.auth.controller;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
+import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
+import com.github.zighang_zighang.global.exception.ApiException;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -68,24 +70,48 @@ public class AuthController {
 
     // OAuth2 제공자별 이메일 추출
     private String getEmailFromPrincipal(OAuth2User principal) {
-        // 카카오의 경우 account_email에서 이메일 추출
-        String email = principal.getAttribute("account_email");
-        if (email == null) {
-            // Google의 경우 email에서 추출
-            email = principal.getAttribute("email");
+        // 카카오의 경우 kakao_account.email에서 이메일 추출
+        Object kakaoAccount = principal.getAttribute("kakao_account");
+        if (kakaoAccount instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> account = (java.util.Map<String, Object>) kakaoAccount;
+            String email = (String) account.get("email");
+            if (email != null) {
+                return email;
+            }
         }
-        return email != null ? email : "unknown@example.com";
+        
+        // Google의 경우 email에서 추출
+        String email = principal.getAttribute("email");
+        if (email != null) {
+            return email;
+        }
+        
+        // 이메일이 없는 경우 ApiException 발생 (이메일은 필수)
+        throw new ApiException(AuthExceptionCode.EMAIL_NOT_PROVIDED);
     }
 
     // OAuth2 제공자별 이름 추출
     private String getNameFromPrincipal(OAuth2User principal) {
-        // 카카오의 경우 profile_nickname에서 이름 추출
-        String name = principal.getAttribute("profile_nickname");
-        if (name == null) {
-            // Google의 경우 name에서 추출
-            name = principal.getAttribute("name");
+        // 카카오의 경우 properties.nickname에서 이름 추출
+        Object properties = principal.getAttribute("properties");
+        if (properties instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> props = (java.util.Map<String, Object>) properties;
+            String nickname = (String) props.get("nickname");
+            if (nickname != null) {
+                return nickname;
+            }
         }
-        return name != null ? name : "Unknown User";
+        
+        // Google의 경우 name에서 추출
+        String name = principal.getAttribute("name");
+        if (name != null) {
+            return name;
+        }
+        
+        // 이름이 없는 경우 기본값 반환 (이름은 선택적)
+        return "Unknown User";
     }
 
     // 임시 토큰 ID로 JWT 토큰 조회 (프론트엔드에서 호출)
