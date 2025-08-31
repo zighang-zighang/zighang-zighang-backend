@@ -2,8 +2,6 @@ package com.github.zighang_zighang.domain.recruitment.dto.response;
 
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
-import com.github.zighang_zighang.domain.recruitment.entity.recruitment.Experience;
-import com.github.zighang_zighang.domain.recruitment.entity.recruitment.JobPosition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,35 +14,53 @@ import java.util.List;
 @AllArgsConstructor(staticName = "of")
 public class RecruitmentResponse {
 
-    @Schema(description = "회사 이름")
-    String companyName;
+    @Schema(description = "공고 ID")
+    String id;
 
     @Schema(description = "채용 공고 제목")
     String title;
 
-    @Schema(description = "직무")
-    List<JobPositionDto> jobPositions;
+    @Schema(description = "채용 공고 URL")
+    String recruitmentUrl;
+
+    @Schema(description = "공고 이미지 URL")
+    String imageUrl;
+
+    @Schema(description = "근무지 목록")
+    List<Location> locations;
+
+    @Schema(description = "최소 경력 (년)")
+    Integer minExperience;
+
+    @Schema(description = "최대 경력 (년)")
+    Integer maxExperience;
+
+    @Schema(description = "학력 조건 목록")
+    List<Education> educations;
 
     @Schema(description = "채용 시작일")
-    LocalDateTime recruitmentStart;
+    LocalDateTime startDate;
 
     @Schema(description = "채용 마감일")
-    LocalDateTime recruitmentEnd;
+    LocalDateTime endDate;
 
     @Schema(description = "마감 타입")
-    EndType endType;
+    EndType deadlineType;
 
-    @Schema(description = "근무지")
-    Location location;
+    @Schema(description = "고용 형태 목록")
+    List<EmploymentType> employmentTypes;
 
-    @Schema(description = "학력")
-    Education education;
+    @Schema(description = "직무 목록")
+    List<Job> jobs;
 
-    @Schema(description = "경력")
-    ExperienceDto experience;
+    @Schema(description = "직무 카테고리 목록")
+    List<JobGroup> jobCategories;
 
-    @Schema(description = "고용 형태")
-    EmploymentType employmentType;
+    @Schema(description = "회사 이름")
+    String companyName;
+
+    @Schema(description = "회사 이미지 URL")
+    String companyImageUrl;
 
     @Schema(description = "회사 규모")
     CompanySize companySize;
@@ -52,65 +68,23 @@ public class RecruitmentResponse {
     public static RecruitmentResponse from(Recruitment recruitment) {
 
         return RecruitmentResponse.of(
-                recruitment.getCompanyName(),
+                recruitment.getId(),
                 recruitment.getTitle(),
-                recruitment.getJobPositions().stream().map(JobPositionDto::from).toList(),
-                recruitment.getRecruitmentStart(),
-                recruitment.getRecruitmentEnd(),
-                recruitment.getEndType(),
-                recruitment.getLocation(),
-                recruitment.getEducation(),
-                ExperienceDto.from(recruitment.getExperience()),
-                recruitment.getEmploymentType(),
+                recruitment.getRecruitmentUrl(),
+                recruitment.getImageUrl(),
+                recruitment.getLocations(),
+                recruitment.getMinExperience(),
+                recruitment.getMaxExperience(),
+                recruitment.getEducations(),
+                recruitment.getStartDate(),
+                recruitment.getEndDate(),
+                recruitment.getDeadlineType(),
+                recruitment.getEmploymentTypes(),
+                recruitment.getJobs(),
+                recruitment.getJobCategories(),
+                recruitment.getCompanyName(),
+                recruitment.getCompanyImageUrl(),
                 recruitment.getCompanySize()
         );
-    }
-
-    @Schema
-    @Getter
-    @AllArgsConstructor(staticName = "of")
-    public static class JobPositionDto {
-
-        @Schema(description = "직무 제목")
-        String title;
-
-        @Schema(description = "직무")
-        Job job;
-
-        @Schema(description = "직무 그룹")
-        JobGroup jobGroup;
-
-        @Schema(description = "직무 설명")
-        String jobDescription;
-
-        public static JobPositionDto from(JobPosition jobPosition) {
-
-            return JobPositionDto.of(
-                    jobPosition.getTitle(),
-                    jobPosition.getJob(),
-                    jobPosition.getJobGroup(),
-                    jobPosition.getJobDescription()
-            );
-        }
-    }
-
-    @Schema
-    @Getter
-    @AllArgsConstructor(staticName = "of")
-    public static class ExperienceDto {
-
-        @Schema(description = "최소 경력 (년)")
-        Integer minExperience;
-
-        @Schema(description = "최대 경력 (년)")
-        Integer maxExperience;
-
-        public static ExperienceDto from(Experience experience) {
-
-            return ExperienceDto.of(
-                    experience.getMinExperience(),
-                    experience.getMaxExperience()
-            );
-        }
     }
 }
