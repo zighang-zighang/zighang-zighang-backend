@@ -2,10 +2,10 @@ package com.github.zighang_zighang.domain.recruitment.controller;
 
 import com.github.zighang_zighang.domain.recruitment.api.RecruitmentApi;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
-import com.github.zighang_zighang.domain.recruitment.dto.response.PageResponse;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.service.RecruitmentService;
 import com.github.zighang_zighang.global.response.ApiResponse;
+import com.github.zighang_zighang.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,9 +41,9 @@ public class RecruitmentController implements RecruitmentApi {
             @RequestParam(defaultValue = "20") Integer size
     ) {
 
-        return ApiResponse.ok(PageResponse.from(recruitmentService.getRecruitments(
+        return ApiResponse.ok(recruitmentService.getRecruitments(
                 jobs, jobCategories, employmentTypes, educations,
                 minExperience, maxExperience, locations, deadlineTypes, page, size
-        )));
+        ));
     }
 }

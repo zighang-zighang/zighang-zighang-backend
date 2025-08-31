@@ -2,7 +2,7 @@ package com.github.zighang_zighang.domain.recruitment.repository;
 
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
-import org.springframework.data.domain.Page;
+import com.github.zighang_zighang.global.response.PageResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +12,7 @@ public interface RecruitmentRepository {
 
     Optional<Recruitment> findById(UUID id);
 
-    Page<Recruitment> findByFilters(
+    PageResponse<Recruitment> findByFilters(
             List<Job> jobs,
             List<JobCategory> jobCategories,
             List<EmploymentType> employmentTypes,

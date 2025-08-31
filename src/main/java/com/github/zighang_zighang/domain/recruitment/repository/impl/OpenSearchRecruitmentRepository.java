@@ -3,6 +3,8 @@ package com.github.zighang_zighang.domain.recruitment.repository.impl;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
+import com.github.zighang_zighang.global.response.PageInfo;
+import com.github.zighang_zighang.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +14,6 @@ import org.opensearch.client.opensearch.core.GetRequest;
 import org.opensearch.client.opensearch.core.SearchRequest;
 import org.opensearch.client.opensearch.core.SearchResponse;
 import org.opensearch.client.opensearch.core.search.Hit;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
 
     @Override
     @SneakyThrows(IOException.class)
-    public Page<Recruitment> findByFilters(
+    public PageResponse<Recruitment> findByFilters(
             List<Job> jobs,
             List<JobCategory> jobCategories,
             List<EmploymentType> employmentTypes,
@@ -86,10 +85,9 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
                 CLASS
         );
 
-        return new PageImpl<>(
+        return PageResponse.of(
                 response.hits().hits().stream().map(Hit::source).toList(),
-                PageRequest.of(page, size),
-                response.hits().total() != null ? response.hits().total().value() : 0
+                PageInfo.of(size, page, response.hits().total() != null ? response.hits().total().value() : 0)
         );
     }
 }

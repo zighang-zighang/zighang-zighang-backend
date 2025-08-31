@@ -1,9 +1,9 @@
 package com.github.zighang_zighang.domain.recruitment.api;
 
 import com.github.zighang_zighang.domain.recruitment.constant.*;
-import com.github.zighang_zighang.domain.recruitment.dto.response.PageResponse;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.global.response.ApiResponse;
+import com.github.zighang_zighang.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

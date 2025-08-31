@@ -4,8 +4,9 @@ import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
+import com.github.zighang_zighang.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class RecruitmentService {
 
     private final RecruitmentRepository recruitmentRepository;
 
+    @Cacheable(value = "recruitment", key = "#id")
     public RecruitmentResponse getRecruitment(UUID id) {
 
         Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(RECRUITMENT_NOT_FOUND::toException);
@@ -26,7 +28,12 @@ public class RecruitmentService {
         return RecruitmentResponse.from(recruitment);
     }
 
-    public Page<RecruitmentResponse> getRecruitments(
+    @Cacheable(
+            value = "recruitments",
+            key = "T(java.util.Objects).hash(#jobs, #jobCategories, #employmentTypes, #educations," +
+                    "#minExperience, #maxExperience, #locations, #deadlineTypes, #page, #size)"
+    )
+    public PageResponse<RecruitmentResponse> getRecruitments(
             List<Job> jobs,
             List<JobCategory> jobCategories,
             List<EmploymentType> employmentTypes,
@@ -39,7 +46,7 @@ public class RecruitmentService {
             Integer size
     ) {
 
-        Page<Recruitment> recruitments = recruitmentRepository.findByFilters(
+        PageResponse<Recruitment> recruitments = recruitmentRepository.findByFilters(
                 jobs, jobCategories, employmentTypes, educations,
                 minExperience, maxExperience, locations, deadlineTypes, page, size
         );

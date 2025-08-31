@@ -2,6 +2,7 @@ package com.github.zighang_zighang.global.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,27 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
 
+        return RedisCacheManager.builder(redisConnectionFactory)
+                .cacheDefaults(redisCacheConfiguration())
+                .build();
+    }
+
+    @Bean
+    public RedisCacheConfiguration redisCacheConfiguration() {
+
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1))
+                .serializeKeysWith(fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(fromSerializer(new GenericJackson2JsonRedisSerializer(cacheObjectMapper())))
+                .disableCachingNullValues();
+    }
+
+    @Bean(defaultCandidate = false, name = "cacheObjectMapper")
+    public ObjectMapper cacheObjectMapper() {
+
         ObjectMapper objectMapper = new ObjectMapper();
+
+        objectMapper.registerModule(new JavaTimeModule());
 
         objectMapper.activateDefaultTyping(
                 objectMapper.getPolymorphicTypeValidator(),
@@ -31,14 +52,6 @@ public class CacheConfig {
                 JsonTypeInfo.As.PROPERTY
         );
 
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofHours(1))
-                .serializeKeysWith(fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
-                .disableCachingNullValues();
-
-        return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(config)
-                .build();
+        return objectMapper;
     }
 }
