@@ -71,25 +71,17 @@ public class RecruitmentResponse {
     @AllArgsConstructor(staticName = "of")
     public static class JobPositionDto {
 
-        @Schema(description = "직무 제목")
-        String title;
-
         @Schema(description = "직무")
         Job job;
 
         @Schema(description = "직무 그룹")
         JobGroup jobGroup;
 
-        @Schema(description = "직무 설명")
-        String jobDescription;
-
         public static JobPositionDto from(JobPosition jobPosition) {
 
             return JobPositionDto.of(
-                    jobPosition.getTitle(),
                     jobPosition.getJob(),
-                    jobPosition.getJobGroup(),
-                    jobPosition.getJobDescription()
+                    jobPosition.getJobGroup()
             );
         }
     }
