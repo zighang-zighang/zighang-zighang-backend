@@ -4,10 +4,12 @@ import com.github.zighang_zighang.global.response.ApiResponse;
 import io.sentry.Sentry;
 import io.sentry.protocol.Request;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -16,6 +18,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -37,17 +40,17 @@ public class ApiExceptionHandler {
         return GlobalExceptionCode.BODY_NOT_READABLE.toResponse();
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ApiResponse<?> methodArgumentNotValidException(MethodArgumentNotValidException e) {
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ApiResponse<?> constraintViolationException(ConstraintViolationException e) {
 
-        if (Objects.isNull(e.getBindingResult().getFieldError())) {
+        ConstraintViolation<?> violation = e.getConstraintViolations().iterator().next();
 
-            return ApiResponse.error(GlobalExceptionCode.BODY_VALIDATION_FAILED.getCode(), e.getMessage());
+        String field = violation.getPropertyPath().toString();
+        if (field.contains(".")) {
+            field = field.substring(field.lastIndexOf(".") + 1);
         }
 
-        String field = e.getBindingResult().getFieldError().getField();
-        String message = e.getBindingResult().getFieldError().getDefaultMessage();
-        String errorMessage = String.format("%s은(는) %s", field, message);
+        String errorMessage = String.format("%s은(는) %s.", field, violation.getMessage());
 
         return ApiResponse.error(GlobalExceptionCode.BODY_VALIDATION_FAILED.getCode(), errorMessage);
     }
@@ -61,6 +64,8 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ApiResponse<?> exception(Exception e, HttpServletRequest request) {
+
+        log.error("", e);
 
         sentry(e, request);
         return GlobalExceptionCode.EXCEPTION.toResponse();

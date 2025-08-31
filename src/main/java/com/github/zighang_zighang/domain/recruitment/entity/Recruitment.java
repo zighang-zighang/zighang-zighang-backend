@@ -10,6 +10,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -17,7 +18,7 @@ import java.util.List;
 public class Recruitment {
 
     @Nonnull
-    String id;
+    UUID id;
 
     @Nonnull
     String title;
@@ -50,7 +51,7 @@ public class Recruitment {
     LocalDateTime endDate;
 
     @Nonnull
-    EndType deadlineType;
+    DeadlineType deadlineType;
 
     @Nonnull
     List<EmploymentType> employmentTypes;
@@ -59,7 +60,7 @@ public class Recruitment {
     List<Job> jobs;
 
     @Nonnull
-    List<JobGroup> jobCategories;
+    List<JobCategory> jobCategories;
 
     @Nonnull
     String companyName;

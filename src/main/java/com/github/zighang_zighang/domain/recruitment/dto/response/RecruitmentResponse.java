@@ -3,19 +3,21 @@ package com.github.zighang_zighang.domain.recruitment.dto.response;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Schema
 @Getter
+@Setter(AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(staticName = "of")
 public class RecruitmentResponse {
 
     @Schema(description = "공고 ID")
-    String id;
+    UUID id;
 
     @Schema(description = "채용 공고 제목")
     String title;
@@ -45,7 +47,7 @@ public class RecruitmentResponse {
     LocalDateTime endDate;
 
     @Schema(description = "마감 타입")
-    EndType deadlineType;
+    DeadlineType deadlineType;
 
     @Schema(description = "고용 형태 목록")
     List<EmploymentType> employmentTypes;
@@ -54,7 +56,7 @@ public class RecruitmentResponse {
     List<Job> jobs;
 
     @Schema(description = "직무 카테고리 목록")
-    List<JobGroup> jobCategories;
+    List<JobCategory> jobCategories;
 
     @Schema(description = "회사 이름")
     String companyName;
