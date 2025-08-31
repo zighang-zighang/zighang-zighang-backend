@@ -10,12 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class JobPosition {
 
-    @Nonnull
+    @Nullable
     @JsonProperty("title")
     String title;
 
@@ -29,5 +31,5 @@ public class JobPosition {
 
     @Nullable
     @JsonProperty("job_description")
-    String jobDescription;
+    List<String> jobDescription;
 }
