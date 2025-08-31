@@ -6,6 +6,7 @@ import io.sentry.protocol.Request;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -17,6 +18,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -62,6 +64,8 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ApiResponse<?> exception(Exception e, HttpServletRequest request) {
+
+        log.error("", e);
 
         sentry(e, request);
         return GlobalExceptionCode.EXCEPTION.toResponse();
