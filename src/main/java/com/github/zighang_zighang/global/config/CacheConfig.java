@@ -51,6 +51,8 @@ public class CacheConfig {
 
         objectMapper.activateDefaultTyping(
                 BasicPolymorphicTypeValidator.builder()
+                        .allowIfBaseType("java.lang")
+                        .allowIfBaseType("java.util")
                         .allowIfBaseType("com.github.zighang_zighang")
                         .build(),
                 ObjectMapper.DefaultTyping.NON_FINAL,
