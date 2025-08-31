@@ -1,0 +1,32 @@
+package com.github.zighang_zighang.domain.recruitment.constant;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.STRING)
+public enum Job {
+    IT_개발,
+    AI_데이터,
+    게임,
+    디자인,
+    기획_전략,
+    마케팅_광고,
+    상품기획_MD,
+    영업,
+    무역_물류,
+    운송_배송,
+    법률_법무,
+    HR_총무,
+    회계_재무_세무,
+    증권_운용,
+    은행_카드_보험,
+    엔지니어링_RND,
+    건설_건축,
+    생산_기능직,
+    의료_보건,
+    공공_복지,
+    교육,
+    미디어_엔터,
+    고객상담_TM,
+    서비스,
+    식음료,
+}
