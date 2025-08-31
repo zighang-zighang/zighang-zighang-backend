@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Schema
 @Getter
@@ -16,7 +17,7 @@ import java.util.List;
 public class RecruitmentResponse {
 
     @Schema(description = "공고 ID")
-    String id;
+    UUID id;
 
     @Schema(description = "채용 공고 제목")
     String title;

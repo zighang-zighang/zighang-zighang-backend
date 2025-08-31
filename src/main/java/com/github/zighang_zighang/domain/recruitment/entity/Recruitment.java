@@ -10,6 +10,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -17,7 +18,7 @@ import java.util.List;
 public class Recruitment {
 
     @Nonnull
-    String id;
+    UUID id;
 
     @Nonnull
     String title;
