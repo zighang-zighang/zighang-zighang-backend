@@ -1,13 +1,12 @@
 package com.github.zighang_zighang.domain.recruitment.api;
 
 import com.github.zighang_zighang.domain.recruitment.constant.*;
+import com.github.zighang_zighang.domain.recruitment.dto.response.PageResponse;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,10 +27,10 @@ public interface RecruitmentApi {
     );
 
     @Operation(
-            summary = "공고 목록 조회 (필터링)",
-            description = "다양한 조건으로 공고 목록을 필터링하여 조회합니다. 페이지네이션이 적용됩니다."
+            summary = "공고 목록 조회",
+            description = "조건으로 공고 목록을 필터링하여 조회합니다. 페이지네이션이 적용됩니다."
     )
-    ApiResponse<Page<RecruitmentResponse>> getRecruitments(
+    ApiResponse<PageResponse<RecruitmentResponse>> getRecruitments(
             @Parameter(description = "직무 필터 (복수 선택 가능)")
             List<Job> jobs,
 
@@ -56,7 +55,10 @@ public interface RecruitmentApi {
             @Parameter(description = "마감 유형 필터 (복수 선택 가능)")
             List<EndType> endTypes,
 
-            @Parameter(description = "페이지 정보 (page, size, sort)")
-            Pageable pageable
+            @Parameter(description = "페이지")
+            Integer page,
+
+            @Parameter(description = "페이지 크기")
+            Integer size
     );
 }
