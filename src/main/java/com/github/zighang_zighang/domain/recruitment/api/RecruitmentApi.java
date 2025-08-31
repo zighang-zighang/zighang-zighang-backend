@@ -7,6 +7,8 @@ import com.github.zighang_zighang.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,9 +45,13 @@ public interface RecruitmentApi {
             @Parameter(description = "학력 필터 (복수 선택 가능)")
             List<Education> educations,
 
+            @Min(0)
+            @Max(10)
             @Parameter(description = "경험 최소값")
             Integer minExperience,
 
+            @Min(0)
+            @Max(10)
             @Parameter(description = "경험 최대값")
             Integer maxExperience,
 
@@ -55,9 +61,12 @@ public interface RecruitmentApi {
             @Parameter(description = "마감 유형 필터 (복수 선택 가능)")
             List<DeadlineType> deadlineTypes,
 
+            @Min(0)
             @Parameter(description = "페이지")
             Integer page,
 
+            @Min(1)
+            @Max(100)
             @Parameter(description = "페이지 크기")
             Integer size
     );
