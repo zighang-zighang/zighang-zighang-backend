@@ -14,13 +14,13 @@ public interface RecruitmentRepository {
 
     Page<Recruitment> findByFilters(
             List<Job> jobs,
-            List<JobGroup> jobGroups,
+            List<JobCategory> jobCategories,
             List<EmploymentType> employmentTypes,
             List<Education> educations,
             Integer minExperience,
             Integer maxExperience,
             List<Location> locations,
-            List<EndType> endTypes,
+            List<DeadlineType> deadlineTypes,
             Integer page,
             Integer size
     );

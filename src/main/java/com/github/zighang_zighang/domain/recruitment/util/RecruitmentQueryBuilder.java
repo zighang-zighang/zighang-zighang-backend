@@ -21,24 +21,6 @@ public class RecruitmentQueryBuilder {
         );
     }
 
-    public static Query generateNestedQuery(List<? extends Enum<?>> enums, String fieldName, String path) {
-
-        if (CollectionUtils.isEmpty(enums)) return null;
-
-        List<FieldValue> values = enums.stream().map(Enum::name).map(FieldValue::of).toList();
-
-        return Query.of(q1 ->
-                q1.nested(q2 ->
-                        q2.path(fieldName)
-                                .query(q3 ->
-                                        q3.terms(q4 -> q4.field(fieldName + "." + path)
-                                                .terms(q5 -> q5.value(values))
-                                        )
-                                )
-                )
-        );
-    }
-
     public static Query generateRangeQuery(Integer minExperience, Integer maxExperience) {
 
         if (minExperience == null && maxExperience == null) return null;
@@ -49,7 +31,7 @@ public class RecruitmentQueryBuilder {
             queries.add(
                     Query.of(q1 ->
                             q1.range(q2 ->
-                                    q2.field("experience.max_experience").gte(JsonData.of(minExperience))
+                                    q2.field("maxExperience").gte(JsonData.of(minExperience))
                             )
                     )
             );
@@ -59,7 +41,7 @@ public class RecruitmentQueryBuilder {
             queries.add(
                     Query.of(q1 ->
                             q1.range(q2 ->
-                                    q2.field("experience.min_experience").lte(JsonData.of(maxExperience))
+                                    q2.field("minExperience").lte(JsonData.of(maxExperience))
                             )
                     )
             );

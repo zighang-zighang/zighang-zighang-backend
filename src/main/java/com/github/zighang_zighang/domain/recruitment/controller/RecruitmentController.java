@@ -30,20 +30,20 @@ public class RecruitmentController implements RecruitmentApi {
     @GetMapping
     public ApiResponse<PageResponse<RecruitmentResponse>> getRecruitments(
             @RequestParam(required = false) List<Job> jobs,
-            @RequestParam(required = false) List<JobGroup> jobGroups,
+            @RequestParam(required = false) List<JobCategory> jobCategories,
             @RequestParam(required = false) List<EmploymentType> employmentTypes,
             @RequestParam(required = false) List<Education> educations,
             @RequestParam(required = false) Integer minExperience,
             @RequestParam(required = false) Integer maxExperience,
             @RequestParam(required = false) List<Location> locations,
-            @RequestParam(required = false) List<EndType> endTypes,
+            @RequestParam(required = false) List<DeadlineType> deadlineTypes,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "20") Integer size
     ) {
 
         return ApiResponse.ok(PageResponse.from(recruitmentService.getRecruitments(
-                jobs, jobGroups, employmentTypes, educations,
-                minExperience, maxExperience, locations, endTypes, page, size
+                jobs, jobCategories, employmentTypes, educations,
+                minExperience, maxExperience, locations, deadlineTypes, page, size
         )));
     }
 }

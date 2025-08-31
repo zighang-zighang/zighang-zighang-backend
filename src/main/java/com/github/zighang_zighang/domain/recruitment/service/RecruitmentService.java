@@ -28,20 +28,20 @@ public class RecruitmentService {
 
     public Page<RecruitmentResponse> getRecruitments(
             List<Job> jobs,
-            List<JobGroup> jobGroups,
+            List<JobCategory> jobCategories,
             List<EmploymentType> employmentTypes,
             List<Education> educations,
             Integer minExperience,
             Integer maxExperience,
             List<Location> locations,
-            List<EndType> endTypes,
+            List<DeadlineType> deadlineTypes,
             Integer page,
             Integer size
     ) {
 
         Page<Recruitment> recruitments = recruitmentRepository.findByFilters(
-                jobs, jobGroups, employmentTypes, educations,
-                minExperience, maxExperience, locations, endTypes, page, size
+                jobs, jobCategories, employmentTypes, educations,
+                minExperience, maxExperience, locations, deadlineTypes, page, size
         );
 
         return recruitments.map(RecruitmentResponse::from);

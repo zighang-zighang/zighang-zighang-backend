@@ -35,7 +35,7 @@ public interface RecruitmentApi {
             List<Job> jobs,
 
             @Parameter(description = "직군 필터 (복수 선택 가능)")
-            List<JobGroup> jobGroups,
+            List<JobCategory> jobCategories,
 
             @Parameter(description = "고용 형태 필터 (복수 선택 가능)")
             List<EmploymentType> employmentTypes,
@@ -53,7 +53,7 @@ public interface RecruitmentApi {
             List<Location> locations,
 
             @Parameter(description = "마감 유형 필터 (복수 선택 가능)")
-            List<EndType> endTypes,
+            List<DeadlineType> deadlineTypes,
 
             @Parameter(description = "페이지")
             Integer page,

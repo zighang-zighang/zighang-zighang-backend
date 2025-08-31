@@ -24,7 +24,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.github.zighang_zighang.domain.recruitment.util.RecruitmentQueryBuilder.*;
+import static com.github.zighang_zighang.domain.recruitment.util.RecruitmentQueryBuilder.generateQuery;
+import static com.github.zighang_zighang.domain.recruitment.util.RecruitmentQueryBuilder.generateRangeQuery;
 
 @Slf4j
 @Repository
@@ -47,25 +48,25 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
     @SneakyThrows(IOException.class)
     public Page<Recruitment> findByFilters(
             List<Job> jobs,
-            List<JobGroup> jobGroups,
+            List<JobCategory> jobCategories,
             List<EmploymentType> employmentTypes,
             List<Education> educations,
             Integer minExperience,
             Integer maxExperience,
             List<Location> locations,
-            List<EndType> endTypes,
+            List<DeadlineType> deadlineTypes,
             Integer page,
             Integer size
     ) {
 
         List<Query> queries = Stream.of(
-                generateNestedQuery(jobs, "job_positions", "job"),
-                generateNestedQuery(jobGroups, "job_positions", "job_group"),
-                generateQuery(employmentTypes, "employment_type"),
-                generateQuery(educations, "education"),
+                generateQuery(jobs, "jobs"),
+                generateQuery(jobCategories, "jobCategories"),
+                generateQuery(employmentTypes, "employmentTypes"),
+                generateQuery(educations, "educations"),
                 generateRangeQuery(minExperience, maxExperience),
-                generateQuery(locations, "location"),
-                generateQuery(endTypes, "end_type")
+                generateQuery(locations, "locations"),
+                generateQuery(deadlineTypes, "deadlineType")
         ).filter(Objects::nonNull).toList();
 
         Query query = Query.of(q ->

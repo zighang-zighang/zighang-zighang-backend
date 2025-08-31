@@ -3,7 +3,7 @@ package com.github.zighang_zighang.domain.recruitment.constant;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @JsonFormat(shape = JsonFormat.Shape.STRING)
-public enum JobGroup {
+public enum JobCategory {
     서버_백엔드,
     프론트엔드,
     웹풀스택,
