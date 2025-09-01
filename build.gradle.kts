@@ -41,9 +41,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
-    implementation("io.jsonwebtoken:jjwt-api:0.12.3")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")
+    implementation(platform("io.jsonwebtoken:jjwt-bom:0.13.0"))
+    implementation("io.jsonwebtoken:jjwt-api")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson")
     runtimeOnly("com.mysql:mysql-connector-j")
 
     implementation("org.opensearch.client:opensearch-java:3.2.0")
