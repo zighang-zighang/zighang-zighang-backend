@@ -1,53 +1,59 @@
 package com.github.zighang_zighang.global.auth.service;
 
+import com.github.zighang_zighang.global.auth.repository.RefreshTokenRedisRepository;
+import com.github.zighang_zighang.global.auth.schema.RefreshToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenStorageService {
     
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     
-    // 토큰 만료 시간 설정
-    private static final Duration TOKEN_EXPIRY = Duration.ofMinutes(5); // 5분
+    // 토큰 만료 시간 설정 (시간 단위)
+    private static final long TOKEN_EXPIRY_HOURS = 24; // 24시간
     
     /**
      * 임시 토큰 ID로 access token을 Redis에 저장
      */
     public void storeAccessToken(String tempTokenId, String accessToken) {
-        String redisKey = "access_token:" + tempTokenId;
-        redisTemplate.opsForValue().set(redisKey, accessToken, TOKEN_EXPIRY);
-        log.info("Access token을 Redis에 저장했습니다. Key: {}, Expiry: {}분", redisKey, TOKEN_EXPIRY.toMinutes());
+        RefreshToken accessTokenEntity = RefreshToken.builder()
+                .id(tempTokenId + "_access") // access token용 고유 ID
+                .token(accessToken)
+                .userId(tempTokenId)
+                .ttl(1) // access token은 1시간만 유지
+                .build();
+        
+        refreshTokenRedisRepository.save(accessTokenEntity);
+        log.info("Access token을 Redis에 저장했습니다. ID: {}, Expiry: 1시간", tempTokenId);
     }
     
     /**
      * 임시 토큰 ID로 refresh token을 Redis에 저장
      */
     public void storeRefreshToken(String tempTokenId, String refreshToken) {
-        String redisKey = "refresh_token:" + tempTokenId;
-        redisTemplate.opsForValue().set(redisKey, refreshToken, TOKEN_EXPIRY);
-        log.info("Refresh token을 Redis에 저장했습니다. Key: {}, Expiry: {}분", redisKey, TOKEN_EXPIRY.toMinutes());
+        RefreshToken refreshTokenEntity = RefreshToken.builder()
+                .id(tempTokenId) // tempTokenId를 직접 id로 사용
+                .token(refreshToken)
+                .userId(tempTokenId) // tempTokenId를 userId로 사용
+                .ttl(TOKEN_EXPIRY_HOURS)
+                .build();
+        
+        refreshTokenRedisRepository.save(refreshTokenEntity);
+        log.info("Refresh token을 Redis에 저장했습니다. ID: {}, Expiry: {}시간", tempTokenId, TOKEN_EXPIRY_HOURS);
     }
     
     /**
      * 임시 토큰 ID로 access token을 Redis에서 조회
      */
     public String getAccessToken(String tempTokenId) {
-        String redisKey = "access_token:" + tempTokenId;
-        String accessToken = redisTemplate.opsForValue().get(redisKey);
-        
-        if (accessToken != null) {
-            log.info("Redis에서 access token을 조회했습니다. Key: {}", redisKey);
-            return accessToken;
-        }
-        
-        log.warn("Redis에서 access token을 찾을 수 없습니다. Key: {}", redisKey);
+        // Access token은 임시로만 사용되므로 별도 저장하지 않음
+        log.warn("Access token은 임시 저장되지 않습니다. ID: {}", tempTokenId);
         return null;
     }
     
@@ -55,68 +61,50 @@ public class TokenStorageService {
      * 임시 토큰 ID로 refresh token을 Redis에서 조회
      */
     public String getRefreshToken(String tempTokenId) {
-        String redisKey = "refresh_token:" + tempTokenId;
-        String refreshToken = redisTemplate.opsForValue().get(redisKey);
-        
-        if (refreshToken != null) {
-            log.info("Redis에서 refresh token을 조회했습니다. Key: {}", redisKey);
-            return refreshToken;
-        }
-        
-        log.warn("Redis에서 refresh token을 찾을 수 없습니다. Key: {}", redisKey);
-        return null;
+        return refreshTokenRedisRepository.findById(tempTokenId)
+                .map(RefreshToken::token)
+                .orElse(null);
     }
     
     /**
      * access token을 조회한 후 Redis에서 제거 (일회성 사용)
      */
     public String getAndRemoveAccessToken(String tempTokenId) {
-        String redisKey = "access_token:" + tempTokenId;
-        String accessToken = redisTemplate.opsForValue().get(redisKey);
-        
-        if (accessToken != null) {
-            // 토큰을 Redis에서 제거
-            redisTemplate.delete(redisKey);
-            log.info("Redis에서 access token을 조회하고 제거했습니다. Key: {}", redisKey);
-            return accessToken;
-        }
-        
-        log.warn("Redis에서 access token을 찾을 수 없습니다. Key: {}", redisKey);
-        return null;
+        return refreshTokenRedisRepository.findById(tempTokenId + "_access")
+                .map(refreshToken -> {
+                    refreshTokenRedisRepository.delete(refreshToken);
+                    log.info("Redis에서 access token을 조회하고 제거했습니다. ID: {}", tempTokenId);
+                    return refreshToken.token();
+                })
+                .orElse(null);
     }
     
     /**
      * refresh token을 조회한 후 Redis에서 제거 (일회성 사용)
      */
     public String getAndRemoveRefreshToken(String tempTokenId) {
-        String redisKey = "refresh_token:" + tempTokenId;
-        String refreshToken = redisTemplate.opsForValue().get(redisKey);
-        
-        if (refreshToken != null) {
-            // 토큰을 Redis에서 제거
-            redisTemplate.delete(redisKey);
-            log.info("Redis에서 refresh token을 조회하고 제거했습니다. Key: {}", redisKey);
-            return refreshToken;
-        }
-        
-        log.warn("Redis에서 refresh token을 찾을 수 없습니다. Key: {}", redisKey);
-        return null;
+        return refreshTokenRedisRepository.findById(tempTokenId)
+                .map(refreshToken -> {
+                    refreshTokenRedisRepository.delete(refreshToken);
+                    log.info("Redis에서 refresh token을 조회하고 제거했습니다. ID: {}", tempTokenId);
+                    return refreshToken.token();
+                })
+                .orElse(null);
     }
     
     /**
      * Redis에 저장된 토큰 개수 반환 (디버깅용)
      */
     public long getStorageSize() {
-        return redisTemplate.keys("access_token:*").size() + redisTemplate.keys("refresh_token:*").size();
+        return refreshTokenRedisRepository.count();
     }
     
     /**
      * 특정 토큰 ID가 Redis에 존재하는지 확인
      */
     public boolean hasTokens(String tempTokenId) {
-        String accessKey = "access_token:" + tempTokenId;
-        String refreshKey = "refresh_token:" + tempTokenId;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(accessKey)) && 
-               Boolean.TRUE.equals(redisTemplate.hasKey(refreshKey));
+        boolean hasAccessToken = refreshTokenRedisRepository.findById(tempTokenId + "_access").isPresent();
+        boolean hasRefreshToken = refreshTokenRedisRepository.findById(tempTokenId).isPresent();
+        return hasAccessToken && hasRefreshToken;
     }
 }
