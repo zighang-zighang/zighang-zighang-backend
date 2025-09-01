@@ -20,14 +20,14 @@ public class JwtUtil {
     private final JwtConfig jwtConfig;
 
     public String generateAccessToken(String email, String name) {
-        return generateToken(email, name, jwtConfig.getAccessTokenExpiration());
+        return generateToken(email, name, jwtConfig.getAccessTokenExpiration(), "access");
     }
 
     public String generateRefreshToken(String email) {
-        return generateToken(email, null, jwtConfig.getRefreshTokenExpiration());
+        return generateToken(email, null, jwtConfig.getRefreshTokenExpiration(), "refresh");
     }
 
-    private String generateToken(String email, String name, long expiration) {
+    private String generateToken(String email, String name, long expiration, String tokenType) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
@@ -36,6 +36,7 @@ public class JwtUtil {
         if (name != null) {
             claims.put("name", name);
         }
+        claims.put("typ", tokenType); // 토큰 타입 구분
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -69,6 +70,46 @@ public class JwtUtil {
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             log.error("JWT 토큰 검증 실패: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Access 토큰 전용 검증 (보안 강화)
+     */
+    public boolean validateAccessToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            
+            // 토큰 타입이 "access"인지 확인
+            String tokenType = claims.get("typ", String.class);
+            if (!"access".equals(tokenType)) {
+                log.warn("Access 토큰이 아닌 토큰 사용 시도: {}", tokenType);
+                return false;
+            }
+            
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.error("Access 토큰 검증 실패: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 토큰 타입 검증
+     */
+    public boolean isAccessToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            if (claims == null) return false;
+            
+            String tokenType = claims.get("typ", String.class);
+            return "access".equals(tokenType);
+        } catch (Exception e) {
             return false;
         }
     }
