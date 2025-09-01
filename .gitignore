@@ -40,10 +40,6 @@ out/
 .env*
 !.env.template
 
-### Environment Configuration Files ###
-src/main/resources/env/
-src/main/resources/application-develop.yaml
-
 ### macOS ###
 .DS_Store
 **/.DS_Store
