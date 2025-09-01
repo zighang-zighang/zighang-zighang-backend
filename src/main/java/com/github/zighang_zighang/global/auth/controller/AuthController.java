@@ -4,6 +4,7 @@ import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
 import com.github.zighang_zighang.global.response.ApiResponse;
+import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,8 @@ public class AuthController {
         // Redis에서 userId로 refresh token 조회
         String refreshToken = tokenStorageService.getRefreshToken(userId);
         if (refreshToken == null) {
-            return ApiResponse.error("REFRESH_TOKEN_NOT_FOUND", "Refresh token을 찾을 수 없습니다.");
+            return ApiResponse.error(AuthExceptionCode.REFRESH_TOKEN_NOT_FOUND.getCode(), 
+                                   AuthExceptionCode.REFRESH_TOKEN_NOT_FOUND.getMessage());
         }
         
         LoginResponse response = authService.refreshToken(refreshToken);

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 
 import java.io.IOException;
 
@@ -29,7 +30,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         // 프론트엔드 에러 페이지로 리다이렉트
         String errorRedirectUrl = String.format(
             "https://zighang-zighang-frontend.vercel.app/auth/error?message=%s&details=%s",
-            java.net.URLEncoder.encode("OAuth2 로그인 실패", java.nio.charset.StandardCharsets.UTF_8),
+            java.net.URLEncoder.encode(AuthExceptionCode.OAUTH2_FAILURE.getMessage(), java.nio.charset.StandardCharsets.UTF_8),
             java.net.URLEncoder.encode(exception.getClass().getSimpleName(), java.nio.charset.StandardCharsets.UTF_8)
         );
         

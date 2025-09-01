@@ -6,6 +6,8 @@ import com.github.zighang_zighang.domain.user.service.UserService;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
+import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
+import com.github.zighang_zighang.global.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,12 +53,12 @@ public class AuthService {
 
     public LoginResponse refreshToken(String refreshToken) {
         if (!jwtUtil.validateToken(refreshToken)) {
-            throw new RuntimeException("유효하지 않은 refresh token입니다");
+            throw new ApiException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
         }
 
         String email = jwtUtil.getEmailFromToken(refreshToken);
         User user = userService.findUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new ApiException(AuthExceptionCode.USER_NOT_FOUND));
 
         // 새로운 access token 생성
         String newAccessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName());
