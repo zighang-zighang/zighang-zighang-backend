@@ -1,19 +1,28 @@
 package com.github.zighang_zighang.global.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
+@Schema
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ApiResponse<T> {
 
-    private final boolean success;
-    private final String code;
-    private final String message;
-    private final T data;
+    @Schema(description = "요청 성공 여부", example = "true")
+    Boolean success;
+
+    @Schema(description = "에러 코드", example = "null")
+    String code;
+
+    @Schema(description = "에러 메시지", example = "null")
+    String message;
+
+    @Schema(description = "응답 데이터")
+    T data;
 
     public static ApiResponse<Void> ok() {
 
