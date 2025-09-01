@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -20,7 +19,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oauth2User = super.loadUser(userRequest);
         
         log.info("OAuth2 사용자 정보 로드 - Provider: {}", userRequest.getClientRegistration().getRegistrationId());
-        log.info("원본 OAuth2 사용자 속성: {}", oauth2User.getAttributes());
+
+        // 디버그 레벨에서만 속성 키 목록 로깅 (민감한 값은 제외)
+        if (log.isDebugEnabled()) {
+            log.debug("OAuth2 속성 키: {}", oauth2User.getAttributes().keySet());
+        }
         
         // 네이버의 경우 response 객체에서 id를 추출하여 nameAttributeKey로 설정
         if ("naver".equals(userRequest.getClientRegistration().getRegistrationId())) {
@@ -34,8 +37,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 String name = (String) responseMap.getOrDefault("name", email);
                 String picture = (String) responseMap.get("profile_image");
                 
-                log.info("네이버 사용자 정보 - ID: {}, Email: {}, Name: {}, Picture: {}", 
-                        providerId, email, name, picture);
+                log.info("네이버 사용자 정보 - ID: {}, Email: {}, Name: {}", 
+                        providerId, maskEmail(email), maskName(name));
                 
                 // nameAttributeKey를 "response"로 설정 (application.yaml의 user-name-attribute와 일치)
                 return new DefaultOAuth2User(
@@ -65,7 +68,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 name = (String) props.get("nickname");
             }
             
-            log.info("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", providerId, email, name);
+            log.info("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", providerId, maskEmail(email), maskName(name));
             
             // nameAttributeKey를 "id"로 설정 (application.yaml의 user-name-attribute와 일치)
             return new DefaultOAuth2User(
@@ -81,7 +84,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             String email = oauth2User.getAttribute("email");
             String name = oauth2User.getAttribute("name");
             
-            log.info("구글 사용자 정보 - ID: {}, Email: {}, Name: {}", providerId, email, name);
+            log.info("구글 사용자 정보 - ID: {}, Email: {}, Name: {}", providerId, maskEmail(email), maskName(name));
         }
         
         // 모든 제공자에 대해 로깅
@@ -89,5 +92,35 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         // 다른 제공자들은 그대로 반환
         return oauth2User;
+    }
+    
+    /**
+     * 이메일 주소 마스킹
+     */
+    private String maskEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return "N/A";
+        }
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 1) {
+            return email; // 너무 짧은 경우 그대로 반환
+        }
+        String localPart = email.substring(0, atIndex);
+        String domain = email.substring(atIndex);
+        String maskedLocal = localPart.charAt(0) + "***" + localPart.charAt(localPart.length() - 1);
+        return maskedLocal + domain;
+    }
+    
+    /**
+     * 이름 마스킹
+     */
+    private String maskName(String name) {
+        if (name == null || name.isEmpty()) {
+            return "N/A";
+        }
+        if (name.length() <= 2) {
+            return name; // 너무 짧은 경우 그대로 반환
+        }
+        return name.charAt(0) + "***" + name.charAt(name.length() - 1);
     }
 }
