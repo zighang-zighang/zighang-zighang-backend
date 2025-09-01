@@ -4,6 +4,8 @@ import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
+import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
+import com.github.zighang_zighang.global.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -101,7 +103,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return email;
         }
         
-        throw new RuntimeException("이메일 정보를 찾을 수 없습니다");
+        throw new ApiException(AuthExceptionCode.EMAIL_NOT_PROVIDED);
     }
 
     // OAuth2 제공자별 이름 추출
@@ -164,7 +166,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return sub;
         }
         
-        throw new RuntimeException("제공자 ID를 찾을 수 없습니다");
+        throw new ApiException(AuthExceptionCode.PROVIDER_ID_NOT_FOUND);
     }
 
     // OAuth2 제공자 타입 추출
@@ -184,6 +186,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return ProviderType.GOOGLE;
         }
         
-        throw new RuntimeException("제공자 타입을 찾을 수 없습니다");
+        throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
     }
 }
