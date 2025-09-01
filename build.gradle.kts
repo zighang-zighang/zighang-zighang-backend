@@ -50,6 +50,8 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+
+    implementation("me.paulschwarz:spring-dotenv:4.0.0")
 }
 
 tasks.withType<JavaCompile> {
