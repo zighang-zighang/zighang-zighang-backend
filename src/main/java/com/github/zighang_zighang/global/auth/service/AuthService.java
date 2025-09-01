@@ -8,12 +8,14 @@ import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.exception.ApiException;
+import com.github.zighang_zighang.global.config.JwtConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -22,6 +24,7 @@ public class AuthService {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final JwtConfig jwtConfig;
 
     @Transactional
     public LoginResponse oauth2Login(String email, String name, ProviderType providerType, Object providerId) {
@@ -62,7 +65,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .userId(user.getId().toString())
-                .expiresIn(3600) // 1시간 (초 단위)
+                .expiresIn((int) TimeUnit.MILLISECONDS.toSeconds(jwtConfig.getAccessTokenExpiration()))
                 .build();
     }
 
@@ -86,7 +89,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .userId(user.getId().toString())
-                .expiresIn(3600) // 1시간 (초 단위)
+                .expiresIn((int) TimeUnit.MILLISECONDS.toSeconds(jwtConfig.getAccessTokenExpiration()))
                 .build();
     }
 }
