@@ -15,6 +15,7 @@ public class LoginResponse {
     private String refreshToken;
     private String email;
     private String name;
+    private String userId;
     @Builder.Default
     private String tokenType = "Bearer";
     private long expiresIn; // 초 단위

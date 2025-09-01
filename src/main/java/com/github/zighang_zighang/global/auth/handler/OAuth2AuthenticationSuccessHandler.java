@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -46,19 +45,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 email, name, providerId, providerType);
         
         try {
-            // OAuth2 사용자 정보로 JWT 토큰 발급 (제공자 정보 포함)
+            // OAuth2 사용자 정보로 JWT 토큰 발급 (Provider 정보 포함)
             LoginResponse tokenResponse = authService.oauth2Login(email, name, providerType, providerId);
             
-            // 토큰을 Redis에 개별적으로 임시 저장 (프론트엔드에서 조회할 수 있도록)
-            String tempTokenId = UUID.randomUUID().toString();
-            tokenStorageService.storeAccessToken(tempTokenId, tokenResponse.getAccessToken());
-            tokenStorageService.storeRefreshToken(tempTokenId, tokenResponse.getRefreshToken());
+            // Refresh Token을 Redis에 저장 (userId 기반)
+            tokenStorageService.storeRefreshToken(tokenResponse.getUserId(), tokenResponse.getRefreshToken());
             
-            // 프론트엔드로 리다이렉트 (tempTokenId 포함)
+            // 프론트엔드로 리다이렉트 (Access Token은 URL로, Refresh Token은 userId로 조회)
             String redirectUrl = String.format(
-                "https://zighang-zighang-frontend.vercel.app/?tempTokenId=%s&email=%s&name=%s&loginSuccess=true",
-                tempTokenId,
-                java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8),
+                "https://zighang-zighang-frontend.vercel.app/?accessToken=%s&userId=%s&name=%s&loginSuccess=true",
+                java.net.URLEncoder.encode(tokenResponse.getAccessToken(), java.nio.charset.StandardCharsets.UTF_8),
+                tokenResponse.getUserId(),
                 java.net.URLEncoder.encode(name, java.nio.charset.StandardCharsets.UTF_8)
             );
             

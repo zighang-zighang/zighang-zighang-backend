@@ -4,7 +4,6 @@ import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
 import com.github.zighang_zighang.global.response.ApiResponse;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,36 +14,14 @@ public class AuthController {
     private final AuthService authService;
     private final TokenStorageService tokenStorageService;
 
-    /**
-     * 임시 토큰 ID로 JWT 토큰 조회 (프론트엔드에서 호출)
-     */
-    @GetMapping("/auth/token/{tempTokenId}")
-    public ApiResponse<String> getTokenByTempId(@PathVariable String tempTokenId, HttpServletResponse response) {
-        try {
-            // 저장소에서 tempTokenId로 실제 토큰 조회
-            String accessToken = tokenStorageService.getAndRemoveAccessToken(tempTokenId);
-            String refreshToken = tokenStorageService.getAndRemoveRefreshToken(tempTokenId);
-            
-            if (accessToken != null && refreshToken != null) {
-                // 토큰을 헤더에 설정
-                response.setHeader("Authorization", "Bearer " + accessToken);
-                response.setHeader("Refresh-Token", refreshToken);
-                
-                // 응답은 성공 메시지만
-                return ApiResponse.ok("로그인 성공");
-            } else {
-                return ApiResponse.error("TOKEN_NOT_FOUND", "토큰을 찾을 수 없습니다.");
-            }
-        } catch (Exception e) {
-            return ApiResponse.error("TOKEN_NOT_FOUND", "토큰을 찾을 수 없습니다: " + e.getMessage());
-        }
-    }
-
     @PostMapping("/auth/refresh")
-    public ApiResponse<LoginResponse> refreshToken(@RequestHeader("Authorization") String refreshToken) {
-        if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
-            refreshToken = refreshToken.substring(7);
+    public ApiResponse<LoginResponse> refreshToken(@RequestParam String userId) {
+        // Redis에서 userId로 refresh token 조회
+        String refreshToken = tokenStorageService.getRefreshToken(userId);
+        if (refreshToken == null) {
+            return ApiResponse.error("REFRESH_TOKEN_NOT_FOUND", "Refresh token을 찾을 수 없습니다.");
         }
+        
         LoginResponse response = authService.refreshToken(refreshToken);
         return ApiResponse.ok(response);
     }

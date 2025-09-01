@@ -44,6 +44,7 @@ public class AuthService {
                 .refreshToken(refreshToken)
                 .email(user.getEmail())
                 .name(user.getName())
+                .userId(user.getId().toString())
                 .expiresIn(3600) // 1시간 (초 단위)
                 .build();
     }
@@ -67,6 +68,7 @@ public class AuthService {
                 .refreshToken(refreshToken) // 기존 refresh token 유지
                 .email(user.getEmail())
                 .name(user.getName())
+                .userId(user.getId().toString())
                 .expiresIn(3600) // 1시간 (초 단위)
                 .build();
     }
