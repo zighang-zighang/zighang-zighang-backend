@@ -31,11 +31,11 @@ public class AuthService {
         if (email == null || email.isBlank() || providerType == null) {
             throw new ApiException(AuthExceptionCode.OAUTH2_FAILURE);
         }
-        email = email.trim().toLowerCase(java.util.Locale.ROOT);
+        String normalizedEmail = email.trim().toLowerCase(java.util.Locale.ROOT);
         
         // 사용자 조회 또는 생성
-        User user = userService.findUserByEmail(email)
-                .orElseGet(() -> userService.createUser(email, name));
+        User user = userService.findUserByEmail(normalizedEmail)
+                .orElseGet(() -> userService.createUser(normalizedEmail, name));
 
         // OAuth2 제공자 정보를 user_provider 테이블에 저장 (보안 검증 포함)
         if (providerId == null) {
