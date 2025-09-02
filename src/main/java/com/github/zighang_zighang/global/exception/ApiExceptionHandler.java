@@ -40,10 +40,6 @@ public class ApiExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ApiResponse<?> authenticationException(AuthenticationException e, HttpServletRequest request) {
         
-        log.error("OAuth2 인증 실패 상세 정보:", e);
-        log.error("요청 URL: {}", request.getRequestURL());
-        log.error("요청 파라미터: {}", request.getQueryString());
-        
         sentry(e, request);
         return AuthExceptionCode.OAUTH2_FAILURE.toResponse();
     }
