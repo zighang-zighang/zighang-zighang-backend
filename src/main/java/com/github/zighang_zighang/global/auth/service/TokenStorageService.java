@@ -76,6 +76,25 @@ public class TokenStorageService {
     }
     
     /**
+     * 사용자 ID와 토큰 값으로 일치하는 refresh token 조회
+     */
+    public String getRefreshTokenByUserIdAndToken(String userId, String refreshToken) {
+        org.springframework.util.Assert.hasText(userId, "userId must not be blank");
+        org.springframework.util.Assert.hasText(refreshToken, "refreshToken must not be blank");
+        
+        List<RefreshToken> userSessions = refreshTokenRedisRepository.findByUserId(userId);
+        
+        // 사용자의 모든 세션에서 요청한 토큰과 일치하는 토큰 찾기
+        for (RefreshToken session : userSessions) {
+            if (refreshToken.equals(session.token())) {
+                return session.token();
+            }
+        }
+        
+        return null; // 일치하는 토큰을 찾지 못함
+    }
+    
+    /**
      * Redis에 저장된 토큰 개수 반환 (디버깅용)
      */
     public long getStorageSize() {

@@ -26,12 +26,13 @@ public class JwtUtil {
         return generateTokenWithUserId(email, name, userId, jwtConfig.getAccessTokenExpiration(), "access");
     }
 
-    public String generateRefreshToken(String email) {
+    public String generateRefreshToken(String email, String userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtConfig.getRefreshTokenExpiration().toMillis());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
+        claims.put("userId", userId);
         claims.put("typ", "refresh"); // 토큰 타입 구분
 
         return Jwts.builder()

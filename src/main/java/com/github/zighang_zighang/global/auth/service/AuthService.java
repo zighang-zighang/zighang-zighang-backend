@@ -59,14 +59,12 @@ public class AuthService {
 
         // JWT 토큰 생성 (userId 포함)
         String accessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName(), user.getId().toString());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail(), user.getId().toString());
 
         log.info("OAuth2 사용자 로그인 성공: {} (제공자: {}, Provider ID: {})", 
                 user.getEmail(), providerType, userProvider.getId());
 
         return LoginResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .email(user.getEmail())
                 .name(user.getName())
                 .userId(user.getId().toString())
@@ -89,8 +87,6 @@ public class AuthService {
         log.info("토큰 갱신 성공: {}", user.getEmail());
 
         return LoginResponse.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(refreshToken) // 기존 refresh token 유지
                 .email(user.getEmail())
                 .name(user.getName())
                 .userId(user.getId().toString())

@@ -30,10 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         
         try {
-            String token = extractTokenFromRequest(request);
-            
-            if (StringUtils.hasText(token) && jwtUtil.validateAccessToken(token)) {
-                String email = jwtUtil.getEmailFromToken(token);
+            // Access token 처리 (Authorization: Bearer)
+            String accessToken = extractAccessTokenFromRequest(request);
+            if (StringUtils.hasText(accessToken) && jwtUtil.validateAccessToken(accessToken)) {
+                String email = jwtUtil.getEmailFromToken(accessToken);
                 
                 if (StringUtils.hasText(email)) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -41,7 +41,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("JWT 인증 성공: {}", email);
+                    log.debug("Access token 인증 성공: {}", email);
+                }
+            }
+            
+            // Refresh token 처리 (Refresh-Token 헤더)
+            String refreshToken = extractRefreshTokenFromRequest(request);
+            if (StringUtils.hasText(refreshToken) && jwtUtil.validateRefreshToken(refreshToken)) {
+                String email = jwtUtil.getEmailFromToken(refreshToken);
+                
+                if (StringUtils.hasText(email)) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    UsernamePasswordAuthenticationToken authentication = 
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.debug("Refresh token 인증 성공: {}", email);
                 }
             }
         } catch (Exception e) {
@@ -51,11 +66,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String extractTokenFromRequest(HttpServletRequest request) {
+    private String extractAccessTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
+    }
+    
+    private String extractRefreshTokenFromRequest(HttpServletRequest request) {
+        return request.getHeader("Refresh-Token");
     }
 }

@@ -4,6 +4,7 @@ import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
+import com.github.zighang_zighang.global.auth.util.JwtUtil;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.exception.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final AuthService authService;
     private final TokenStorageService tokenStorageService;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void onAuthenticationSuccess(
@@ -51,6 +53,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             // OAuth2 사용자 정보로 JWT 토큰 발급 (Provider 정보 포함)
             LoginResponse tokenResponse = authService.oauth2Login(email, name, providerType, providerId);
             
+            // JWT 토큰 생성
+            String accessToken = jwtUtil.generateAccessToken(email, name, tokenResponse.getUserId());
+            String refreshToken = jwtUtil.generateRefreshToken(email, tokenResponse.getUserId());
+            
             // User-Agent에서 디바이스 정보 추출
             String userAgent = request.getHeader("User-Agent");
             String deviceInfo = extractDeviceInfo(userAgent);
@@ -58,14 +64,15 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             // Refresh Token을 Redis에 저장 (userId 기반으로 통일)
             String sessionId = tokenStorageService.storeRefreshToken(
                 tokenResponse.getUserId(), 
-                tokenResponse.getRefreshToken(), 
+                refreshToken, 
                 deviceInfo
             );
             
-            // 프론트엔드로 리다이렉트 (Access Token은 fragment로, 세션 ID로 관리)
+            // 프론트엔드로 리다이렉트 (Access Token과 Refresh Token은 fragment로, 세션 ID로 관리)
             String redirectUrl = String.format(
-                "https://zighang-zighang-frontend.vercel.app/#accessToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
-                java.net.URLEncoder.encode(tokenResponse.getAccessToken(), java.nio.charset.StandardCharsets.UTF_8),
+                "https://zighang-zighang-frontend.vercel.app/#accessToken=%s&refreshToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
+                java.net.URLEncoder.encode(accessToken, java.nio.charset.StandardCharsets.UTF_8),
+                java.net.URLEncoder.encode(refreshToken, java.nio.charset.StandardCharsets.UTF_8),
                 sessionId,
                 tokenResponse.getUserId(),
                 java.net.URLEncoder.encode(name, java.nio.charset.StandardCharsets.UTF_8)

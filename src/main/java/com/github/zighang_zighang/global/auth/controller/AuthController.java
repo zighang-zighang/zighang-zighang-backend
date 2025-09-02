@@ -49,6 +49,7 @@ public class AuthController {
         // Refresh token에서 사용자 정보 추출
         String email = jwtUtil.getEmailFromToken(refreshToken);
         String userId = jwtUtil.getUserIdFromToken(refreshToken);
+        
         if (email == null || userId == null) {
             return ResponseEntity
                 .status(401)
@@ -56,9 +57,10 @@ public class AuthController {
                                       AuthExceptionCode.INVALID_TOKEN.getMessage()));
         }
         
-        // Redis에서 해당 사용자의 refresh token과 일치하는지 확인 (userId 사용)
-        String storedRefreshToken = tokenStorageService.getRefreshToken(userId);
-        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+        // Redis에서 해당 사용자의 refresh token과 일치하는지 확인 (userId와 토큰 값으로 검증)
+        String storedRefreshToken = tokenStorageService.getRefreshTokenByUserIdAndToken(userId, refreshToken);
+        
+        if (storedRefreshToken == null) {
             return ResponseEntity
                 .status(401)
                 .body(ApiResponse.error(AuthExceptionCode.REFRESH_TOKEN_NOT_FOUND.getCode(), 
@@ -68,9 +70,14 @@ public class AuthController {
         // 토큰 갱신
         LoginResponse response = authService.refreshToken(refreshToken);
         
-        // 응답 헤더에 캐시 방지 및 보안 헤더 설정
+        // 새로운 access token 생성 (헤더용)
+        String newAccessToken = jwtUtil.generateAccessToken(email, response.getName(), userId);
+        
+        // 응답 헤더에 토큰과 캐시 방지 및 보안 헤더 설정
         return ResponseEntity
             .ok()
+            .header("Authorization", "Bearer " + newAccessToken)
+            .header("Refresh-Token", refreshToken) // 기존 refresh token 유지
             .header(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
             .header(HttpHeaders.PRAGMA, "no-cache")
             .header(HttpHeaders.EXPIRES, "0")
