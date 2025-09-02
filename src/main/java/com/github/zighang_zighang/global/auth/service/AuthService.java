@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -65,7 +64,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .userId(user.getId().toString())
-                .expiresIn((int) TimeUnit.MILLISECONDS.toSeconds(jwtConfig.getAccessTokenExpiration()))
+                .expiresIn((int) jwtConfig.getAccessTokenExpiration().toSeconds())
                 .build();
     }
 
@@ -89,7 +88,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .userId(user.getId().toString())
-                .expiresIn((int) TimeUnit.MILLISECONDS.toSeconds(jwtConfig.getAccessTokenExpiration()))
+                .expiresIn((int) jwtConfig.getAccessTokenExpiration().toSeconds())
                 .build();
     }
 }

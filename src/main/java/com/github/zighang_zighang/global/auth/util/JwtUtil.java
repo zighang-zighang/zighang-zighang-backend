@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import jakarta.annotation.PostConstruct;
 
 @Slf4j
@@ -29,9 +30,9 @@ public class JwtUtil {
         return generateToken(email, null, jwtConfig.getRefreshTokenExpiration(), "refresh");
     }
 
-    private String generateToken(String email, String name, long expiration, String tokenType) {
+    private String generateToken(String email, String name, Duration expiration, String tokenType) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration);
+        Date expiryDate = new Date(now.getTime() + expiration.toMillis());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
