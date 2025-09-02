@@ -18,9 +18,10 @@ public record RefreshToken(
         @Indexed
         String token,
 
+        @Indexed
         String userId,
 
-        @TimeToLive(unit = TimeUnit.HOURS)
+        @TimeToLive(unit = TimeUnit.MILLISECONDS)
         long ttl
 ) {
 
