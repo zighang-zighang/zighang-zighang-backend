@@ -38,8 +38,8 @@ public class AuthController {
                                       AuthExceptionCode.TOKEN_NOT_FOUND.getMessage()));
         }
         
-        // Refresh token 유효성 검증
-        if (!jwtUtil.validateToken(refreshToken)) {
+        // Refresh token 유효성 + 유형(typ=refresh) 검증
+        if (!jwtUtil.validateRefreshToken(refreshToken)) {
             return ResponseEntity
                 .status(401)
                 .body(ApiResponse.error(AuthExceptionCode.INVALID_REFRESH_TOKEN.getCode(), 

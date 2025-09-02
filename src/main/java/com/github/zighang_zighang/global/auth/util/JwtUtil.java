@@ -129,6 +129,31 @@ public class JwtUtil {
     }
 
     /**
+     * Refresh 토큰 전용 검증 (보안 강화)
+     */
+    public boolean validateRefreshToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            
+            // 토큰 타입이 "refresh"인지 확인
+            String tokenType = claims.get("typ", String.class);
+            if (!"refresh".equals(tokenType)) {
+                log.warn("Refresh 토큰이 아닌 토큰 사용 시도: {}", tokenType);
+                return false;
+            }
+            
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.error("Refresh 토큰 검증 실패: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * 토큰 타입 검증
      */
     public boolean isAccessToken(String token) {
