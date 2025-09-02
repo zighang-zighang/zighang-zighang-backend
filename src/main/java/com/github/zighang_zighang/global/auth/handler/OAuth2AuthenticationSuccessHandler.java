@@ -53,9 +53,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             // Refresh Token을 Redis에 저장 (userId 기반)
             tokenStorageService.storeRefreshToken(tokenResponse.getUserId(), tokenResponse.getRefreshToken());
             
-            // 프론트엔드로 리다이렉트 (Access Token은 URL로, Refresh Token은 userId로 조회)
+            // 프론트엔드로 리다이렉트 (Access Token은 fragment로, Refresh Token은 userId로 조회)
             String redirectUrl = String.format(
-                "https://zighang-zighang-frontend.vercel.app/?accessToken=%s&userId=%s&name=%s&loginSuccess=true",
+                "https://zighang-zighang-frontend.vercel.app/#accessToken=%s&userId=%s&name=%s&loginSuccess=true",
                 java.net.URLEncoder.encode(tokenResponse.getAccessToken(), java.nio.charset.StandardCharsets.UTF_8),
                 tokenResponse.getUserId(),
                 java.net.URLEncoder.encode(name, java.nio.charset.StandardCharsets.UTF_8)

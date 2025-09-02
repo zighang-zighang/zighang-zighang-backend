@@ -29,7 +29,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         
         // 프론트엔드 에러 페이지로 리다이렉트
         String errorRedirectUrl = String.format(
-            "https://zighang-zighang-frontend.vercel.app/auth/error?message=%s&details=%s",
+            "https://zighang-zighang-frontend.vercel.app/auth/error#message=%s&details=%s",
             java.net.URLEncoder.encode(AuthExceptionCode.OAUTH2_FAILURE.getMessage(), java.nio.charset.StandardCharsets.UTF_8),
             java.net.URLEncoder.encode(exception.getClass().getSimpleName(), java.nio.charset.StandardCharsets.UTF_8)
         );
