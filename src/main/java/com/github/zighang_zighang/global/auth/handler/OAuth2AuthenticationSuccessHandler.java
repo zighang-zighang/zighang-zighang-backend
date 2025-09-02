@@ -36,10 +36,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         OAuth2User principal = (OAuth2User) authentication.getPrincipal();
         
-        // 디버깅을 위한 로깅 추가
-        log.info("OAuth2 로그인 성공 - Principal: {}", principal);
-        log.info("OAuth2 사용자 속성들: {}", principal.getAttributes());
-        
         String email = getEmailFromPrincipal(principal);
         String name = getNameFromPrincipal(principal);
         Object providerId = getProviderIdFromPrincipal(principal);
