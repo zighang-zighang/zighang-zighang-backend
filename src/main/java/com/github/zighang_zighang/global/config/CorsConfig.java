@@ -17,12 +17,18 @@ public class CorsConfig {
         
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:3000",
-            "https://zighang-zighang-frontend.vercel.app"
+            "https://*.vercel.app"  // Vercel 서브도메인 패턴으로 확장
         ));
         
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // 쿠키 기반 인증 지원
+        configuration.setAllowCredentials(true);
+        
+        // preflight 요청 캐시 시간 설정 (1시간)
+        configuration.setMaxAge(3600L);
         
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Refresh-Token"));
         
