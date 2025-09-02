@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.global.auth.schema;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
@@ -15,12 +16,11 @@ public record RefreshToken(
         @Id
         String id,
 
-        String token,
+        @NotBlank String token,
 
-        @Indexed
-        String userId,
+        @Indexed @NotBlank String userId,
 
-        String sessionId,
+        @Indexed @NotBlank String sessionId,
 
         String deviceInfo,
 
