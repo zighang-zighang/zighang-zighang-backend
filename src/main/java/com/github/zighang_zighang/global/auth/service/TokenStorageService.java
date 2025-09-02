@@ -25,24 +25,25 @@ public class TokenStorageService {
         // 입력값 검증
         validateInput(userId, refreshToken);
         
-        // JWT 설정의 refresh token 만료 시간을 밀리초 단위로 사용
-        long ttlMillis = jwtConfig.getRefreshTokenExpiration().toMillis();
-        
+                // JWT 설정의 refresh token 만료 시간을 '초' 단위로 사용 (Spring Data Redis @TimeToLive 기본 단위는 초)
+        var exp = jwtConfig.getRefreshTokenExpiration();
+        long ttlSeconds = exp.toSeconds();
+
         // 고유한 세션 ID 생성
         String sessionId = UUID.randomUUID().toString();
-        
+
         RefreshToken refreshTokenEntity = RefreshToken.builder()
                 .id(sessionId) // sessionId를 id로 사용
                 .token(refreshToken)
                 .userId(userId)
                 .sessionId(sessionId)
                 .deviceInfo(deviceInfo != null ? deviceInfo : "Unknown Device")
-                .ttl(ttlMillis)
+                .ttl(ttlSeconds)
                 .build();
-        
+
         refreshTokenRedisRepository.save(refreshTokenEntity);
-        log.info("Refresh token을 Redis에 저장했습니다. 키: {}, 사용자 ID: {}, 세션 ID: {}, 디바이스: {}, Expiry: {}ms ({}일)", 
-                refreshTokenEntity.getRedisKey(), userId, sessionId, deviceInfo, ttlMillis, ttlMillis / (1000 * 1000 * 60 * 60 * 24));
+        log.info("Refresh token을 Redis에 저장했습니다. 키: {}, 사용자 ID: {}, 세션 ID: {}, 디바이스: {}, Expiry: {}s ({}일)",
+                refreshTokenEntity.getRedisKey(), userId, sessionId, deviceInfo, ttlSeconds, exp.toDays());
         
         return sessionId;
     }
