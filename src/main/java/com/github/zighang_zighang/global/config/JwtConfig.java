@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
+import org.springframework.boot.convert.DurationUnit;
+import java.time.temporal.ChronoUnit;
 
 @Data
 @Component
@@ -20,9 +22,11 @@ public class JwtConfig {
     private String secretKey;
     
     @NotNull(message = "Access token 만료 시간은 필수입니다")
+    @DurationUnit(ChronoUnit.SECONDS)
     private Duration accessTokenExpiration;
     
     @NotNull(message = "Refresh token 만료 시간은 필수입니다")
+    @DurationUnit(ChronoUnit.SECONDS)
     private Duration refreshTokenExpiration;
     
     @NotBlank(message = "JWT issuer는 필수입니다")
