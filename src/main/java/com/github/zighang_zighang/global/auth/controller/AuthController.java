@@ -24,7 +24,7 @@ public class AuthController {
 
     @PostMapping("/auth/refresh")
     public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(
-            @RequestHeader(value = "Refresh-Token", required = true) String refreshTokenHeader) {
+            @RequestHeader(value = "Refresh-Token", required = false) String refreshTokenHeader) {
         
         try {
             // Refresh Token 검증
