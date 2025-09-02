@@ -27,6 +27,12 @@ public class AuthService {
 
     @Transactional
     public LoginResponse oauth2Login(String email, String name, ProviderType providerType, Object providerId) {
+        // 입력 검증 및 이메일 정규화
+        if (email == null || email.isBlank() || providerType == null) {
+            throw new ApiException(AuthExceptionCode.OAUTH2_FAILURE);
+        }
+        email = email.trim().toLowerCase(java.util.Locale.ROOT);
+        
         // 사용자 조회 또는 생성
         User user = userService.findUserByEmail(email)
                 .orElseGet(() -> userService.createUser(email, name));
