@@ -11,6 +11,8 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import jakarta.annotation.PostConstruct;
 
 @Slf4j
 @Component
@@ -131,6 +133,23 @@ public class JwtUtil {
     }
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes());
+        return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes(StandardCharsets.UTF_8));
+    }
+    
+    /**
+     * 애플리케이션 시작 시 JWT 시크릿 키 강도 검증
+     */
+    @PostConstruct
+    void validateSecretStrength() {
+        byte[] key = jwtConfig.getSecretKey().getBytes(StandardCharsets.UTF_8);
+        if (key.length < 32) { // 256bit (32 bytes)
+            String errorMsg = String.format(
+                "JWT secret 길이가 HS256에 충분하지 않습니다. 현재: %d bytes, 필요: >=32 bytes", 
+                key.length
+            );
+            log.error(errorMsg);
+            throw new IllegalStateException(errorMsg);
+        }
+        log.info("JWT 시크릿 키 강도 검증 통과: {} bytes", key.length);
     }
 }
