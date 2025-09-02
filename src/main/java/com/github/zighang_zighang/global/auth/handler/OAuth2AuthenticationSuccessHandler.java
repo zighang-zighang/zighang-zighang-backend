@@ -42,9 +42,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String name = getNameFromPrincipal(principal);
         Object providerId = getProviderIdFromPrincipal(principal);
         ProviderType providerType = getProviderTypeFromPrincipal(principal);
-        
-        log.info("추출된 이메일: {}, 이름: {}, 제공자 ID: {}, 제공자 타입: {}", 
-                email, name, providerId, providerType);
+
+        if (log.isDebugEnabled()) {
+            log.debug("OAuth2 추출 결과 - providerType={}", providerType);
+        }
         
         try {
             // OAuth2 사용자 정보로 JWT 토큰 발급 (Provider 정보 포함)
