@@ -41,7 +41,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String email = getEmailFromPrincipal(principal);
         String name = getNameFromPrincipal(principal);
         Object providerId = getProviderIdFromPrincipal(principal);
-        ProviderType providerType = getProviderTypeFromPrincipal(principal);
+        ProviderType providerType = resolveProviderType(authentication, principal);
 
         if (log.isDebugEnabled()) {
             log.debug("OAuth2 추출 결과 - providerType={}", providerType);
@@ -177,7 +177,59 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         throw new ApiException(AuthExceptionCode.PROVIDER_ID_NOT_FOUND);
     }
 
-    // OAuth2 제공자 타입 추출
+    // OAuth2 제공자 타입 추출 (우선순위: registrationId > provider 속성)
+    private ProviderType resolveProviderType(Authentication authentication, OAuth2User principal) {
+        // 1. OAuth2AuthenticationToken의 registrationId 우선 사용 (가장 정확)
+        if (authentication instanceof org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken oauth2) {
+            String registrationId = oauth2.getAuthorizedClientRegistrationId();
+            if (registrationId != null) {
+                switch (registrationId.toLowerCase()) {
+                    case "naver":
+                        return ProviderType.NAVER;
+                    case "kakao":
+                        return ProviderType.KAKAO;
+                    case "google":
+                        return ProviderType.GOOGLE;
+                    default:
+                        log.warn("지원하지 않는 registrationId: {}", registrationId);
+                        break;
+                }
+            }
+        }
+        
+        // 2. 폴백: provider 속성에서 제공자 타입 추출
+        String provider = principal.getAttribute("provider");
+        if (provider != null) {
+            switch (provider.toLowerCase()) {
+                case "naver":
+                    return ProviderType.NAVER;
+                case "kakao":
+                    return ProviderType.KAKAO;
+                case "google":
+                    return ProviderType.GOOGLE;
+                default:
+                    log.warn("지원하지 않는 제공자: {}", provider);
+                    break;
+            }
+        }
+        
+        // 3. 최종 폴백: 기존 방식으로 제공자 타입 추출
+        if (principal.getAttribute("nickname") != null) {
+            return ProviderType.NAVER;
+        }
+        if (principal.getAttribute("kakao_account") != null) {
+            return ProviderType.KAKAO;
+        }
+        if (principal.getAttribute("sub") != null) {
+            return ProviderType.GOOGLE;
+        }
+        
+        // 모든 방법 실패 시 예외 발생
+        log.warn("제공자 타입을 식별할 수 없습니다. registrationId, provider 속성, 휴리스틱 모두 실패. 사용 가능한 속성: {}", principal.getAttributes().keySet());
+        throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
+    }
+
+    // OAuth2 제공자 타입 추출 (기존 방식 - 하위 호환성)
     private ProviderType getProviderTypeFromPrincipal(OAuth2User principal) {
         // provider 속성에서 직접 제공자 타입 추출
         String provider = principal.getAttribute("provider");
