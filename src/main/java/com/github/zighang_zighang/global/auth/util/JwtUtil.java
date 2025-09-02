@@ -25,6 +25,10 @@ public class JwtUtil {
     public String generateAccessToken(String email, String name) {
         return generateToken(email, name, jwtConfig.getAccessTokenExpiration(), "access");
     }
+    
+    public String generateAccessToken(String email, String name, String userId) {
+        return generateTokenWithUserId(email, name, userId, jwtConfig.getAccessTokenExpiration(), "access");
+    }
 
     public String generateRefreshToken(String email) {
         return generateToken(email, null, jwtConfig.getRefreshTokenExpiration(), "refresh");
@@ -36,6 +40,28 @@ public class JwtUtil {
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
+        if (name != null) {
+            claims.put("name", name);
+        }
+        claims.put("typ", tokenType); // 토큰 타입 구분
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(email)
+                .setIssuer(jwtConfig.getIssuer())
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
+                .compact();
+    }
+    
+    private String generateTokenWithUserId(String email, String name, String userId, Duration expiration, String tokenType) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expiration.toMillis());
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("email", email);
+        claims.put("userId", userId);
         if (name != null) {
             claims.put("name", name);
         }
@@ -120,6 +146,11 @@ public class JwtUtil {
     public String getEmailFromToken(String token) {
         Claims claims = parseToken(token);
         return claims != null ? claims.getSubject() : null;
+    }
+    
+    public String getUserIdFromToken(String token) {
+        Claims claims = parseToken(token);
+        return claims != null ? claims.get("userId", String.class) : null;
     }
 
     public boolean isTokenExpired(String token) {

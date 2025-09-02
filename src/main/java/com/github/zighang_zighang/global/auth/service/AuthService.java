@@ -51,8 +51,8 @@ public class AuthService {
                 return newProvider;
             });
 
-        // JWT 토큰 생성
-        String accessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName());
+        // JWT 토큰 생성 (userId 포함)
+        String accessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName(), user.getId().toString());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
         log.info("OAuth2 사용자 로그인 성공: {} (제공자: {}, Provider ID: {})", 

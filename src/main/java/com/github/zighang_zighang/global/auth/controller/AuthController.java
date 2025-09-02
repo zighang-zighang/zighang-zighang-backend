@@ -53,15 +53,16 @@ public class AuthController {
         
         // Access token에서 사용자 정보 추출
         String email = jwtUtil.getEmailFromToken(accessToken);
-        if (email == null) {
+        String userId = jwtUtil.getUserIdFromToken(accessToken);
+        if (email == null || userId == null) {
             return ResponseEntity
                 .status(401)
                 .body(ApiResponse.error(AuthExceptionCode.INVALID_TOKEN.getCode(), 
                                       AuthExceptionCode.INVALID_TOKEN.getMessage()));
         }
         
-        // Redis에서 해당 사용자의 refresh token과 일치하는지 확인
-        String storedRefreshToken = tokenStorageService.getRefreshToken(email);
+        // Redis에서 해당 사용자의 refresh token과 일치하는지 확인 (userId 사용)
+        String storedRefreshToken = tokenStorageService.getRefreshToken(userId);
         if (storedRefreshToken == null || !storedRefreshToken.equals(refreshTokenHeader)) {
             return ResponseEntity
                 .status(401)
