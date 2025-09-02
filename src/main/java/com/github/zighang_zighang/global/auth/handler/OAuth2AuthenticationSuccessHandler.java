@@ -199,7 +199,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 }
             }
         }
-        
+
         // 2. 폴백: provider 속성에서 제공자 타입 추출
         String provider = principal.getAttribute("provider");
         if (provider != null) {
@@ -214,17 +214,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     log.warn("지원하지 않는 제공자: {}", provider);
                     break;
             }
-        }
-        
-        // 3. 최종 폴백: 기존 방식으로 제공자 타입 추출
-        if (principal.getAttribute("nickname") != null) {
-            return ProviderType.NAVER;
-        }
-        if (principal.getAttribute("kakao_account") != null) {
-            return ProviderType.KAKAO;
-        }
-        if (principal.getAttribute("sub") != null) {
-            return ProviderType.GOOGLE;
         }
         
         // 모든 방법 실패 시 예외 발생

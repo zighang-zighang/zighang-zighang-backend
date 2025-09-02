@@ -83,7 +83,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     /**
      * 카카오 사용자 정보 처리
      */
-        private OAuth2User processKakaoUser(OAuth2User oauth2User) {
+    private OAuth2User processKakaoUser(OAuth2User oauth2User) {
         Long providerId = oauth2User.getAttribute("id");
         String email = null, name = null, picture = null;
 
@@ -92,13 +92,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             @SuppressWarnings("unchecked")
             Map<String, Object> account = (Map<String, Object>) kakaoAccount;
             email = (String) account.get("email");
-        }
-        Object properties = oauth2User.getAttribute("properties");
-        if (properties instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> props = (Map<String, Object>) properties;
-            name = (String) props.get("nickname");
-            picture = (String) props.get("profile_image");
+            
+            // kakao_account.profile에서 닉네임과 프로필 이미지 추출
+            Object profile = account.get("profile");
+            if (profile instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> profileMap = (Map<String, Object>) profile;
+                name = (String) profileMap.get("nickname");
+                picture = (String) profileMap.get("profile_image_url");
+            }
         }
 
         log.debug("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", 
