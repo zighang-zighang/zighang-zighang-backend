@@ -1,9 +1,11 @@
 package com.github.zighang_zighang.global.auth.controller;
 
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
+import com.github.zighang_zighang.global.auth.dto.TokenRefreshResponse;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
+import com.github.zighang_zighang.global.exception.ApiException;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import lombok.RequiredArgsConstructor;
@@ -22,66 +24,35 @@ public class AuthController {
 
     @PostMapping("/auth/refresh")
     public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(
-            @RequestHeader(value = "Refresh-Token", required = false) String refreshTokenHeader,
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+            @RequestHeader(value = "Refresh-Token", required = true) String refreshTokenHeader) {
         
-        // 1) Refresh-Token 우선 사용, 없으면 Authorization: Bearer 로부터 추출
-        String refreshToken = refreshTokenHeader;
-        if ((refreshToken == null || refreshToken.isBlank()) && authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            refreshToken = authorizationHeader.substring(7);
-        }
-        
-        if (refreshToken == null || refreshToken.isBlank()) {
+        try {
+            // Refresh Token 검증
+            String refreshToken = refreshTokenHeader;
+            if (refreshToken == null || refreshToken.isBlank()) {
+                return ResponseEntity
+                    .status(401)
+                    .body(ApiResponse.error(AuthExceptionCode.TOKEN_NOT_FOUND.getCode(), 
+                                          "Refresh Token이 필요합니다."));
+            }
+
+            TokenRefreshResponse tokenResponse = authService.refreshToken(refreshToken);
+            
+            // 응답 헤더에 토큰과 캐시 방지 및 보안 헤더 설정
+            return ResponseEntity
+                .ok()
+                .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
+                .header("Refresh-Token", tokenResponse.getRefreshToken())
+                .header(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header(HttpHeaders.EXPIRES, "0")
+                .body(ApiResponse.ok(tokenResponse.getUserInfo()));
+                
+        } catch (ApiException e) {
             return ResponseEntity
                 .status(401)
-                .body(ApiResponse.error(AuthExceptionCode.TOKEN_NOT_FOUND.getCode(), 
-                                      AuthExceptionCode.TOKEN_NOT_FOUND.getMessage()));
+                .body(ApiResponse.error(e.getErrorCode(), e.getErrorMessage()));
         }
-        
-        // Refresh token 유효성 + 유형(typ=refresh) 검증
-        if (!jwtUtil.validateRefreshToken(refreshToken)) {
-            return ResponseEntity
-                .status(401)
-                .body(ApiResponse.error(AuthExceptionCode.INVALID_REFRESH_TOKEN.getCode(), 
-                                      AuthExceptionCode.INVALID_REFRESH_TOKEN.getMessage()));
-        }
-        
-        // Refresh token에서 사용자 정보 추출
-        String email = jwtUtil.getEmailFromToken(refreshToken);
-        String userId = jwtUtil.getUserIdFromToken(refreshToken);
-        
-        if (email == null || userId == null) {
-            return ResponseEntity
-                .status(401)
-                .body(ApiResponse.error(AuthExceptionCode.INVALID_TOKEN.getCode(), 
-                                      AuthExceptionCode.INVALID_TOKEN.getMessage()));
-        }
-        
-        // Redis에서 해당 사용자의 refresh token과 일치하는지 확인 (userId와 토큰 값으로 검증)
-        String storedRefreshToken = tokenStorageService.getRefreshTokenByUserIdAndToken(userId, refreshToken);
-        
-        if (storedRefreshToken == null) {
-            return ResponseEntity
-                .status(401)
-                .body(ApiResponse.error(AuthExceptionCode.REFRESH_TOKEN_NOT_FOUND.getCode(), 
-                                      AuthExceptionCode.REFRESH_TOKEN_NOT_FOUND.getMessage()));
-        }
-        
-        // 토큰 갱신
-        LoginResponse response = authService.refreshToken(refreshToken);
-        
-        // 새로운 access token 생성 (헤더용)
-        String newAccessToken = jwtUtil.generateAccessToken(email, response.getName(), userId);
-        
-        // 응답 헤더에 토큰과 캐시 방지 및 보안 헤더 설정
-        return ResponseEntity
-            .ok()
-            .header("Authorization", "Bearer " + newAccessToken)
-            .header("Refresh-Token", refreshToken) // 기존 refresh token 유지
-            .header(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
-            .header(HttpHeaders.PRAGMA, "no-cache")
-            .header(HttpHeaders.EXPIRES, "0")
-            .body(ApiResponse.ok(response));
     }
 
         @GetMapping("/login")

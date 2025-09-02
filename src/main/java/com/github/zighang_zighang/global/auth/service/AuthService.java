@@ -5,6 +5,7 @@ import com.github.zighang_zighang.domain.user.entity.UserProvider;
 import com.github.zighang_zighang.domain.user.service.UserService;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
+import com.github.zighang_zighang.global.auth.dto.TokenRefreshResponse;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.exception.ApiException;
@@ -73,7 +74,10 @@ public class AuthService {
                 .build();
     }
 
-    public LoginResponse refreshToken(String refreshToken) {
+    /**
+     * Refresh Token으로 새로운 Access Token과 Refresh Token 발급 (토큰 회전)
+     */
+    public TokenRefreshResponse refreshToken(String refreshToken) {
         // 1. refresh token 타입 검증 (typ=refresh 강제)
         if (!jwtUtil.validateRefreshToken(refreshToken)) {
             throw new ApiException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
@@ -92,16 +96,32 @@ public class AuthService {
             throw new ApiException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
         }
 
-        // 3. 새로운 access token 생성
+        // 3. 토큰 회전: 새로운 access token과 refresh token 생성
         String newAccessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName(), user.getId().toString());
+        String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail(), user.getId().toString());
 
-        log.info("토큰 갱신 성공: {}", user.getEmail());
+        // 4. 기존 refresh token 무효화 (Redis에서 제거)
+        tokenStorageService.getUserActiveSessions(userId)
+                .stream()
+                .filter(rt -> refreshToken.equals(rt.token()))
+                .findFirst()
+                .ifPresent(rt -> tokenStorageService.removeSession(rt.sessionId()));
 
-        return LoginResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .userId(user.getId().toString())
-                .expiresIn((int) jwtConfig.getAccessTokenExpiration().toSeconds())
+        // 5. 새로운 refresh token을 Redis에 저장
+        String sessionId = tokenStorageService.storeRefreshToken(userId, newRefreshToken, "Token Refresh");
+
+        log.info("토큰 회전 성공: {} (기존 토큰 무효화, 새 토큰 발급)", user.getEmail());
+
+        return TokenRefreshResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .sessionId(sessionId)
+                .userInfo(LoginResponse.builder()
+                        .email(user.getEmail())
+                        .name(user.getName())
+                        .userId(user.getId().toString())
+                        .expiresIn((int) jwtConfig.getAccessTokenExpiration().toSeconds())
+                        .build())
                 .build();
     }
 }

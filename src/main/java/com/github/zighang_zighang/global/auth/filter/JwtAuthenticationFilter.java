@@ -29,8 +29,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
+        // 이미 인증된 요청이면 중복 처리 방지
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         try {
-            // Access token 처리 (Authorization: Bearer)
+            // Access token만 처리 (Authorization: Bearer)
+            // Refresh token은 /auth/refresh 엔드포인트에서만 처리
             String accessToken = extractAccessTokenFromRequest(request);
             if (StringUtils.hasText(accessToken) && jwtUtil.validateAccessToken(accessToken)) {
                 String email = jwtUtil.getEmailFromToken(accessToken);
@@ -44,21 +51,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     log.debug("Access token 인증 성공: {}", email);
                 }
             }
-            
-            // Refresh token 처리 (Refresh-Token 헤더)
-            String refreshToken = extractRefreshTokenFromRequest(request);
-            if (StringUtils.hasText(refreshToken) && jwtUtil.validateRefreshToken(refreshToken)) {
-                String email = jwtUtil.getEmailFromToken(refreshToken);
-                
-                if (StringUtils.hasText(email)) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                    UsernamePasswordAuthenticationToken authentication = 
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("Refresh token 인증 성공: {}", email);
-                }
-            }
         } catch (Exception e) {
             log.error("JWT 인증 처리 중 오류 발생: {}", e.getMessage());
         }
@@ -69,12 +61,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String extractAccessTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+            String token = bearerToken.substring(7).trim();
+            return StringUtils.hasText(token) ? token : null;
         }
         return null;
-    }
-    
-    private String extractRefreshTokenFromRequest(HttpServletRequest request) {
-        return request.getHeader("Refresh-Token");
     }
 }

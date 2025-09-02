@@ -80,19 +80,6 @@ public class JwtUtil {
         }
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser()
-                    .verifyWith(getSigningKey())
-                    .build()
-                    .parseSignedClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            log.error("JWT 토큰 검증 실패: {}", e.getMessage());
-            return false;
-        }
-    }
-
     /**
      * Access 토큰 전용 검증 (보안 강화)
      */

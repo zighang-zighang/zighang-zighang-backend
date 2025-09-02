@@ -36,7 +36,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/oauth2/**", "/login/oauth2/**", "/error").permitAll()
+                .requestMatchers("/", "/login", "/oauth2/**", "/login/oauth2/**", "/error", "/auth/refresh").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
