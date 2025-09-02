@@ -24,6 +24,7 @@ public class AuthService {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final JwtConfig jwtConfig;
+    private final TokenStorageService tokenStorageService;
 
     @Transactional
     public LoginResponse oauth2Login(String email, String name, ProviderType providerType, Object providerId) {
@@ -73,15 +74,25 @@ public class AuthService {
     }
 
     public LoginResponse refreshToken(String refreshToken) {
-        if (!jwtUtil.validateToken(refreshToken)) {
+        // 1. refresh token 타입 검증 (typ=refresh 강제)
+        if (!jwtUtil.validateRefreshToken(refreshToken)) {
             throw new ApiException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
         }
 
         String email = jwtUtil.getEmailFromToken(refreshToken);
+        String userId = jwtUtil.getUserIdFromToken(refreshToken);
         User user = userService.findUserByEmail(email)
                 .orElseThrow(() -> new ApiException(AuthExceptionCode.USER_NOT_FOUND));
 
-        // 새로운 access token 생성
+        // 2. 세션 바인딩: Redis에 저장된 refresh token과 대조
+        boolean matched = tokenStorageService.getUserActiveSessions(userId)
+                .stream().anyMatch(rt -> refreshToken.equals(rt.token()));
+        if (!matched) {
+            log.warn("Redis에 저장되지 않은 refresh token 사용 시도: userId={}, email={}", userId, email);
+            throw new ApiException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 3. 새로운 access token 생성
         String newAccessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName(), user.getId().toString());
 
         log.info("토큰 갱신 성공: {}", user.getEmail());
