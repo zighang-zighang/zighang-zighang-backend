@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -17,81 +18,117 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauth2User = super.loadUser(userRequest);
+        String provider = userRequest.getClientRegistration().getRegistrationId();
         
-        log.info("OAuth2 사용자 정보 로드 - Provider: {}", userRequest.getClientRegistration().getRegistrationId());
+        log.info("OAuth2 사용자 정보 로드 - Provider: {}", provider);
 
         // 디버그 레벨에서만 속성 키 목록 로깅 (민감한 값은 제외)
         if (log.isDebugEnabled()) {
             log.debug("OAuth2 속성 키: {}", oauth2User.getAttributes().keySet());
         }
         
-        // 네이버의 경우 response 객체에서 id를 추출하여 nameAttributeKey로 설정
-        if ("naver".equals(userRequest.getClientRegistration().getRegistrationId())) {
-            Object response = oauth2User.getAttribute("response");
-            if (response instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> responseMap = (Map<String, Object>) response;
-                
-                String providerId = (String) responseMap.get("id");
-                String email = (String) responseMap.get("email");
-                String name = (String) responseMap.getOrDefault("name", email);
-                String picture = (String) responseMap.get("profile_image");
-                
-                log.info("네이버 사용자 정보 - ID: {}, Email: {}, Name: {}", 
-                        providerId, maskEmail(email), maskName(name));
-                
-                // nameAttributeKey를 "response"로 설정 (application.yaml의 user-name-attribute와 일치)
-                return new DefaultOAuth2User(
-                    oauth2User.getAuthorities(),
-                    oauth2User.getAttributes(),  // 원본 속성 그대로 유지
-                    "response"  // nameAttributeKey를 "response"로 설정
-                );
-            }
-        }
+        // 모든 제공자에 대해 일관된 방식으로 처리
+        OAuth2User processedUser = processOAuth2User(oauth2User, provider);
         
-        // 카카오의 경우
-        if ("kakao".equals(userRequest.getClientRegistration().getRegistrationId())) {
-            Long providerId = oauth2User.getAttribute("id");  // Long으로 직접 캐스팅
+        log.info("OAuth2 사용자 정보 처리 완료 - Provider: {}", provider);
+        return processedUser;
+    }
+    
+    /**
+     * OAuth2 제공자별 사용자 정보 처리
+     */
+    private OAuth2User processOAuth2User(OAuth2User oauth2User, String provider) {
+        switch (provider) {
+            case "naver":
+                return processNaverUser(oauth2User);
+            case "kakao":
+                return processKakaoUser(oauth2User);
+            case "google":
+                return processGoogleUser(oauth2User);
+            default:
+                log.warn("지원하지 않는 OAuth2 제공자: {}", provider);
+                return oauth2User;
+        }
+    }
+    
+    /**
+     * 네이버 사용자 정보 처리
+     */
+    private OAuth2User processNaverUser(OAuth2User oauth2User) {
+        Object response = oauth2User.getAttribute("response");
+        if (response instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> responseMap = (Map<String, Object>) response;
             
-            String email = null;
-            Object kakaoAccount = oauth2User.getAttribute("kakao_account");
-            if (kakaoAccount instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> account = (Map<String, Object>) kakaoAccount;
-                email = (String) account.get("email");
-            }
-            String name = null;
-            Object properties = oauth2User.getAttribute("properties");
-            if (properties instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> props = (Map<String, Object>) properties;
-                name = (String) props.get("nickname");
-            }
+            String providerId = (String) responseMap.get("id");
+            String email = (String) responseMap.get("email");
+            String name = (String) responseMap.getOrDefault("name", email);
+            String picture = (String) responseMap.get("profile_image");
             
-            log.info("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", providerId, maskEmail(email), maskName(name));
+            log.info("네이버 사용자 정보 - ID: {}, Email: {}, Name: {}", 
+                    providerId, maskEmail(email), maskName(name));
             
-            // nameAttributeKey를 "id"로 설정 (application.yaml의 user-name-attribute와 일치)
+            // response를 평탄화하여 attributes로 사용하고, nameAttributeKey는 "id"로 지정
+            Map<String, Object> attributes = new HashMap<>(responseMap);
             return new DefaultOAuth2User(
                 oauth2User.getAuthorities(),
-                oauth2User.getAttributes(),  // 원본 속성 그대로 유지
-                "id"  // nameAttributeKey를 "id"로 설정
+                attributes,
+                "id"  // 표준화된 nameAttributeKey
             );
         }
+        return oauth2User;
+    }
+    
+    /**
+     * 카카오 사용자 정보 처리
+     */
+    private OAuth2User processKakaoUser(OAuth2User oauth2User) {
+        Long providerId = oauth2User.getAttribute("id");
         
-        // 구글의 경우
-        if ("google".equals(userRequest.getClientRegistration().getRegistrationId())) {
-            String providerId = oauth2User.getAttribute("sub");
-            String email = oauth2User.getAttribute("email");
-            String name = oauth2User.getAttribute("name");
-            
-            log.info("구글 사용자 정보 - ID: {}, Email: {}, Name: {}", providerId, maskEmail(email), maskName(name));
+        String email = null;
+        Object kakaoAccount = oauth2User.getAttribute("kakao_account");
+        if (kakaoAccount instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> account = (Map<String, Object>) kakaoAccount;
+            email = (String) account.get("email");
         }
         
-        // 모든 제공자에 대해 로깅
-        log.info("OAuth2 사용자 정보 로드 완료 - Provider: {}", userRequest.getClientRegistration().getRegistrationId());
+        String name = null;
+        Object properties = oauth2User.getAttribute("properties");
+        if (properties instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> props = (Map<String, Object>) properties;
+            name = (String) props.get("nickname");
+        }
         
-        // 다른 제공자들은 그대로 반환
-        return oauth2User;
+        log.info("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", 
+                providerId, maskEmail(email), maskName(name));
+        
+        // 표준화된 nameAttributeKey 사용
+        return new DefaultOAuth2User(
+            oauth2User.getAuthorities(),
+            oauth2User.getAttributes(),
+            "id"
+        );
+    }
+    
+    /**
+     * 구글 사용자 정보 처리
+     */
+    private OAuth2User processGoogleUser(OAuth2User oauth2User) {
+        String providerId = oauth2User.getAttribute("sub");
+        String email = oauth2User.getAttribute("email");
+        String name = oauth2User.getAttribute("name");
+        
+        log.info("구글 사용자 정보 - ID: {}, Email: {}, Name: {}", 
+                providerId, maskEmail(email), maskName(name));
+        
+        // 표준화된 nameAttributeKey 사용
+        return new DefaultOAuth2User(
+            oauth2User.getAuthorities(),
+            oauth2User.getAttributes(),
+            "sub"  // Google의 경우 "sub"가 표준
+        );
     }
     
     /**

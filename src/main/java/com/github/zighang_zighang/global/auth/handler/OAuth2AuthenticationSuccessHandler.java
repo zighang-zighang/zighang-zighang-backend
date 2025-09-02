@@ -93,15 +93,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // OAuth2 제공자별 이메일 추출
     private String getEmailFromPrincipal(OAuth2User principal) {
-        // 네이버의 경우 response.email에서 이메일 추출
-        Object response = principal.getAttribute("response");
-        if (response instanceof java.util.Map) {
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> resp = (java.util.Map<String, Object>) response;
-            String email = (String) resp.get("email");
-            if (email != null) {
-                return email;
-            }
+        // 네이버의 경우 email에서 이메일 추출 (response가 평탄화됨)
+        String email = principal.getAttribute("email");
+        if (email != null) {
+            return email;
         }
         
         // 카카오의 경우 kakao_account.email에서 이메일 추출
@@ -109,14 +104,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         if (kakaoAccount instanceof java.util.Map) {
             @SuppressWarnings("unchecked")
             java.util.Map<String, Object> account = (java.util.Map<String, Object>) kakaoAccount;
-            String email = (String) account.get("email");
-            if (email != null) {
-                return email;
+            String kakaoEmail = (String) account.get("email");
+            if (kakaoEmail != null) {
+                return kakaoEmail;
             }
         }
         
         // Google의 경우 email에서 이메일 추출
-        String email = principal.getAttribute("email");
         if (email != null) {
             return email;
         }
@@ -126,15 +120,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // OAuth2 제공자별 이름 추출
     private String getNameFromPrincipal(OAuth2User principal) {
-        // 네이버의 경우 response.name에서 이름 추출
-        Object response = principal.getAttribute("response");
-        if (response instanceof java.util.Map) {
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> resp = (java.util.Map<String, Object>) response;
-            String name = (String) resp.get("name");
-            if (name != null) {
-                return name;
-            }
+        // 네이버의 경우 name에서 이름 추출 (response가 평탄화됨)
+        String name = principal.getAttribute("name");
+        if (name != null) {
+            return name;
         }
         
         // 카카오의 경우 properties.nickname에서 이름 추출
@@ -149,7 +138,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
         
         // Google의 경우 name에서 이름 추출
-        String name = principal.getAttribute("name");
         if (name != null) {
             return name;
         }
@@ -161,21 +149,22 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // OAuth2 제공자별 제공자 ID 추출
     private Object getProviderIdFromPrincipal(OAuth2User principal) {
-        // 네이버의 경우 response.id에서 제공자 ID 추출 (String)
-        Object response = principal.getAttribute("response");
-        if (response instanceof java.util.Map) {
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> resp = (java.util.Map<String, Object>) response;
-            String id = (String) resp.get("id");
-            if (id != null) {
-                return id;
-            }
-        }
-        
-        // 카카오의 경우 id에서 제공자 ID 추출 (Long)
-        Long id = principal.getAttribute("id");
+        // 네이버의 경우 id에서 제공자 ID 추출 (String) - response가 평탄화됨
+        Object id = principal.getAttribute("id");
         if (id != null) {
             return id;
+        }
+        
+        // 카카오의 경우 id에서 제공자 ID 추출 (Long 또는 String)
+        // 카카오는 id가 Long 타입일 수 있음
+        if (id != null) {
+            if (id instanceof String) {
+                return id;
+            } else if (id instanceof Long) {
+                return id;
+            } else if (id instanceof Number) {
+                return id.toString();
+            }
         }
         
         // Google의 경우 sub에서 제공자 ID 추출 (String)
@@ -189,8 +178,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // OAuth2 제공자 타입 추출
     private ProviderType getProviderTypeFromPrincipal(OAuth2User principal) {
-        // 네이버의 경우 response 속성이 있으면 NAVER
-        if (principal.getAttribute("response") != null) {
+        // 네이버의 경우 nickname 속성이 있으면 NAVER (네이버 고유 속성)
+        if (principal.getAttribute("nickname") != null) {
             return ProviderType.NAVER;
         }
         
@@ -204,6 +193,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return ProviderType.GOOGLE;
         }
         
+        // 디버깅을 위한 로깅 추가
+        log.warn("제공자 타입을 식별할 수 없습니다. 사용 가능한 속성: {}", principal.getAttributes().keySet());
         throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
     }
     
