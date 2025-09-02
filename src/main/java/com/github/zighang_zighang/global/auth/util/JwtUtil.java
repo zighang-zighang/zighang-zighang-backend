@@ -22,28 +22,17 @@ public class JwtUtil {
 
     private final JwtConfig jwtConfig;
 
-    public String generateAccessToken(String email, String name) {
-        return generateToken(email, name, jwtConfig.getAccessTokenExpiration(), "access");
-    }
-    
-    public String generateAccessToken(String email, String name, String userId) {
+        public String generateAccessToken(String email, String name, String userId) {
         return generateTokenWithUserId(email, name, userId, jwtConfig.getAccessTokenExpiration(), "access");
     }
 
     public String generateRefreshToken(String email) {
-        return generateToken(email, null, jwtConfig.getRefreshTokenExpiration(), "refresh");
-    }
-
-    private String generateToken(String email, String name, Duration expiration, String tokenType) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration.toMillis());
+        Date expiryDate = new Date(now.getTime() + jwtConfig.getRefreshTokenExpiration().toMillis());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
-        if (name != null) {
-            claims.put("name", name);
-        }
-        claims.put("typ", tokenType); // 토큰 타입 구분
+        claims.put("typ", "refresh"); // 토큰 타입 구분
 
         return Jwts.builder()
                 .setClaims(claims)

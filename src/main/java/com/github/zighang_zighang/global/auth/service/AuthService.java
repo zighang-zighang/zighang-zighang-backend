@@ -84,7 +84,7 @@ public class AuthService {
                 .orElseThrow(() -> new ApiException(AuthExceptionCode.USER_NOT_FOUND));
 
         // 새로운 access token 생성
-        String newAccessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName());
+        String newAccessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName(), user.getId().toString());
 
         log.info("토큰 갱신 성공: {}", user.getEmail());
 
