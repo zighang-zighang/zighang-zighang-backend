@@ -41,17 +41,20 @@ public class TokenStorageService {
                 .build();
         
         refreshTokenRedisRepository.save(refreshTokenEntity);
-        log.info("Refresh token을 Redis에 저장했습니다. 사용자 ID: {}, 세션 ID: {}, 디바이스: {}, Expiry: {}ms ({}일)", 
-                userId, sessionId, deviceInfo, ttlMillis, ttlMillis / (1000 * 1000 * 60 * 60 * 24));
+        log.info("Refresh token을 Redis에 저장했습니다. 키: {}, 사용자 ID: {}, 세션 ID: {}, 디바이스: {}, Expiry: {}ms ({}일)", 
+                refreshTokenEntity.getRedisKey(), userId, sessionId, deviceInfo, ttlMillis, ttlMillis / (1000 * 1000 * 60 * 60 * 24));
         
         return sessionId;
     }
     
     /**
      * 사용자 ID로 refresh token을 Redis에 저장 (기존 호환성)
+     * 다중 세션 지원을 위해 내부적으로 세션 ID 생성
      */
     public void storeRefreshToken(String userId, String refreshToken) {
-        storeRefreshToken(userId, refreshToken, null);
+        // 다중 세션 지원을 위해 기본 디바이스 정보로 세션 ID 생성
+        String sessionId = storeRefreshToken(userId, refreshToken, "Default Device");
+        log.info("기존 호환성 메서드로 토큰 저장 완료. 세션 ID: {}", sessionId);
     }
     
     /**
@@ -63,13 +66,12 @@ public class TokenStorageService {
     }
     
     /**
-     * 사용자 ID로 refresh token을 Redis에서 조회
+     * 사용자 ID로 refresh token을 Redis에서 조회 (첫 번째 활성 세션)
      */
     public String getRefreshToken(String userId) {
         org.springframework.util.Assert.hasText(userId, "userId must not be blank");
-        return refreshTokenRedisRepository.findById(userId)
-                .map(RefreshToken::token)
-                .orElse(null);
+        List<RefreshToken> userSessions = refreshTokenRedisRepository.findByUserId(userId);
+        return userSessions.isEmpty() ? null : userSessions.get(0).token();
     }
     
     /**
@@ -132,5 +134,56 @@ public class TokenStorageService {
     public long getUserActiveSessionCount(String userId) {
         org.springframework.util.Assert.hasText(userId, "userId must not be blank");
         return refreshTokenRedisRepository.findByUserId(userId).size();
+    }
+    
+    /**
+     * 특정 사용자의 모든 세션 정보를 상세하게 출력 (디버깅용)
+     */
+    public void debugUserSessions(String userId) {
+        org.springframework.util.Assert.hasText(userId, "userId must not be blank");
+        log.info("=== 사용자 {}의 세션 정보 ===", userId);
+        
+        List<RefreshToken> userSessions = getUserActiveSessions(userId);
+        
+        if (userSessions.isEmpty()) {
+            log.info("활성 세션이 없습니다.");
+        } else {
+            for (int i = 0; i < userSessions.size(); i++) {
+                RefreshToken session = userSessions.get(i);
+                log.info("세션 {}: SessionID={}, Device={}, TTL={}ms ({}일)", 
+                        i + 1, 
+                        session.sessionId(), 
+                        session.deviceInfo(),
+                        session.ttl(),
+                        session.ttl() / (1000 * 1000 * 60 * 60 * 24));
+            }
+            log.info("총 {}개의 활성 세션이 있습니다.", userSessions.size());
+        }
+        log.info("===============================");
+    }
+    
+    /**
+     * Redis에 저장된 모든 토큰 정보 출력 (디버깅용)
+     */
+    public void debugAllTokens() {
+        log.info("=== Redis에 저장된 모든 토큰 정보 ===");
+        
+        Iterable<RefreshToken> allTokens = refreshTokenRedisRepository.findAll();
+        long count = 0;
+        
+        for (RefreshToken token : allTokens) {
+            count++;
+            log.info("토큰 {}: ID={}, UserID={}, SessionID={}, Device={}, TTL={}ms ({}일)", 
+                    count, 
+                    token.id(), 
+                    token.userId(), 
+                    token.sessionId(), 
+                    token.deviceInfo(),
+                    token.ttl(),
+                    token.ttl() / (1000 * 1000 * 60 * 60 * 24));
+        }
+        
+        log.info("총 {}개의 토큰이 Redis에 저장되어 있습니다.", count);
+        log.info("=========================================");
     }
 }

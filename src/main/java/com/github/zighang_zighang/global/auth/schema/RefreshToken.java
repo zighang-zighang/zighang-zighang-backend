@@ -15,13 +15,11 @@ public record RefreshToken(
         @Id
         String id,
 
-        @Indexed
         String token,
 
         @Indexed
         String userId,
 
-        @Indexed
         String sessionId,
 
         String deviceInfo,
@@ -30,4 +28,10 @@ public record RefreshToken(
         long ttl
 ) {
 
+    /**
+     * Redis 키 생성: refresh_token:{userId}:{sessionId}
+     */
+    public String getRedisKey() {
+        return String.format("refresh_token:%s:%s", userId, sessionId);
+    }
 }
