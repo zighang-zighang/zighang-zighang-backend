@@ -70,6 +70,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             
             // response를 평탄화하여 attributes로 사용하고, nameAttributeKey는 "id"로 지정
             Map<String, Object> attributes = new HashMap<>(responseMap);
+            attributes.put("provider", "naver"); // 제공자 타입 추가
             return new DefaultOAuth2User(
                 oauth2User.getAuthorities(),
                 attributes,
@@ -82,34 +83,36 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     /**
      * 카카오 사용자 정보 처리
      */
-    private OAuth2User processKakaoUser(OAuth2User oauth2User) {
+        private OAuth2User processKakaoUser(OAuth2User oauth2User) {
         Long providerId = oauth2User.getAttribute("id");
-        
-        String email = null;
+        String email = null, name = null, picture = null;
+
         Object kakaoAccount = oauth2User.getAttribute("kakao_account");
         if (kakaoAccount instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> account = (Map<String, Object>) kakaoAccount;
             email = (String) account.get("email");
         }
-        
-        String name = null;
         Object properties = oauth2User.getAttribute("properties");
         if (properties instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> props = (Map<String, Object>) properties;
             name = (String) props.get("nickname");
+            picture = (String) props.get("profile_image");
         }
-        
-        log.info("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", 
+
+        log.debug("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", 
                 providerId, maskEmail(email), maskName(name));
+
+        // 표준화된 속성으로 평탄화
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("id", providerId != null ? String.valueOf(providerId) : null);
+        attributes.put("email", email);
+        attributes.put("name", name != null ? name : email);
+        attributes.put("picture", picture);
+        attributes.put("provider", "kakao"); // 제공자 타입 추가
         
-        // 표준화된 nameAttributeKey 사용
-        return new DefaultOAuth2User(
-            oauth2User.getAuthorities(),
-            oauth2User.getAttributes(),
-            "id"
-        );
+        return new DefaultOAuth2User(oauth2User.getAuthorities(), attributes, "id");
     }
     
     /**
@@ -123,10 +126,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         log.info("구글 사용자 정보 - ID: {}, Email: {}, Name: {}", 
                 providerId, maskEmail(email), maskName(name));
         
-        // 표준화된 nameAttributeKey 사용
+        // 표준화된 속성으로 평탄화하고 제공자 타입 추가
+        Map<String, Object> attributes = new HashMap<>(oauth2User.getAttributes());
+        attributes.put("provider", "google"); // 제공자 타입 추가
+        
         return new DefaultOAuth2User(
             oauth2User.getAuthorities(),
-            oauth2User.getAttributes(),
+            attributes,
             "sub"  // Google의 경우 "sub"가 표준
         );
     }

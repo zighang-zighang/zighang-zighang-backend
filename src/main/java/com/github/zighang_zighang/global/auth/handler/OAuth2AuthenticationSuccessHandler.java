@@ -179,23 +179,24 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // OAuth2 제공자 타입 추출
     private ProviderType getProviderTypeFromPrincipal(OAuth2User principal) {
-        // 네이버의 경우 nickname 속성이 있으면 NAVER (네이버 고유 속성)
-        if (principal.getAttribute("nickname") != null) {
-            return ProviderType.NAVER;
+        // provider 속성에서 직접 제공자 타입 추출
+        String provider = principal.getAttribute("provider");
+        if (provider != null) {
+            switch (provider.toLowerCase()) {
+                case "naver":
+                    return ProviderType.NAVER;
+                case "kakao":
+                    return ProviderType.KAKAO;
+                case "google":
+                    return ProviderType.GOOGLE;
+                default:
+                    log.warn("지원하지 않는 제공자: {}", provider);
+                    break;
+            }
         }
         
-        // 카카오의 경우 kakao_account 속성이 있으면 KAKAO
-        if (principal.getAttribute("kakao_account") != null) {
-            return ProviderType.KAKAO;
-        }
-        
-        // Google의 경우 sub 속성이 있으면 GOOGLE
-        if (principal.getAttribute("sub") != null) {
-            return ProviderType.GOOGLE;
-        }
-        
-        // 디버깅을 위한 로깅 추가
-        log.warn("제공자 타입을 식별할 수 없습니다. 사용 가능한 속성: {}", principal.getAttributes().keySet());
+        // provider 속성이 없으면 예외 발생
+        log.warn("제공자 타입을 식별할 수 없습니다. provider 속성이 누락되었습니다. 사용 가능한 속성: {}", principal.getAttributes().keySet());
         throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
     }
     
