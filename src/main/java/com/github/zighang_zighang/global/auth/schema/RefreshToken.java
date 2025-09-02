@@ -21,6 +21,11 @@ public record RefreshToken(
         @Indexed
         String userId,
 
+        @Indexed
+        String sessionId,
+
+        String deviceInfo,
+
         @TimeToLive(unit = TimeUnit.MILLISECONDS)
         long ttl
 ) {

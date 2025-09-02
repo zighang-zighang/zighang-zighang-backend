@@ -50,13 +50,22 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             // OAuth2 사용자 정보로 JWT 토큰 발급 (Provider 정보 포함)
             LoginResponse tokenResponse = authService.oauth2Login(email, name, providerType, providerId);
             
-            // Refresh Token을 Redis에 저장 (userId 기반)
-            tokenStorageService.storeRefreshToken(tokenResponse.getUserId(), tokenResponse.getRefreshToken());
+            // User-Agent에서 디바이스 정보 추출
+            String userAgent = request.getHeader("User-Agent");
+            String deviceInfo = extractDeviceInfo(userAgent);
             
-            // 프론트엔드로 리다이렉트 (Access Token은 fragment로, Refresh Token은 userId로 조회)
+            // Refresh Token을 Redis에 저장 (세션 기반, 다중 디바이스 지원)
+            String sessionId = tokenStorageService.storeRefreshToken(
+                tokenResponse.getUserId(), 
+                tokenResponse.getRefreshToken(), 
+                deviceInfo
+            );
+            
+            // 프론트엔드로 리다이렉트 (Access Token은 fragment로, 세션 ID로 관리)
             String redirectUrl = String.format(
-                "https://zighang-zighang-frontend.vercel.app/#accessToken=%s&userId=%s&name=%s&loginSuccess=true",
+                "https://zighang-zighang-frontend.vercel.app/#accessToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
                 java.net.URLEncoder.encode(tokenResponse.getAccessToken(), java.nio.charset.StandardCharsets.UTF_8),
+                sessionId,
                 tokenResponse.getUserId(),
                 java.net.URLEncoder.encode(name, java.nio.charset.StandardCharsets.UTF_8)
             );
@@ -190,5 +199,37 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
         
         throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
+    }
+    
+    /**
+     * User-Agent에서 디바이스 정보 추출
+     */
+    private String extractDeviceInfo(String userAgent) {
+        if (userAgent == null || userAgent.isEmpty()) {
+            return "Unknown Device";
+        }
+        
+        String deviceInfo = "Unknown Device";
+        
+        // 모바일 디바이스 감지
+        if (userAgent.toLowerCase().contains("mobile") || 
+            userAgent.toLowerCase().contains("android") || 
+            userAgent.toLowerCase().contains("iphone") || 
+            userAgent.toLowerCase().contains("ipad")) {
+            deviceInfo = "Mobile Device";
+        }
+        // 데스크톱 브라우저 감지
+        else if (userAgent.toLowerCase().contains("chrome") || 
+                 userAgent.toLowerCase().contains("firefox") || 
+                 userAgent.toLowerCase().contains("safari") || 
+                 userAgent.toLowerCase().contains("edge")) {
+            deviceInfo = "Desktop Browser";
+        }
+        // 기타
+        else {
+            deviceInfo = "Other Device";
+        }
+        
+        return deviceInfo;
     }
 }
