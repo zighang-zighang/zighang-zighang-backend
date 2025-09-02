@@ -73,10 +73,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             getRedirectStrategy().sendRedirect(request, response, redirectUrl);
             
         } catch (Exception e) {
-            // 에러 로깅 (서버에만 상세 정보 저장)
-            log.error("OAuth2 로그인 처리 중 오류 발생: {}", e.getMessage(), e);
+            // 상세 예외 정보는 서버 로그에만 기록 (보안 강화)
+            log.error("OAuth2 로그인 처리 중 오류 발생 - 예외 타입: {}, 메시지: {}", 
+                    e.getClass().getSimpleName(), e.getMessage());
             
-            // 프론트엔드에는 일반화된 에러 코드만 전달
+            // 스택 트레이스는 디버그 레벨에서만 로깅
+            if (log.isDebugEnabled()) {
+                log.debug("OAuth2 로그인 처리 중 오류 상세 정보", e);
+            }
+            
+            // 프론트엔드에는 일반화된 에러 코드만 전달 (보안상 안전)
             String errorRedirectUrl = String.format(
                 "https://zighang-zighang-frontend.vercel.app/auth/error#code=%s",
                 "OAUTH2_LOGIN_FAILED"
