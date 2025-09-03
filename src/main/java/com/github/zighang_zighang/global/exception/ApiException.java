@@ -1,8 +1,7 @@
 package com.github.zighang_zighang.global.exception;
 
-import lombok.Getter;
+import com.github.zighang_zighang.global.response.ApiResponse;
 
-@Getter
 public class ApiException extends RuntimeException {
 
     private final ApiExceptionCode code;
@@ -11,18 +10,16 @@ public class ApiException extends RuntimeException {
         super(code.getMessage());
         this.code = code;
     }
-    
-    /**
-     * 에러 코드를 String으로 반환 (API 응답용)
-     */
+
     public String getErrorCode() {
         return code.getCode();
     }
-    
-    /**
-     * 에러 메시지를 String으로 반환 (API 응답용)
-     */
+
     public String getErrorMessage() {
         return code.getMessage();
+    }
+
+    public ApiResponse<?> toResponse() {
+        return code.toResponse();
     }
 }

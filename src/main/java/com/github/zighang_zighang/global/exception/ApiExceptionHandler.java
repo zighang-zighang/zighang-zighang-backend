@@ -69,7 +69,7 @@ public class ApiExceptionHandler {
     public ApiResponse<?> apiException(ApiException e, HttpServletRequest request) {
 
         sentry(e, request);
-        return e.getCode().toResponse();
+        return e.toResponse();
     }
 
     @ExceptionHandler(Exception.class)
@@ -97,7 +97,7 @@ public class ApiExceptionHandler {
 //                    }
 
                     if (throwable instanceof ApiException ae) {
-                        scope.setTag("error.code", ae.getCode().getCode());
+                        scope.setTag("error.code", ae.getErrorCode());
                     }
 
                     Request sentryRequest = scope.getRequest();
