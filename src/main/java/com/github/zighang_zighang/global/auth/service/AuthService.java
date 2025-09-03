@@ -10,8 +10,11 @@ import com.github.zighang_zighang.global.auth.util.JwtUtil;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.exception.ApiException;
 import com.github.zighang_zighang.global.config.JwtConfig;
+import com.github.zighang_zighang.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,24 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final JwtConfig jwtConfig;
     private final TokenStorageService tokenStorageService;
+
+    public ResponseEntity<ApiResponse<LoginResponse>> handleRefreshToken(String refreshTokenHeader) {
+        if (refreshTokenHeader == null || refreshTokenHeader.isBlank()) {
+            throw new ApiException(AuthExceptionCode.TOKEN_NOT_FOUND);
+        }
+
+        TokenRefreshResponse tokenResponse = this.refreshToken(refreshTokenHeader);
+
+        return ResponseEntity
+                .ok()
+                .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
+                .header("Refresh-Token", tokenResponse.getRefreshToken())
+                .header(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header(HttpHeaders.EXPIRES, "0")
+                .body(ApiResponse.ok(tokenResponse.getUserInfo()));
+    }
+
 
     @Transactional
     public LoginResponse oauth2Login(String email, String name, ProviderType providerType, Object providerId) {

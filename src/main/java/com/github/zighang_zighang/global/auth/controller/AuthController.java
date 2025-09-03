@@ -19,29 +19,12 @@ import org.springframework.http.ResponseEntity;
 public class AuthController {
 
     private final AuthService authService;
-    private final TokenStorageService tokenStorageService;
-    private final JwtUtil jwtUtil;
 
     @PostMapping("/auth/refresh")
     public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(
             @RequestHeader(value = "Refresh-Token", required = false) String refreshTokenHeader) {
-
-        if (refreshTokenHeader == null || refreshTokenHeader.isBlank()) {
-            throw new ApiException(AuthExceptionCode.TOKEN_NOT_FOUND);
-        }
-
-        TokenRefreshResponse tokenResponse = authService.refreshToken(refreshTokenHeader);
-
-        return ResponseEntity
-                .ok()
-                .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
-                .header("Refresh-Token", tokenResponse.getRefreshToken())
-                .header(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
-                .header(HttpHeaders.PRAGMA, "no-cache")
-                .header(HttpHeaders.EXPIRES, "0")
-                .body(ApiResponse.ok(tokenResponse.getUserInfo()));
+        return authService.handleRefreshToken(refreshTokenHeader);
     }
-
 
     @GetMapping("/login")
     public String login(@RequestParam(value = "error", required = false) String error, 
