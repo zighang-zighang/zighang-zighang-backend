@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.user.entity;
 
+import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentView;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,5 +25,9 @@ public class User extends BaseSchema {
     @Builder.Default
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<UserProvider> providers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    List<RecruitmentView> recruitmentViews = new ArrayList<>();
 }
 
