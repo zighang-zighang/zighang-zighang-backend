@@ -13,7 +13,7 @@ import java.util.UUID;
                 @Index(columnList = "user_id"),
         },
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"user_id", "recruitmentId"})
+                @UniqueConstraint(columnNames = {"user_id", "recruitment_id"})
         }
 )
 @Getter
