@@ -1,12 +1,16 @@
 package com.github.zighang_zighang.global.auth.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
+import com.github.zighang_zighang.global.exception.ApiException;
+import com.github.zighang_zighang.global.response.ApiResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,16 +28,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
-        // 이미 인증된 요청이면 중복 처리 방지
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
         
         try {
             // Access token만 처리 (Authorization: Bearer)
@@ -53,6 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             log.error("JWT 인증 처리 중 오류 발생: {}", e.getMessage());
+            handleException(response, e);
+            return;
         }
         
         filterChain.doFilter(request, response);
@@ -66,4 +67,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+    private void handleException(HttpServletResponse response, Exception e) throws IOException {
+        String code = "INTERNAL_ERROR";
+        String message = "알 수 없는 서버 오류가 발생했습니다.";
+
+        if (e instanceof ApiException apiEx) {
+            code = apiEx.getErrorCode();
+            message = apiEx.getMessage();
+        }
+
+        ApiResponse<?> apiResponse = ApiResponse.error(code, message);
+        String content = objectMapper.writeValueAsString(apiResponse);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(content);
+        response.getWriter().flush();
+    }
+
 }

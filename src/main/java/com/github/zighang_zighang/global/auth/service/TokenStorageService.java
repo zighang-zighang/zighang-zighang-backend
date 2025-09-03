@@ -19,13 +19,13 @@ public class TokenStorageService {
     private final JwtConfig jwtConfig;
     
     /**
-     * 사용자 ID로 refresh token을 Redis에 저장 (다중 디바이스 지원)
+     * session ID로 refresh token을 Redis에 저장 (다중 디바이스 지원)
      */
     public String storeRefreshToken(String userId, String refreshToken, String deviceInfo) {
         // 입력값 검증
         validateInput(userId, refreshToken);
-        
-                // JWT 설정의 refresh token 만료 시간을 '초' 단위로 사용 (Spring Data Redis @TimeToLive 기본 단위는 초)
+
+        // JWT 설정의 refresh token 만료 시간을 '초' 단위로 사용 (Spring Data Redis @TimeToLive 기본 단위는 초)
         var exp = jwtConfig.getRefreshTokenExpiration();
         long ttlSeconds = exp.toSeconds();
 

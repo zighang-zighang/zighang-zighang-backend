@@ -57,7 +57,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             String userAgent = request.getHeader("User-Agent");
             String deviceInfo = extractDeviceInfo(userAgent);
             
-            // Refresh Token을 Redis에 저장 (userId 기반으로 통일)
+            // Refresh Token을 Redis에 저장
             String sessionId = tokenStorageService.storeRefreshToken(
                 tokenResponse.getUserId(), 
                 refreshToken, 
