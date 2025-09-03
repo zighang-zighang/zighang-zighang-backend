@@ -108,7 +108,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         attributes.put(OAuth2AttributeKeys.EMAIL, userInfo.getEmail());
         attributes.put(OAuth2AttributeKeys.NAME, userInfo.getName());
         attributes.put(OAuth2AttributeKeys.PICTURE, userInfo.getPicture());
-        attributes.put(OAuth2AttributeKeys.PROVIDER, userInfo.getProvider());
+        attributes.put(OAuth2AttributeKeys.PROVIDER, OAuth2AttributeKeys.PROVIDER_KAKAO); // Enum이 아닌 String으로 들어가게끔하기 위함
         
         return new DefaultOAuth2User(oauth2User.getAuthorities(), attributes, userInfo.getNameAttributeKey());
     }
