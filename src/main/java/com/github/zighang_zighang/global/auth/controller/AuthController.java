@@ -25,21 +25,14 @@ public class AuthController {
     @PostMapping("/auth/refresh")
     public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(
             @RequestHeader(value = "Refresh-Token", required = false) String refreshTokenHeader) {
-        
-        try {
-            // Refresh Token 검증
-            String refreshToken = refreshTokenHeader;
-            if (refreshToken == null || refreshToken.isBlank()) {
-                return ResponseEntity
-                    .status(401)
-                    .body(ApiResponse.error(AuthExceptionCode.TOKEN_NOT_FOUND.getCode(), 
-                                          "Refresh Token이 필요합니다."));
-            }
 
-            TokenRefreshResponse tokenResponse = authService.refreshToken(refreshToken);
-            
-            // 응답 헤더에 토큰과 캐시 방지 및 보안 헤더 설정
-            return ResponseEntity
+        if (refreshTokenHeader == null || refreshTokenHeader.isBlank()) {
+            throw new ApiException(AuthExceptionCode.TOKEN_NOT_FOUND);
+        }
+
+        TokenRefreshResponse tokenResponse = authService.refreshToken(refreshTokenHeader);
+
+        return ResponseEntity
                 .ok()
                 .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
                 .header("Refresh-Token", tokenResponse.getRefreshToken())
@@ -47,15 +40,10 @@ public class AuthController {
                 .header(HttpHeaders.PRAGMA, "no-cache")
                 .header(HttpHeaders.EXPIRES, "0")
                 .body(ApiResponse.ok(tokenResponse.getUserInfo()));
-                
-        } catch (ApiException e) {
-            return ResponseEntity
-                .status(401)
-                .body(ApiResponse.error(e.getErrorCode(), e.getErrorMessage()));
-        }
     }
 
-        @GetMapping("/login")
+
+    @GetMapping("/login")
     public String login(@RequestParam(value = "error", required = false) String error, 
                        @RequestParam(value = "details", required = false) String details) {
         // XSS 방지를 위해 HTML 이스케이프 처리
