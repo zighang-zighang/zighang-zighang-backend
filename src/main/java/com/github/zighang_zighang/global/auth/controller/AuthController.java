@@ -1,18 +1,12 @@
 package com.github.zighang_zighang.global.auth.controller;
 
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
-import com.github.zighang_zighang.global.auth.dto.TokenRefreshResponse;
 import com.github.zighang_zighang.global.auth.service.AuthService;
-import com.github.zighang_zighang.global.auth.service.TokenStorageService;
-import com.github.zighang_zighang.global.auth.util.JwtUtil;
-import com.github.zighang_zighang.global.exception.ApiException;
 import com.github.zighang_zighang.global.response.ApiResponse;
-import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequiredArgsConstructor

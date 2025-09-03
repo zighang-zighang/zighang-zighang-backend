@@ -1,10 +1,10 @@
 package com.github.zighang_zighang.domain.user.service;
 
+import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.domain.user.entity.UserProvider;
-import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
-import com.github.zighang_zighang.domain.user.constant.ProviderType;
+import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

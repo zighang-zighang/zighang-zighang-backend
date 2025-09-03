@@ -1,21 +1,21 @@
 package com.github.zighang_zighang.global.config;
 
 import com.github.zighang_zighang.global.auth.filter.JwtAuthenticationFilter;
-import com.github.zighang_zighang.global.auth.service.CustomOAuth2UserService;
-import com.github.zighang_zighang.global.auth.handler.OAuth2AuthenticationSuccessHandler;
 import com.github.zighang_zighang.global.auth.handler.OAuth2AuthenticationFailureHandler;
+import com.github.zighang_zighang.global.auth.handler.OAuth2AuthenticationSuccessHandler;
+import com.github.zighang_zighang.global.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.http.HttpStatus;
 
 @Configuration
 @EnableWebSecurity
