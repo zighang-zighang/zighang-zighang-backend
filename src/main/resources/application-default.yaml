@@ -76,3 +76,7 @@ jwt:
 # Registry Configuration
 registry:
   url: ${REGISTRY_URL}
+
+# Frontend Configuration
+frontend:
+  base-url: ${FRONTEND_BASE_URL:https://zighang-zighang-frontend.vercel.app}

@@ -9,6 +9,7 @@ import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -26,6 +27,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final AuthService authService;
     private final TokenStorageService tokenStorageService;
     private final JwtUtil jwtUtil;
+
+    @Value("${frontend.base-url}")
+    private String frontendBaseUrl;
 
     @Override
     public void onAuthenticationSuccess(
@@ -66,7 +70,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             
             // 프론트엔드로 리다이렉트 (Access Token과 Refresh Token은 fragment로, 세션 ID로 관리)
             String redirectUrl = String.format(
-                "https://zighang-zighang-frontend.vercel.app/#accessToken=%s&refreshToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
+                "%s/#accessToken=%s&refreshToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
+                frontendBaseUrl,
                 java.net.URLEncoder.encode(accessToken, java.nio.charset.StandardCharsets.UTF_8),
                 java.net.URLEncoder.encode(refreshToken, java.nio.charset.StandardCharsets.UTF_8),
                 sessionId,
@@ -88,7 +93,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             
             // 프론트엔드에는 일반화된 에러 코드만 전달 (보안상 안전)
             String errorRedirectUrl = String.format(
-                "https://zighang-zighang-frontend.vercel.app/auth/error#code=%s",
+                "%s/auth/error#code=%s",
+                frontendBaseUrl,
                 "OAUTH2_LOGIN_FAILED"
             );
             getRedirectStrategy().sendRedirect(request, response, errorRedirectUrl);
