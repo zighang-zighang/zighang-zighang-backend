@@ -1,26 +1,35 @@
 package com.github.zighang_zighang.global.auth.dto;
 
+import com.github.zighang_zighang.domain.user.constant.ProviderType;
+import com.github.zighang_zighang.global.auth.constant.OAuth2AttributeKeys;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 
-/**
- * OAuth2 사용자 정보 DTO
- * Map 대신 타입 안전한 객체로 사용자 정보를 관리
- */
+@Schema(description = "OAuth2 사용자 정보 DTO")
 @Getter
 @Builder
 public class OAuth2UserInfo {
-    
+
+    @NonNull
     private final String providerId;
+
+    @NonNull
     private final String email;
+
+    @NonNull
     private final String name;
+
     private final String picture;
-    private final String provider;
+
+    @NonNull
+    private final ProviderType provider;
 
     public String getNameAttributeKey() {
         return switch (provider) {
-            case "google" -> "sub";
-            case "kakao", "naver" -> "id";
+            case GOOGLE -> "sub";
+            case KAKAO, NAVER -> "id";
             default -> "id";
         };
     }

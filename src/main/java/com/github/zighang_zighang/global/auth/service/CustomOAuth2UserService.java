@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.global.auth.service;
 
+import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.global.auth.constant.OAuth2AttributeKeys;
 import com.github.zighang_zighang.global.auth.dto.OAuth2UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +55,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .name((String) responseMap.getOrDefault(OAuth2AttributeKeys.NAME, 
                     responseMap.get(OAuth2AttributeKeys.EMAIL)))
                 .picture((String) responseMap.get(OAuth2AttributeKeys.PROFILE_IMAGE))
-                .provider(OAuth2AttributeKeys.PROVIDER_NAVER)
+                .provider(ProviderType.NAVER)
                 .build();
             
             // response를 평탄화하여 attributes로 사용
@@ -98,7 +99,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             .email(email)
             .name(name != null ? name : email)
             .picture(picture)
-            .provider(OAuth2AttributeKeys.PROVIDER_KAKAO)
+            .provider(ProviderType.KAKAO)
             .build();
 
         // 표준화된 속성으로 평탄화
@@ -121,7 +122,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             .email(oauth2User.getAttribute(OAuth2AttributeKeys.EMAIL))
             .name(oauth2User.getAttribute(OAuth2AttributeKeys.NAME))
             .picture(oauth2User.getAttribute(OAuth2AttributeKeys.PICTURE))
-            .provider(OAuth2AttributeKeys.PROVIDER_GOOGLE)
+            .provider(ProviderType.GOOGLE)
             .build();
         
         // 표준화된 속성으로 평탄화하고 제공자 타입 추가
