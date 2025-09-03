@@ -80,10 +80,6 @@ public class AuthService {
                 return newProvider;
             });
 
-        // JWT 토큰 생성 (userId 포함)
-        String accessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName(), user.getId().toString());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail(), user.getId().toString());
-
         log.info("OAuth2 사용자 로그인 성공: {} (제공자: {}, Provider ID: {})", 
                 user.getEmail(), providerType, userProvider.getId());
 
@@ -119,7 +115,7 @@ public class AuthService {
 
         // 3. 토큰 회전: 새로운 access token과 refresh token 생성
         String newAccessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getName(), user.getId().toString());
-        String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail(), user.getId().toString());
+        String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail(), user.getName(), user.getId().toString());
 
         // 4. 기존 refresh token 무효화 (Redis에서 제거)
         tokenStorageService.getUserActiveSessions(userId)

@@ -24,40 +24,23 @@ public class JwtUtil {
 
     private final JwtConfig jwtConfig;
 
-        public String generateAccessToken(String email, String name, String userId) {
-        return generateTokenWithUserId(email, name, userId, jwtConfig.getAccessTokenExpiration(), "access");
+    public String generateAccessToken(String email, String name, String userId) {
+        return generateToken(email, name, userId, jwtConfig.getAccessTokenExpiration(), "access");
     }
 
-    public String generateRefreshToken(String email, String userId) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtConfig.getRefreshTokenExpiration().toMillis());
-
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("email", email);
-        claims.put("userId", userId);
-        claims.put("typ", "refresh"); // 토큰 타입 구분
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(email)
-                .setIssuer(jwtConfig.getIssuer())
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey(), Jwts.SIG.HS256)
-                .compact();
+    public String generateRefreshToken(String email, String name, String userId) {
+        return generateToken(email, name, userId, jwtConfig.getRefreshTokenExpiration(), "refresh");
     }
-    
-    private String generateTokenWithUserId(String email, String name, String userId, Duration expiration, String tokenType) {
+
+    private String generateToken(String email, String name, String userId, Duration expiration, String tokenType) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration.toMillis());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
         claims.put("userId", userId);
-        if (name != null) {
-            claims.put("name", name);
-        }
-        claims.put("typ", tokenType); // 토큰 타입 구분
+        claims.put("name", name);
+        claims.put("typ", tokenType);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -92,8 +75,7 @@ public class JwtUtil {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-            
-            // 토큰 타입이 "access"인지 확인
+
             String tokenType = claims.get("typ", String.class);
             if (!"access".equals(tokenType)) {
                 log.warn("Access 토큰이 아닌 토큰 사용 시도: {}", tokenType);
@@ -107,9 +89,6 @@ public class JwtUtil {
         }
     }
 
-    /**
-     * Refresh 토큰 전용 검증 (보안 강화)
-     */
     public boolean validateRefreshToken(String token) {
         try {
             Claims claims = Jwts.parser()
@@ -117,8 +96,7 @@ public class JwtUtil {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-            
-            // 토큰 타입이 "refresh"인지 확인
+
             String tokenType = claims.get("typ", String.class);
             if (!"refresh".equals(tokenType)) {
                 log.warn("Refresh 토큰이 아닌 토큰 사용 시도: {}", tokenType);
@@ -132,21 +110,6 @@ public class JwtUtil {
         }
     }
 
-    /**
-     * 토큰 타입 검증
-     */
-    public boolean isAccessToken(String token) {
-        try {
-            Claims claims = parseToken(token);
-            if (claims == null) return false;
-            
-            String tokenType = claims.get("typ", String.class);
-            return "access".equals(tokenType);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public String getEmailFromToken(String token) {
         Claims claims = parseToken(token);
         return claims != null ? claims.getSubject() : null;
@@ -155,17 +118,6 @@ public class JwtUtil {
     public String getUserIdFromToken(String token) {
         Claims claims = parseToken(token);
         return claims != null ? claims.get("userId", String.class) : null;
-    }
-
-    public boolean isTokenExpired(String token) {
-        try {
-            Claims claims = parseToken(token);
-            if (claims == null) return true;
-            
-            return claims.getExpiration().before(new Date());
-        } catch (Exception e) {
-            return true;
-        }
     }
 
     private SecretKey getSigningKey() {

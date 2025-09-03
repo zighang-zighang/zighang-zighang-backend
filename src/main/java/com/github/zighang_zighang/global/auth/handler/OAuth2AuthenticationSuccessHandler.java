@@ -51,7 +51,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             
             // JWT 토큰 생성
             String accessToken = jwtUtil.generateAccessToken(email, name, tokenResponse.getUserId());
-            String refreshToken = jwtUtil.generateRefreshToken(email, tokenResponse.getUserId());
+            String refreshToken = jwtUtil.generateRefreshToken(email, name, tokenResponse.getUserId());
             
             // User-Agent에서 디바이스 정보 추출
             String userAgent = request.getHeader("User-Agent");
