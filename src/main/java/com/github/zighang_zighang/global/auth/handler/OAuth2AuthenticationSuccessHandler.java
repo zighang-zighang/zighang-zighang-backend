@@ -2,11 +2,13 @@ package com.github.zighang_zighang.global.auth.handler;
 
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
+import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
-import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.exception.ApiException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,9 +17,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 
 @Slf4j
 @Component
@@ -72,11 +75,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             String redirectUrl = String.format(
                 "%s/#accessToken=%s&refreshToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
                 frontendBaseUrl,
-                java.net.URLEncoder.encode(accessToken, java.nio.charset.StandardCharsets.UTF_8),
-                java.net.URLEncoder.encode(refreshToken, java.nio.charset.StandardCharsets.UTF_8),
+                URLEncoder.encode(accessToken, StandardCharsets.UTF_8),
+                URLEncoder.encode(refreshToken, StandardCharsets.UTF_8),
                 sessionId,
                 tokenResponse.getUserId(),
-                java.net.URLEncoder.encode(name, java.nio.charset.StandardCharsets.UTF_8)
+                URLEncoder.encode(name, StandardCharsets.UTF_8)
             );
             
             getRedirectStrategy().sendRedirect(request, response, redirectUrl);
