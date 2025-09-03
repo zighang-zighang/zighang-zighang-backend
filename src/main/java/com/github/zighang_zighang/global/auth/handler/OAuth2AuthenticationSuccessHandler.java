@@ -106,29 +106,22 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // OAuth2 제공자별 이메일 추출
     private String getEmailFromPrincipal(OAuth2User principal) {
-        // 네이버의 경우 email에서 이메일 추출 (response가 평탄화됨)
         String email = principal.getAttribute("email");
-        if (email != null) {
-            return email;
-        }
-        
-        // 카카오의 경우 kakao_account.email에서 이메일 추출
-        Object kakaoAccount = principal.getAttribute("kakao_account");
-        if (kakaoAccount instanceof java.util.Map) {
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, Object> account = (java.util.Map<String, Object>) kakaoAccount;
-            String kakaoEmail = (String) account.get("email");
-            if (kakaoEmail != null) {
-                return kakaoEmail;
+        if (email == null) {
+            // 카카오의 경우 kakao_account.email에서 이메일 추출
+            Object kakaoAccount = principal.getAttribute("kakao_account");
+            if (kakaoAccount instanceof java.util.Map) {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> account = (java.util.Map<String, Object>) kakaoAccount;
+                email = (String) account.get("email");
             }
         }
-        
-        // Google의 경우 email에서 이메일 추출
-        if (email != null) {
-            return email;
+
+        if (email == null) {
+            throw new ApiException(AuthExceptionCode.EMAIL_NOT_PROVIDED);
         }
-        
-        throw new ApiException(AuthExceptionCode.EMAIL_NOT_PROVIDED);
+
+        return email;
     }
 
     // OAuth2 제공자별 이름 추출
@@ -168,8 +161,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return id;
         }
         
-        // 카카오의 경우 id에서 제공자 ID 추출 (Long 또는 String)
-        // 카카오는 id가 Long 타입일 수 있음
+        // 카카오의 경우 id에서 제공자 ID 추출 (Long 또는 String. id가 Long 타입일 수 있음)
         if (id != null) {
             if (id instanceof String) {
                 return id;
@@ -247,7 +239,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     break;
             }
         }
-        
+
         // provider 속성이 없으면 예외 발생
         log.warn("제공자 타입을 식별할 수 없습니다. provider 속성이 누락되었습니다. 사용 가능한 속성: {}", principal.getAttributes().keySet());
         throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
