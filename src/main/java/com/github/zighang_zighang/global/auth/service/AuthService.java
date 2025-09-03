@@ -71,17 +71,12 @@ public class AuthService {
                 if (!up.getUser().getId().equals(user.getId())) {
                     throw new ApiException(AuthExceptionCode.AUTHENTICATION_FAILED); // 교차 링크 차단
                 }
-                log.info("기존 OAuth2 제공자 정보 사용: {} - {} ({})", user.getEmail(), providerType, providerIdStr);
                 return up;
             })
             .orElseGet(() -> {
                 UserProvider newProvider = userService.createUserProvider(user, providerType, providerIdStr);
-                log.info("새로운 OAuth2 제공자 정보 생성: {} - {} ({})", user.getEmail(), providerType, providerIdStr);
                 return newProvider;
             });
-
-        log.info("OAuth2 사용자 로그인 성공: {} (제공자: {}, Provider ID: {})", 
-                user.getEmail(), providerType, userProvider.getId());
 
         return LoginResponse.builder()
                 .email(user.getEmail())

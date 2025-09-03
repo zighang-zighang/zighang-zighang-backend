@@ -20,17 +20,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oauth2User = super.loadUser(userRequest);
         String provider = userRequest.getClientRegistration().getRegistrationId();
         
-        log.info("OAuth2 사용자 정보 로드 - Provider: {}", provider);
-
-        // 디버그 레벨에서만 속성 키 목록 로깅 (민감한 값은 제외)
-        if (log.isDebugEnabled()) {
-            log.debug("OAuth2 속성 키: {}", oauth2User.getAttributes().keySet());
-        }
-        
         // 모든 제공자에 대해 일관된 방식으로 처리
         OAuth2User processedUser = processOAuth2User(oauth2User, provider);
-        
-        log.info("OAuth2 사용자 정보 처리 완료 - Provider: {}", provider);
         return processedUser;
     }
     
@@ -46,7 +37,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             case "google":
                 return processGoogleUser(oauth2User);
             default:
-                log.warn("지원하지 않는 OAuth2 제공자: {}", provider);
                 return oauth2User;
         }
     }
@@ -64,9 +54,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             String email = (String) responseMap.get("email");
             String name = (String) responseMap.getOrDefault("name", email);
             String picture = (String) responseMap.get("profile_image");
-            
-            log.info("네이버 사용자 정보 - ID: {}, Email: {}, Name: {}", 
-                    providerId, maskEmail(email), maskName(name));
             
             // response를 평탄화하여 attributes로 사용하고, nameAttributeKey는 "id"로 지정
             Map<String, Object> attributes = new HashMap<>(responseMap);
@@ -103,9 +90,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
         }
 
-        log.debug("카카오 사용자 정보 - ID: {}, Email: {}, Name: {}", 
-                providerId, maskEmail(email), maskName(name));
-
         // 표준화된 속성으로 평탄화
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", providerId != null ? String.valueOf(providerId) : null);
@@ -125,9 +109,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
         
-        log.info("구글 사용자 정보 - ID: {}, Email: {}, Name: {}", 
-                providerId, maskEmail(email), maskName(name));
-        
         // 표준화된 속성으로 평탄화하고 제공자 타입 추가
         Map<String, Object> attributes = new HashMap<>(oauth2User.getAttributes());
         attributes.put("provider", "google"); // 제공자 타입 추가
@@ -137,35 +118,5 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             attributes,
             "sub"  // Google의 경우 "sub"가 표준
         );
-    }
-    
-    /**
-     * 이메일 주소 마스킹
-     */
-    private String maskEmail(String email) {
-        if (email == null || email.isEmpty()) {
-            return "N/A";
-        }
-        int atIndex = email.indexOf('@');
-        if (atIndex <= 1) {
-            return email; // 너무 짧은 경우 그대로 반환
-        }
-        String localPart = email.substring(0, atIndex);
-        String domain = email.substring(atIndex);
-        String maskedLocal = localPart.charAt(0) + "***" + localPart.charAt(localPart.length() - 1);
-        return maskedLocal + domain;
-    }
-    
-    /**
-     * 이름 마스킹
-     */
-    private String maskName(String name) {
-        if (name == null || name.isEmpty()) {
-            return "N/A";
-        }
-        if (name.length() <= 2) {
-            return name; // 너무 짧은 경우 그대로 반환
-        }
-        return name.charAt(0) + "***" + name.charAt(name.length() - 1);
     }
 }

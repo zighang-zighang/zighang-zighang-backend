@@ -47,10 +47,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String name = getNameFromPrincipal(principal);
         Object providerId = getProviderIdFromPrincipal(principal);
         ProviderType providerType = resolveProviderType(authentication, principal);
-
-        if (log.isDebugEnabled()) {
-            log.debug("OAuth2 추출 결과 - providerType={}", providerType);
-        }
         
         try {
             // OAuth2 사용자 정보로 JWT 토큰 발급 (Provider 정보 포함)
@@ -85,14 +81,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             getRedirectStrategy().sendRedirect(request, response, redirectUrl);
             
         } catch (Exception e) {
-            // 상세 예외 정보는 서버 로그에만 기록 (보안 강화)
-            log.error("OAuth2 로그인 처리 중 오류 발생 - 예외 타입: {}, 메시지: {}", 
-                    e.getClass().getSimpleName(), e.getMessage());
-            
-            // 스택 트레이스는 디버그 레벨에서만 로깅
-            if (log.isDebugEnabled()) {
-                log.debug("OAuth2 로그인 처리 중 오류 상세 정보", e);
-            }
+            log.error("OAuth2 로그인 처리 중 오류 발생", e);
             
             // 프론트엔드에는 일반화된 에러 코드만 전달 (보안상 안전)
             String errorRedirectUrl = String.format(
@@ -195,7 +184,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     case "google":
                         return ProviderType.GOOGLE;
                     default:
-                        log.warn("지원하지 않는 registrationId: {}", registrationId);
                         break;
                 }
             }
@@ -212,13 +200,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 case "google":
                     return ProviderType.GOOGLE;
                 default:
-                    log.warn("지원하지 않는 제공자: {}", provider);
                     break;
             }
         }
         
-        // 모든 방법 실패 시 예외 발생
-        log.warn("제공자 타입을 식별할 수 없습니다. registrationId, provider 속성, 휴리스틱 모두 실패. 사용 가능한 속성: {}", principal.getAttributes().keySet());
         throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
     }
 
@@ -235,13 +220,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 case "google":
                     return ProviderType.GOOGLE;
                 default:
-                    log.warn("지원하지 않는 제공자: {}", provider);
                     break;
             }
         }
 
-        // provider 속성이 없으면 예외 발생
-        log.warn("제공자 타입을 식별할 수 없습니다. provider 속성이 누락되었습니다. 사용 가능한 속성: {}", principal.getAttributes().keySet());
         throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
     }
     
