@@ -1,5 +1,7 @@
 package com.github.zighang_zighang.global.auth.service;
 
+import com.github.zighang_zighang.global.auth.constant.OAuth2AttributeKeys;
+import com.github.zighang_zighang.global.auth.dto.OAuth2UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -29,39 +31,40 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * OAuth2 제공자별 사용자 정보 처리
      */
     private OAuth2User processOAuth2User(OAuth2User oauth2User, String provider) {
-        switch (provider) {
-            case "naver":
-                return processNaverUser(oauth2User);
-            case "kakao":
-                return processKakaoUser(oauth2User);
-            case "google":
-                return processGoogleUser(oauth2User);
-            default:
-                return oauth2User;
-        }
+        return switch (provider) {
+            case OAuth2AttributeKeys.PROVIDER_NAVER -> processNaverUser(oauth2User);
+            case OAuth2AttributeKeys.PROVIDER_KAKAO -> processKakaoUser(oauth2User);
+            case OAuth2AttributeKeys.PROVIDER_GOOGLE -> processGoogleUser(oauth2User);
+            default -> oauth2User;
+        };
     }
     
     /**
      * 네이버 사용자 정보 처리
      */
     private OAuth2User processNaverUser(OAuth2User oauth2User) {
-        Object response = oauth2User.getAttribute("response");
+        Object response = oauth2User.getAttribute(OAuth2AttributeKeys.RESPONSE);
         if (response instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> responseMap = (Map<String, Object>) response;
             
-            String providerId = (String) responseMap.get("id");
-            String email = (String) responseMap.get("email");
-            String name = (String) responseMap.getOrDefault("name", email);
-            String picture = (String) responseMap.get("profile_image");
+            OAuth2UserInfo userInfo = OAuth2UserInfo.builder()
+                .providerId((String) responseMap.get(OAuth2AttributeKeys.ID))
+                .email((String) responseMap.get(OAuth2AttributeKeys.EMAIL))
+                .name((String) responseMap.getOrDefault(OAuth2AttributeKeys.NAME, 
+                    responseMap.get(OAuth2AttributeKeys.EMAIL)))
+                .picture((String) responseMap.get(OAuth2AttributeKeys.PROFILE_IMAGE))
+                .provider(OAuth2AttributeKeys.PROVIDER_NAVER)
+                .build();
             
-            // response를 평탄화하여 attributes로 사용하고, nameAttributeKey는 "id"로 지정
+            // response를 평탄화하여 attributes로 사용
             Map<String, Object> attributes = new HashMap<>(responseMap);
-            attributes.put("provider", "naver"); // 제공자 타입 추가
+            attributes.put(OAuth2AttributeKeys.PROVIDER, OAuth2AttributeKeys.PROVIDER_NAVER);
+            
             return new DefaultOAuth2User(
                 oauth2User.getAuthorities(),
                 attributes,
-                "id"  // 표준화된 nameAttributeKey
+                userInfo.getNameAttributeKey()
             );
         }
         return oauth2User;
@@ -71,52 +74,64 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * 카카오 사용자 정보 처리
      */
     private OAuth2User processKakaoUser(OAuth2User oauth2User) {
-        Long providerId = oauth2User.getAttribute("id");
+        Long providerId = oauth2User.getAttribute(OAuth2AttributeKeys.ID);
         String email = null, name = null, picture = null;
 
-        Object kakaoAccount = oauth2User.getAttribute("kakao_account");
+        Object kakaoAccount = oauth2User.getAttribute(OAuth2AttributeKeys.KAKAO_ACCOUNT);
         if (kakaoAccount instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> account = (Map<String, Object>) kakaoAccount;
-            email = (String) account.get("email");
+            email = (String) account.get(OAuth2AttributeKeys.EMAIL);
             
             // kakao_account.profile에서 닉네임과 프로필 이미지 추출
             Object profile = account.get("profile");
             if (profile instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> profileMap = (Map<String, Object>) profile;
-                name = (String) profileMap.get("nickname");
-                picture = (String) profileMap.get("profile_image_url");
+                name = (String) profileMap.get(OAuth2AttributeKeys.NICKNAME);
+                picture = (String) profileMap.get(OAuth2AttributeKeys.PROFILE_IMAGE_URL);
             }
         }
 
+        OAuth2UserInfo userInfo = OAuth2UserInfo.builder()
+            .providerId(providerId != null ? String.valueOf(providerId) : null)
+            .email(email)
+            .name(name != null ? name : email)
+            .picture(picture)
+            .provider(OAuth2AttributeKeys.PROVIDER_KAKAO)
+            .build();
+
         // 표준화된 속성으로 평탄화
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put("id", providerId != null ? String.valueOf(providerId) : null);
-        attributes.put("email", email);
-        attributes.put("name", name != null ? name : email);
-        attributes.put("picture", picture);
-        attributes.put("provider", "kakao"); // 제공자 타입 추가
+        attributes.put(OAuth2AttributeKeys.ID, userInfo.getProviderId());
+        attributes.put(OAuth2AttributeKeys.EMAIL, userInfo.getEmail());
+        attributes.put(OAuth2AttributeKeys.NAME, userInfo.getName());
+        attributes.put(OAuth2AttributeKeys.PICTURE, userInfo.getPicture());
+        attributes.put(OAuth2AttributeKeys.PROVIDER, userInfo.getProvider());
         
-        return new DefaultOAuth2User(oauth2User.getAuthorities(), attributes, "id");
+        return new DefaultOAuth2User(oauth2User.getAuthorities(), attributes, userInfo.getNameAttributeKey());
     }
     
     /**
      * 구글 사용자 정보 처리
      */
     private OAuth2User processGoogleUser(OAuth2User oauth2User) {
-        String providerId = oauth2User.getAttribute("sub");
-        String email = oauth2User.getAttribute("email");
-        String name = oauth2User.getAttribute("name");
+        OAuth2UserInfo userInfo = OAuth2UserInfo.builder()
+            .providerId(oauth2User.getAttribute(OAuth2AttributeKeys.SUB))
+            .email(oauth2User.getAttribute(OAuth2AttributeKeys.EMAIL))
+            .name(oauth2User.getAttribute(OAuth2AttributeKeys.NAME))
+            .picture(oauth2User.getAttribute(OAuth2AttributeKeys.PICTURE))
+            .provider(OAuth2AttributeKeys.PROVIDER_GOOGLE)
+            .build();
         
         // 표준화된 속성으로 평탄화하고 제공자 타입 추가
         Map<String, Object> attributes = new HashMap<>(oauth2User.getAttributes());
-        attributes.put("provider", "google"); // 제공자 타입 추가
+        attributes.put(OAuth2AttributeKeys.PROVIDER, OAuth2AttributeKeys.PROVIDER_GOOGLE);
         
         return new DefaultOAuth2User(
             oauth2User.getAuthorities(),
             attributes,
-            "sub"  // Google의 경우 "sub"가 표준
+            userInfo.getNameAttributeKey()
         );
     }
 }

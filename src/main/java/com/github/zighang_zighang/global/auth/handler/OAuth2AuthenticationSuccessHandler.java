@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.global.auth.handler;
 
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
+import com.github.zighang_zighang.global.auth.constant.OAuth2AttributeKeys;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.auth.service.AuthService;
@@ -95,14 +96,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // OAuth2 제공자별 이메일 추출
     private String getEmailFromPrincipal(OAuth2User principal) {
-        String email = principal.getAttribute("email");
+        String email = principal.getAttribute(OAuth2AttributeKeys.EMAIL);
         if (email == null) {
             // 카카오의 경우 kakao_account.email에서 이메일 추출
-            Object kakaoAccount = principal.getAttribute("kakao_account");
+            Object kakaoAccount = principal.getAttribute(OAuth2AttributeKeys.KAKAO_ACCOUNT);
             if (kakaoAccount instanceof java.util.Map) {
                 @SuppressWarnings("unchecked")
                 java.util.Map<String, Object> account = (java.util.Map<String, Object>) kakaoAccount;
-                email = (String) account.get("email");
+                email = (String) account.get(OAuth2AttributeKeys.EMAIL);
             }
         }
 
@@ -116,17 +117,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     // OAuth2 제공자별 이름 추출
     private String getNameFromPrincipal(OAuth2User principal) {
         // 네이버의 경우 name에서 이름 추출 (response가 평탄화됨)
-        String name = principal.getAttribute("name");
+        String name = principal.getAttribute(OAuth2AttributeKeys.NAME);
         if (name != null) {
             return name;
         }
         
         // 카카오의 경우 properties.nickname에서 이름 추출
-        Object properties = principal.getAttribute("properties");
+        Object properties = principal.getAttribute(OAuth2AttributeKeys.PROPERTIES);
         if (properties instanceof java.util.Map) {
             @SuppressWarnings("unchecked")
             java.util.Map<String, Object> props = (java.util.Map<String, Object>) properties;
-            String nickname = (String) props.get("nickname");
+            String nickname = (String) props.get(OAuth2AttributeKeys.NICKNAME);
             if (nickname != null) {
                 return nickname;
             }
@@ -145,7 +146,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     // OAuth2 제공자별 제공자 ID 추출
     private Object getProviderIdFromPrincipal(OAuth2User principal) {
         // 네이버의 경우 id에서 제공자 ID 추출 (String) - response가 평탄화됨
-        Object id = principal.getAttribute("id");
+        Object id = principal.getAttribute(OAuth2AttributeKeys.ID);
         if (id != null) {
             return id;
         }
@@ -162,7 +163,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
         
         // Google의 경우 sub에서 제공자 ID 추출 (String)
-        String sub = principal.getAttribute("sub");
+        String sub = principal.getAttribute(OAuth2AttributeKeys.SUB);
         if (sub != null) {
             return sub;
         }
@@ -190,14 +191,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
 
         // 2. 폴백: provider 속성에서 제공자 타입 추출
-        String provider = principal.getAttribute("provider");
+        String provider = principal.getAttribute(OAuth2AttributeKeys.PROVIDER);
         if (provider != null) {
             switch (provider.toLowerCase()) {
-                case "naver":
+                case OAuth2AttributeKeys.PROVIDER_NAVER:
                     return ProviderType.NAVER;
-                case "kakao":
+                case OAuth2AttributeKeys.PROVIDER_KAKAO:
                     return ProviderType.KAKAO;
-                case "google":
+                case OAuth2AttributeKeys.PROVIDER_GOOGLE:
                     return ProviderType.GOOGLE;
                 default:
                     break;
@@ -210,14 +211,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     // OAuth2 제공자 타입 추출 (기존 방식 - 하위 호환성)
     private ProviderType getProviderTypeFromPrincipal(OAuth2User principal) {
         // provider 속성에서 직접 제공자 타입 추출
-        String provider = principal.getAttribute("provider");
+        String provider = principal.getAttribute(OAuth2AttributeKeys.PROVIDER);
         if (provider != null) {
             switch (provider.toLowerCase()) {
-                case "naver":
+                case OAuth2AttributeKeys.PROVIDER_NAVER:
                     return ProviderType.NAVER;
-                case "kakao":
+                case OAuth2AttributeKeys.PROVIDER_KAKAO:
                     return ProviderType.KAKAO;
-                case "google":
+                case OAuth2AttributeKeys.PROVIDER_GOOGLE:
                     return ProviderType.GOOGLE;
                 default:
                     break;
