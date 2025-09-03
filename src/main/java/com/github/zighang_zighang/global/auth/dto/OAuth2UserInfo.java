@@ -28,9 +28,9 @@ public class OAuth2UserInfo {
 
     public String getNameAttributeKey() {
         return switch (provider) {
-            case GOOGLE -> "sub";
-            case KAKAO, NAVER -> "id";
-            default -> "id";
+            case GOOGLE -> OAuth2AttributeKeys.SUB;
+            case KAKAO, NAVER -> OAuth2AttributeKeys.ID;
+            default -> OAuth2AttributeKeys.ID;
         };
     }
 }
