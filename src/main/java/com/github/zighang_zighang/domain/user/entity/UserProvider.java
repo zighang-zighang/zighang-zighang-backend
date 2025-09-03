@@ -7,8 +7,8 @@ import lombok.*;
 
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "unique_user_provider_type_provider_id", columnNames = {"type", "providerId"}),
-        @UniqueConstraint(name = "unique_user_provider_user_type", columnNames = {"user_id", "type"})
+        @UniqueConstraint(columnNames = {"type", "providerId"}),
+        @UniqueConstraint(columnNames = {"user_id", "type"})
 })
 @Getter
 @Setter

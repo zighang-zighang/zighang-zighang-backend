@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +29,7 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
 
     @Cacheable(value = "bookmarks", key = "#user.id + '-' + #page + '-' + #size")
+    @Transactional(readOnly = true)
     public PageResponse<RecruitmentResponse> getBookmarks(User user, Integer page, Integer size) {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -47,6 +49,7 @@ public class BookmarkService {
     }
 
     @CacheEvict(value = "bookmarks", key = "#user.id + '-*'")
+    @Transactional
     @RecruitmentExist("#recruitmentId")
     public void addBookmark(User user, UUID recruitmentId) {
 
@@ -64,6 +67,7 @@ public class BookmarkService {
     }
 
     @CacheEvict(value = "bookmarks", key = "#user.id + '-*'")
+    @Transactional
     @RecruitmentExist("#recruitmentId")
     public void removeBookmark(User user, UUID recruitmentId) {
 
