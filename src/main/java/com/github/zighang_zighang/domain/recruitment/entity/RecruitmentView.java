@@ -8,6 +8,15 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
+@Table(
+        indexes = {
+                @Index(columnList = "user_id"),
+                @Index(columnList = "recruitment_id")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "recruitment_id"})
+        }
+)
 @Getter
 @Setter
 @Builder
