@@ -3,6 +3,8 @@ package com.github.zighang_zighang.global.auth.service;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.domain.user.entity.UserProvider;
+import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
+import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.domain.user.service.UserService;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.dto.TokenRefreshResponse;
@@ -26,6 +28,8 @@ import java.util.Optional;
 public class AuthService {
 
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final UserProviderRepository userProviderRepository;
     private final JwtUtil jwtUtil;
     private final JwtConfig jwtConfig;
     private final TokenStorageService tokenStorageService;
@@ -57,7 +61,7 @@ public class AuthService {
         String normalizedEmail = email.trim().toLowerCase(java.util.Locale.ROOT);
         
         // 사용자 조회 또는 생성
-        User user = userService.findUserByEmail(normalizedEmail)
+        User user = userRepository.findByEmail(normalizedEmail)
                 .orElseGet(() -> userService.createUser(normalizedEmail, name));
 
         // OAuth2 제공자 정보를 user_provider 테이블에 저장 (보안 검증 포함)
@@ -65,18 +69,18 @@ public class AuthService {
             throw new ApiException(AuthExceptionCode.OAUTH2_FAILURE);
         }
         String providerIdStr = providerId.toString();
-        Optional<UserProvider> upOpt = userService.findUserProviderByProviderIdAndType(providerIdStr, providerType);
+        Optional<UserProvider> upOpt = userProviderRepository.findByProviderIdAndType(providerIdStr, providerType);
         UserProvider userProvider = upOpt
-            .map(up -> {
-                if (!up.getUser().getId().equals(user.getId())) {
-                    throw new ApiException(AuthExceptionCode.AUTHENTICATION_FAILED); // 교차 링크 차단
-                }
-                return up;
-            })
-            .orElseGet(() -> {
-                UserProvider newProvider = userService.createUserProvider(user, providerType, providerIdStr);
-                return newProvider;
-            });
+                .map(up -> {
+                    if (!up.getUser().getId().equals(user.getId())) {
+                        throw new ApiException(AuthExceptionCode.AUTHENTICATION_FAILED); // 교차 링크 차단
+                    }
+                    return up;
+                })
+                .orElseGet(() -> {
+                    UserProvider newProvider = userService.createUserProvider(user, providerType, providerIdStr);
+                    return newProvider;
+                });
 
         return LoginResponse.builder()
                 .email(user.getEmail())
@@ -97,7 +101,7 @@ public class AuthService {
 
         String email = jwtUtil.getEmailFromToken(refreshToken);
         String userId = jwtUtil.getUserIdFromToken(refreshToken);
-        User user = userService.findUserByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ApiException(AuthExceptionCode.USER_NOT_FOUND));
 
         // 2. 세션 바인딩: Redis에 저장된 refresh token과 대조

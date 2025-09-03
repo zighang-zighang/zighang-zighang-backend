@@ -39,17 +39,4 @@ public class UserService {
         
         return userProviderRepository.save(userProvider);
     }
-
-    public Optional<User> findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public Optional<UserProvider> findUserProviderByProviderIdAndType(String providerId, ProviderType type) {
-        return userProviderRepository.findByProviderIdAndType(providerId, type);
-    }
-
-    @Transactional
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
 }
