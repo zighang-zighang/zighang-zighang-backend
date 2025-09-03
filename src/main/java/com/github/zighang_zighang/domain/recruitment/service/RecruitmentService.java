@@ -33,17 +33,18 @@ public class RecruitmentService {
 
         if (Objects.nonNull(user)) {
 
-            if (!recruitmentViewRepository.existsByUserAndRecruitmentId(user, id)) {
-                recruitmentViewRepository.save(
-                        RecruitmentView.builder()
-                                .user(user)
-                                .recruitmentId(id)
-                                .viewCount(0)
-                                .build()
-                );
-            }
+            RecruitmentView view = recruitmentViewRepository.findByUserAndRecruitmentId(user, id)
+                    .orElseGet(() ->
+                            recruitmentViewRepository.save(
+                                    RecruitmentView.builder()
+                                            .user(user)
+                                            .recruitmentId(id)
+                                            .viewCount(0)
+                                            .build()
+                            )
+                    );
 
-            recruitmentViewRepository.incrementViewCount(user, id);
+            view.addViewCount();
         }
 
         return RecruitmentResponse.from(recruitment);

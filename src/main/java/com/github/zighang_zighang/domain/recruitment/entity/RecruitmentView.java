@@ -33,4 +33,9 @@ public class RecruitmentView extends BaseSchema {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
+
+    public void addViewCount() {
+
+        this.viewCount += 1;
+    }
 }
