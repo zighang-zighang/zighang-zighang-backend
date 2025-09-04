@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.RECRUITMENT_NOT_FOUND;
+import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +29,7 @@ public class RecruitmentService {
     @Transactional
     public RecruitmentResponse getRecruitment(User user, UUID id) {
 
-        Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(RECRUITMENT_NOT_FOUND::toException);
+        Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
 
         if (Objects.nonNull(user)) {
 
