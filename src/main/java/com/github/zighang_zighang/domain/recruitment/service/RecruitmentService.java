@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.RECRUITMENT_NOT_FOUND;
+import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class RecruitmentService {
     @Cacheable(value = "recruitment", key = "#id")
     public RecruitmentResponse getRecruitment(UUID id) {
 
-        Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(RECRUITMENT_NOT_FOUND::toException);
+        Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
 
         return RecruitmentResponse.from(recruitment);
     }
