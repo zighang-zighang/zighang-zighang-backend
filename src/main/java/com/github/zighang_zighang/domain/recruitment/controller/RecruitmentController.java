@@ -25,7 +25,8 @@ public class RecruitmentController implements RecruitmentApi {
     @GetMapping("/{recruitmentId}")
     public ApiResponse<RecruitmentResponse> getRecruitment(@PathVariable UUID recruitmentId) {
 
-        return ApiResponse.ok(recruitmentService.getRecruitment(recruitmentId));
+        // TODO: Security 구성 후 실제 유저 전달
+        return ApiResponse.ok(recruitmentService.getRecruitment(null, recruitmentId));
     }
 
     @Override

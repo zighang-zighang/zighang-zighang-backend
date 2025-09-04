@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.github.zighang_zighang"
-version = "0.4.0"
+version = "0.3.0"
 
 java {
     toolchain {

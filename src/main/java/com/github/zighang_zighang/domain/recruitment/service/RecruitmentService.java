@@ -3,13 +3,18 @@ package com.github.zighang_zighang.domain.recruitment.service;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
+import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentView;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
+import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentViewRepository;
+import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.response.PageResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
@@ -19,11 +24,28 @@ import static com.github.zighang_zighang.domain.recruitment.exception.Recruitmen
 public class RecruitmentService {
 
     private final RecruitmentRepository recruitmentRepository;
+    private final RecruitmentViewRepository recruitmentViewRepository;
 
-    @Cacheable(value = "recruitment", key = "#id")
-    public RecruitmentResponse getRecruitment(UUID id) {
+    @Transactional
+    public RecruitmentResponse getRecruitment(User user, UUID id) {
 
         Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
+
+        if (Objects.nonNull(user)) {
+
+            RecruitmentView view = recruitmentViewRepository.findByUserAndRecruitmentId(user, id)
+                    .orElseGet(() ->
+                            recruitmentViewRepository.save(
+                                    RecruitmentView.builder()
+                                            .user(user)
+                                            .recruitmentId(id)
+                                            .viewCount(0)
+                                            .build()
+                            )
+                    );
+
+            view.addViewCount();
+        }
 
         return RecruitmentResponse.from(recruitment);
     }
