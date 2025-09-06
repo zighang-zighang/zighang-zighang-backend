@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.domain.bookmark.api;
 
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
+import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +23,8 @@ public interface BookmarkApi {
             description = "북마크한 공고 목록을 조회합니다. 페이지네이션이 적용됩니다."
     )
     ApiResponse<PageResponse<RecruitmentResponse>> getBookmarks(
+            CustomUserDetails user,
+
             @Min(0)
             @Parameter(description = "페이지")
             Integer page,
@@ -37,6 +40,8 @@ public interface BookmarkApi {
             description = "북마크를 추가합니다."
     )
     ApiResponse<Void> addBookmark(
+            CustomUserDetails user,
+
             @Parameter(description = "공고 ID")
             UUID recruitmentId
     );
@@ -46,6 +51,8 @@ public interface BookmarkApi {
             description = "북마크를 삭제합니다."
     )
     ApiResponse<Void> removeBookmark(
+            CustomUserDetails user,
+
             @Parameter(description = "공고 ID")
             UUID recruitmentId
     );

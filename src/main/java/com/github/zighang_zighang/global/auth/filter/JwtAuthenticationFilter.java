@@ -44,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Access token만 처리 (Authorization: Bearer)
             // Refresh token은 /auth/refresh 엔드포인트에서만 처리
             String accessToken = extractAccessTokenFromRequest(request);
+
             if (StringUtils.hasText(accessToken) && jwtUtil.validateAccessToken(accessToken)) {
                 String email = jwtUtil.getEmailFromToken(accessToken);
                 
@@ -51,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                     UsernamePasswordAuthenticationToken authentication = 
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    
+
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     log.debug("Access token 인증 성공: {}", email);
                 }

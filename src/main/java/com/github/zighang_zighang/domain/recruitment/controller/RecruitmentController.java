@@ -4,9 +4,11 @@ import com.github.zighang_zighang.domain.recruitment.api.RecruitmentApi;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.service.RecruitmentService;
+import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +25,12 @@ public class RecruitmentController implements RecruitmentApi {
 
     @Override
     @GetMapping("/{recruitmentId}")
-    public ApiResponse<RecruitmentResponse> getRecruitment(@PathVariable UUID recruitmentId) {
+    public ApiResponse<RecruitmentResponse> getRecruitment(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @PathVariable UUID recruitmentId
+    ) {
 
-        // TODO: Security 구성 후 실제 유저 전달
-        return ApiResponse.ok(recruitmentService.getRecruitment(null, recruitmentId));
+        return ApiResponse.ok(recruitmentService.getRecruitment(user.getUser(), recruitmentId));
     }
 
     @Override

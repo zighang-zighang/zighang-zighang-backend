@@ -1,11 +1,14 @@
 package com.github.zighang_zighang.global.exception;
 
+import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
+import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import io.sentry.Sentry;
 import io.sentry.protocol.Request;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -79,18 +82,17 @@ public class ApiExceptionHandler {
 
         Sentry.captureException(
                 throwable, (scope) -> {
-//                    TODO: 스프링 시큐리티 설정 후, 주석 해제
-//                    if (request.getUserPrincipal() instanceof UserAuthentication authentication) {
-//                        User user = authentication.getPrincipal();
-//                        io.sentry.protocol.User sentryUser = new io.sentry.protocol.User();
-//
-//                        sentryUser.setId(user.getId());
-//                        sentryUser.setEmail(user.getEmail());
-//                        sentryUser.setName(user.getName());
-//                        sentryUser.setIpAddress(request.getRemoteAddr());
-//
-//                        scope.setUser(sentryUser);
-//                    }
+                    if (request.getUserPrincipal() instanceof UsernamePasswordAuthenticationToken authentication) {
+                        User user = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+                        io.sentry.protocol.User sentryUser = new io.sentry.protocol.User();
+
+                        sentryUser.setId(user.getId().toString());
+                        sentryUser.setEmail(user.getEmail());
+                        sentryUser.setUsername(user.getName());
+                        sentryUser.setIpAddress(request.getRemoteAddr());
+
+                        scope.setUser(sentryUser);
+                    }
 
                     if (throwable instanceof ApiException ae) {
                         scope.setTag("error.code", ae.getErrorCode());

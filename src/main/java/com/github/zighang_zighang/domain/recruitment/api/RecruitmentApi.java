@@ -2,6 +2,7 @@ package com.github.zighang_zighang.domain.recruitment.api;
 
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
+import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +25,8 @@ public interface RecruitmentApi {
             description = "공고 ID를 통해 특정 공고의 상세 정보를 조회합니다."
     )
     ApiResponse<RecruitmentResponse> getRecruitment(
+            CustomUserDetails user,
+
             @Parameter(description = "공고 ID")
             UUID recruitmentId
     );

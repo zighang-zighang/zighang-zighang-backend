@@ -28,13 +28,6 @@ public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
-    private final String[] allowedUrls = {
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/oauth2/**",
-            "/auth/refresh",
-    };
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -42,10 +35,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(allowedUrls).permitAll()
-                .anyRequest().authenticated()
-            )
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/login")
                 .redirectionEndpoint(redirection -> redirection

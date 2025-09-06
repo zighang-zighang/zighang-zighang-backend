@@ -3,6 +3,7 @@ package com.github.zighang_zighang.global.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.info.BuildProperties;
@@ -24,7 +25,8 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .components(createComponents())
-                .info(createInfo());
+                .info(createInfo())
+                .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME));
     }
 
     private Components createComponents() {
