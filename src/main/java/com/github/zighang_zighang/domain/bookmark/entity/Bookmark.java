@@ -27,7 +27,7 @@ public class Bookmark extends BaseSchema {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "BINARY(16)")
     UUID recruitmentId;
 }
 

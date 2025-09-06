@@ -14,4 +14,4 @@ public enum BookmarkExceptions implements ApiExceptionCode {
 
     private final String code;
     private final String message;
-    }
+}
