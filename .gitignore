@@ -39,3 +39,7 @@ out/
 ### Environment ###
 .env*
 !.env.template
+
+### macOS ###
+.DS_Store
+**/.DS_Store

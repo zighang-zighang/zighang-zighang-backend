@@ -1,14 +1,15 @@
 package com.github.zighang_zighang.global.exception;
 
+import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import io.sentry.Sentry;
 import io.sentry.protocol.Request;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -17,7 +18,6 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -27,11 +27,18 @@ public class ApiExceptionHandler {
         return GlobalExceptionCode.NOT_FOUND.toResponse();
     }
 
-//    @ExceptionHandler(AuthorizationDeniedException.class)
-//    public ApiResponse<?> authorizationDeniedException(AuthorizationDeniedException ignored) {
-//
-//        return GlobalExceptionCode.NOT_PERMITTED.toResponse();
-//    }
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ApiResponse<?> authorizationDeniedException(AuthorizationDeniedException ignored) {
+
+        return GlobalExceptionCode.NOT_PERMITTED.toResponse();
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ApiResponse<?> authenticationException(AuthenticationException e, HttpServletRequest request) {
+        
+        sentry(e, request);
+        return AuthExceptionCode.OAUTH2_FAILURE.toResponse();
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ApiResponse<?> httpMessageNotReadableException(HttpMessageNotReadableException ignored) {
@@ -39,17 +46,17 @@ public class ApiExceptionHandler {
         return GlobalExceptionCode.BODY_NOT_READABLE.toResponse();
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ApiResponse<?> constraintViolationException(ConstraintViolationException e) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ApiResponse<?> methodArgumentNotValidException(MethodArgumentNotValidException e) {
 
-        ConstraintViolation<?> violation = e.getConstraintViolations().iterator().next();
+        if (Objects.isNull(e.getBindingResult().getFieldError())) {
 
-        String field = violation.getPropertyPath().toString();
-        if (field.contains(".")) {
-            field = field.substring(field.lastIndexOf(".") + 1);
+            return ApiResponse.error(GlobalExceptionCode.BODY_VALIDATION_FAILED.getCode(), e.getMessage());
         }
 
-        String errorMessage = String.format("%s은(는) %s.", field, violation.getMessage());
+        String field = e.getBindingResult().getFieldError().getField();
+        String message = e.getBindingResult().getFieldError().getDefaultMessage();
+        String errorMessage = String.format("%s은(는) %s", field, message);
 
         return ApiResponse.error(GlobalExceptionCode.BODY_VALIDATION_FAILED.getCode(), errorMessage);
     }
@@ -58,13 +65,11 @@ public class ApiExceptionHandler {
     public ApiResponse<?> apiException(ApiException e, HttpServletRequest request) {
 
         sentry(e, request);
-        return e.getCode().toResponse();
+        return e.toResponse();
     }
 
     @ExceptionHandler(Exception.class)
     public ApiResponse<?> exception(Exception e, HttpServletRequest request) {
-
-        log.error("", e);
 
         sentry(e, request);
         return GlobalExceptionCode.EXCEPTION.toResponse();
@@ -88,7 +93,7 @@ public class ApiExceptionHandler {
 //                    }
 
                     if (throwable instanceof ApiException ae) {
-                        scope.setTag("error.code", ae.getCode().getCode());
+                        scope.setTag("error.code", ae.getErrorCode());
                     }
 
                     Request sentryRequest = scope.getRequest();
