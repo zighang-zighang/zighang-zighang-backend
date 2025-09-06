@@ -34,21 +34,14 @@ public class AuthService {
     private final JwtConfig jwtConfig;
     private final TokenStorageService tokenStorageService;
 
-    public ResponseEntity<ApiResponse<LoginResponse>> handleRefreshToken(String refreshTokenHeader) {
+    public ApiResponse<LoginResponse> handleRefreshToken(String refreshTokenHeader) {
         if (refreshTokenHeader == null || refreshTokenHeader.isBlank()) {
             throw new ApiException(AuthExceptionCode.TOKEN_NOT_FOUND);
         }
 
         TokenRefreshResponse tokenResponse = this.refreshToken(refreshTokenHeader);
 
-        return ResponseEntity
-                .ok()
-                .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
-                .header("Refresh-Token", tokenResponse.getRefreshToken())
-                .header(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
-                .header(HttpHeaders.PRAGMA, "no-cache")
-                .header(HttpHeaders.EXPIRES, "0")
-                .body(ApiResponse.ok(tokenResponse.getUserInfo()));
+        return ApiResponse.ok(tokenResponse.getUserInfo());
     }
 
 

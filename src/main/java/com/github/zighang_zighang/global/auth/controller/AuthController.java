@@ -16,7 +16,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(
+    public ApiResponse<LoginResponse> refreshToken(
             @RequestHeader(value = "Refresh-Token", required = false) String refreshTokenHeader) {
         return authService.handleRefreshToken(refreshTokenHeader);
     }
