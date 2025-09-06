@@ -6,6 +6,8 @@ import com.github.zighang_zighang.domain.memo.dto.response.MemosResponse;
 import com.github.zighang_zighang.domain.memo.entity.Memo;
 import com.github.zighang_zighang.domain.memo.exception.MemoExceptions;
 import com.github.zighang_zighang.domain.memo.repository.MemoRepository;
+import com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions;
+import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
 import com.github.zighang_zighang.domain.recruitment.service.RecruitmentService;
 import com.github.zighang_zighang.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import java.util.UUID;
 public class MemoService {
 
     private final RecruitmentService recruitmentService;
+
+    private final RecruitmentRepository recruitmentRepository;
     private final MemoRepository memoRepository;
 
     public MemosResponse getMemos(User user, UUID recruitmentId) {
@@ -35,6 +39,9 @@ public class MemoService {
 
     @Transactional
     public MemoResponse createMemo(User user, UUID recruitmentId, UpsertMemoRequest request) {
+
+        recruitmentRepository.findById(recruitmentId)
+                .orElseThrow(RecruitmentExceptions.NOT_FOUND::toException);
 
         Memo memo = memoRepository.save(
                 Memo.builder()

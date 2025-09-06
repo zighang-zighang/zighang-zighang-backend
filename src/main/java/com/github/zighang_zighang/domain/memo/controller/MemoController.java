@@ -39,7 +39,7 @@ public class MemoController implements MemoApi {
     public ApiResponse<MemoResponse> createMemo(
             @AuthenticationPrincipal CustomUserDetails user,
             @RequestParam UUID recruitmentId,
-            @RequestBody UpsertMemoRequest request
+            @RequestBody @Validated UpsertMemoRequest request
     ) {
 
         return ApiResponse.ok(memoService.createMemo(user.getUser(), recruitmentId, request));
@@ -50,7 +50,7 @@ public class MemoController implements MemoApi {
     public ApiResponse<MemoResponse> updateMemo(
             @AuthenticationPrincipal CustomUserDetails user,
             @PathVariable UUID memoId,
-            @RequestBody UpsertMemoRequest request
+            @RequestBody @Validated UpsertMemoRequest request
     ) {
         return ApiResponse.ok(memoService.updateMemo(user.getUser(), memoId, request));
     }
