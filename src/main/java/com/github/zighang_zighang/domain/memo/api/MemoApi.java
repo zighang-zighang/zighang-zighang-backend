@@ -1,0 +1,57 @@
+package com.github.zighang_zighang.domain.memo.api;
+
+import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
+import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
+import com.github.zighang_zighang.domain.memo.dto.response.MemosResponse;
+import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
+import com.github.zighang_zighang.global.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.UUID;
+
+@Tag(
+        name = "[메모]",
+        description = "메모 API"
+)
+public interface MemoApi {
+
+    @Operation(
+            summary = "메모 목록 조회",
+            description = "사용자의 메모 목록을 조회합니다. recruitmentId 파라미터로 특정 공고의 메모만 조회할 수 있습니다."
+    )
+    ApiResponse<MemosResponse> getMemos(
+            CustomUserDetails user,
+            @Parameter(description = "공고 ID") UUID recruitmentId
+    );
+
+    @Operation(
+            summary = "메모 생성",
+            description = "특정 공고에 대한 메모를 생성합니다."
+    )
+    ApiResponse<MemoResponse> createMemo(
+            CustomUserDetails user,
+            @Parameter(description = "공고 ID", required = true) UUID recruitmentId,
+            UpsertMemoRequest request
+    );
+
+    @Operation(
+            summary = "메모 수정",
+            description = "메모를 수정합니다."
+    )
+    ApiResponse<MemoResponse> updateMemo(
+            CustomUserDetails user,
+            @Parameter(description = "메모 ID", required = true) UUID memoId,
+            UpsertMemoRequest request
+    );
+
+    @Operation(
+            summary = "메모 삭제",
+            description = "메모를 삭제합니다."
+    )
+    ApiResponse<Void> deleteMemo(
+            CustomUserDetails user,
+            @Parameter(description = "메모 ID", required = true) UUID memoId
+    );
+}
