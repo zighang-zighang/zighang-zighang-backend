@@ -76,7 +76,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             
             // 프론트엔드로 리다이렉트 (Access Token과 Refresh Token은 fragment로, 세션 ID로 관리)
             String redirectUrl = String.format(
-                "%s/#accessToken=%s&refreshToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
+                "%s/auth/callback?accessToken=%s&refreshToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
                 targetBaseUrl,
                 URLEncoder.encode(accessToken, StandardCharsets.UTF_8),
                 URLEncoder.encode(refreshToken, StandardCharsets.UTF_8),
