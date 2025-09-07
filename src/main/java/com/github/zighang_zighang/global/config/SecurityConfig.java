@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.global.config;
 
 import com.github.zighang_zighang.global.auth.filter.JwtAuthenticationFilter;
+import com.github.zighang_zighang.global.auth.filter.RedirectUriCookieFilter;
 import com.github.zighang_zighang.global.auth.handler.OAuth2AuthenticationFailureHandler;
 import com.github.zighang_zighang.global.auth.handler.OAuth2AuthenticationSuccessHandler;
 import com.github.zighang_zighang.global.auth.service.CustomOAuth2UserService;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -27,6 +29,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+    private final RedirectUriCookieFilter redirectUriCookieFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -47,6 +50,7 @@ public class SecurityConfig {
                 .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler)
             )
+            .addFilterBefore(redirectUriCookieFilter, OAuth2AuthorizationRequestRedirectFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
