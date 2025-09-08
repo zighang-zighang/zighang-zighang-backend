@@ -4,6 +4,7 @@ import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentView;
 import com.github.zighang_zighang.global.classification.*;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class User extends BaseSchema {
     private List<JobCategory> interestJobCategories = new ArrayList<>();
 
     // 경력
+    @Min(0)
     private int careerYear;
 
     // 최종 학력 - 최종 학교
