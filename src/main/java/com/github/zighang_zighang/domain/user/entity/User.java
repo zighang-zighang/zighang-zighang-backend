@@ -70,8 +70,10 @@ public class User extends BaseSchema {
             GraduationStatus graduationStatus,
             Region preferredRegion
     ) {
-        this.interestedJobs = interestedJobs;
-        this.interestJobCategories = interestJobCategories;
+        this.interestedJobs.clear();
+        if (interestedJobs != null) this.interestedJobs.addAll(interestedJobs);
+        this.interestJobCategories.clear();
+        if (interestJobCategories != null) this.interestJobCategories.addAll(interestJobCategories);
         this.careerYear = careerYear;
         this.educationLevel = educationLevel;
         this.graduationStatus = graduationStatus;
