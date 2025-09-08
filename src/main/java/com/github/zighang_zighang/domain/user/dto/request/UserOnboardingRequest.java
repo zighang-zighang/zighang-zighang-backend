@@ -1,9 +1,6 @@
 package com.github.zighang_zighang.domain.user.dto.request;
 
-import com.github.zighang_zighang.global.classification.EducationLevel;
-import com.github.zighang_zighang.global.classification.Job;
-import com.github.zighang_zighang.global.classification.JobCategory;
-import com.github.zighang_zighang.global.classification.Region;
+import com.github.zighang_zighang.global.classification.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -25,8 +22,11 @@ public class UserOnboardingRequest {
     @Schema(description = "경력")
     int careerYears;
 
-    @Schema(description = "최종 학력")
+    @Schema(description = "최종 학력 - 최종 학교")
     EducationLevel educationLevel;
+
+    @Schema(description = "최종 학력 - 졸업 구분")
+    GraduationStatus graduationStatus;
 
     @Schema(description = "선호 근무지")
     Region preferredRegion;

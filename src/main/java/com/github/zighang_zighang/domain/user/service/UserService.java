@@ -49,20 +49,20 @@ public class UserService {
     @Transactional
     public UserResponse addOnboarding(User user, UserOnboardingRequest request) {
 
+        validateOnboarding(request);
+
         User managedUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new ApiException(UserException.NOT_FOUND));
 
-        validateOnboarding(request);
-
-        // TODO: 최종 학력 - 우리 피그마로 수정 반영
         // TODO: 자기소개서 업로드
 
-        // 관심 직군/직무, 경력, 학력, 지역 저장
+        // 관심 직군/직무, 경력, 학교, 졸업 구분, 지역 저장
         managedUser.updateOnboardingInfo(
                 request.getInterestedJobs(),
                 request.getInterestedJobCategories(),
                 request.getCareerYears(),
                 request.getEducationLevel(),
+                request.getGraduationStatus(),
                 request.getPreferredRegion()
         );
 
