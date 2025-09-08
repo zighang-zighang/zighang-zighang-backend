@@ -85,7 +85,7 @@ public enum JobCategory {
     패키지(Job.디자인),
     광고_콘텐츠(Job.디자인),
     영상_모션(Job.디자인),
-    _3D_VFX(Job.디자인),
+    THREE_D_VFX(Job.디자인),
     출판_편집(Job.디자인),
     건축_공공_조경디자인(Job.디자인),
     패션_텍스타일(Job.디자인),
