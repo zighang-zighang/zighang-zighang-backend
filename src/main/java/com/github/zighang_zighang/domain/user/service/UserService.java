@@ -89,4 +89,10 @@ public class UserService {
     }
 
 
+    public UserResponse getMyProfile(User user) {
+        User managedUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new ApiException(UserException.NOT_FOUND));
+
+        return UserResponse.from(managedUser);
+    }
 }

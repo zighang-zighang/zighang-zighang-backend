@@ -8,10 +8,7 @@ import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -26,6 +23,13 @@ public class UserController implements UserApi {
             @RequestBody UserOnboardingRequest userOnboardingRequest
             ) {
         return ApiResponse.ok(userService.addOnboarding(user.getUser(), userOnboardingRequest));
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> getUser(
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        return ApiResponse.ok(userService.getMyProfile(user.getUser()));
     }
 
 }

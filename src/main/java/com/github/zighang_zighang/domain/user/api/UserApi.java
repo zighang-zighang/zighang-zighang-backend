@@ -16,12 +16,20 @@ public interface UserApi {
 
     @Operation(
             summary = "온보딩 정보 등록/수정",
-            description = "직군, 직무, 경력, 학력, 지역, 자기소개서 URL을 포함한 온보딩 정보를 등록하거나 수정합니다."
+            description = "직군, 직무, 경력, 학력, 지역, 자기소개서 URL을 포함한 온보딩/최근 설정한 필터 정보를 등록하거나 수정합니다."
     )
     ApiResponse<UserResponse> addOnboarding(
             @Parameter(hidden = true) CustomUserDetails user,
 
             @Parameter(description = "유저 온보딩 요청 정보")
             UserOnboardingRequest userOnboardingRequest
+    );
+
+    @Operation(
+            summary = "현재 유저 정보 조회",
+            description = "로그인한 사용자의 기본 정보 및 온보딩/최근 필터 정보를 조회합니다."
+    )
+    ApiResponse<UserResponse> getUser(
+            @Parameter(hidden = true) CustomUserDetails user
     );
 }
