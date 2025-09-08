@@ -19,13 +19,13 @@ public interface AuthApi {
             parameters = {
                     @Parameter(
                             name = "Refresh-Token",
-                            description = "요청 헤더에 포함된 Refresh Token",
+                            description = "요청 헤더에 포함된 Refresh Token(raw 값, Bearer 미포함)",
                             required = true,
-                            example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                            example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                     )
             }
     )
     ApiResponse<LoginResponse> refreshToken(
-            @RequestHeader(value = "Refresh-Token", required = false) String refreshTokenHeader
+            @RequestHeader(value = "Refresh-Token", required = true) String refreshTokenHeader
     );
 }
