@@ -1,5 +1,7 @@
 package com.github.zighang_zighang.domain.user.service;
 
+import com.github.zighang_zighang.domain.resume.entity.Resume;
+import com.github.zighang_zighang.domain.resume.repository.ResumeRepository;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
 import com.github.zighang_zighang.domain.user.dto.response.UserResponse;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
+    private final ResumeRepository resumeRepository;
 
     @Transactional
     public User createUser(String email, String name) {
@@ -65,6 +69,15 @@ public class UserService {
                 request.getGraduationStatus(),
                 request.getPreferredRegion()
         );
+
+        if(request.getResumeUrl() != null && !request.getResumeUrl().isBlank()) {
+            Resume resume = Resume.builder()
+                    .resumeUrl(request.getResumeUrl())
+                    .user(managedUser)
+                    .build();
+
+            managedUser.getResumes().add(resume);
+        }
 
         return UserResponse.from(managedUser);
     }

@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.domain.user.entity;
 
 import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentView;
+import com.github.zighang_zighang.domain.resume.entity.Resume;
 import com.github.zighang_zighang.global.classification.*;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import jakarta.persistence.*;
@@ -49,6 +50,9 @@ public class User extends BaseSchema {
     private Region preferredRegion;
 
     // 자기소개서
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Resume> resumes = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
