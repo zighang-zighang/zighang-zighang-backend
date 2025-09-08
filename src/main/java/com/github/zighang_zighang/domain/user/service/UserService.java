@@ -8,10 +8,14 @@ import com.github.zighang_zighang.domain.user.entity.UserProvider;
 import com.github.zighang_zighang.domain.user.exception.UserException;
 import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
 import com.github.zighang_zighang.domain.user.repository.UserRepository;
+import com.github.zighang_zighang.global.classification.Job;
+import com.github.zighang_zighang.global.classification.JobCategory;
 import com.github.zighang_zighang.global.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +52,9 @@ public class UserService {
         User managedUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new ApiException(UserException.NOT_FOUND));
 
-        // TODO: 직무가 직군에 해당하는지 검증
+        validateOnboarding(request);
+
+        // TODO: 최종 학력 - 우리 피그마로 수정 반영
         // TODO: 자기소개서 업로드
 
         // 관심 직군/직무, 경력, 학력, 지역 저장
@@ -62,5 +68,25 @@ public class UserService {
 
         return UserResponse.from(managedUser);
     }
+
+    public void validateOnboarding(UserOnboardingRequest request) {
+        List<Job> selectedJobs = request.getInterestedJobs();
+        List<JobCategory> selectedCategories = request.getInterestedJobCategories();
+
+        // 직군 최대 3개인지 검증
+        if (selectedJobs.size() > 3) {
+            throw new ApiException(UserException.EXCEEDED_MAX_JOB_SELECTION);
+        }
+
+        // 선택한 직무 중에서, 직군에 속하지 않는 항목을 필터링
+        List<JobCategory> invalidCategories = selectedCategories.stream()
+                .filter(category -> !selectedJobs.contains(category.parent()))
+                .toList();
+
+        if (!invalidCategories.isEmpty()) {
+            throw new ApiException(UserException.INVALID_JOB_CATEGORY_SELECTION);
+        }
+    }
+
 
 }
