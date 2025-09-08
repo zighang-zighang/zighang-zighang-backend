@@ -24,11 +24,13 @@ public class User extends BaseSchema {
     private String name;
 
     // 직군
+    @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     private List<Job> interestedJobs = new ArrayList<>();
 
     // 직무
+    @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     private List<JobCategory> interestJobCategories = new ArrayList<>();
