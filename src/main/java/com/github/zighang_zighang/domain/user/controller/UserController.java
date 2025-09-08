@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.user.controller;
 
+import com.github.zighang_zighang.domain.user.api.UserApi;
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
 import com.github.zighang_zighang.domain.user.dto.response.UserResponse;
 import com.github.zighang_zighang.domain.user.service.UserService;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-public class UserController { // TODO: 스웨거 설정 (+auth)
+public class UserController implements UserApi {
 
     private final UserService userService;
 
