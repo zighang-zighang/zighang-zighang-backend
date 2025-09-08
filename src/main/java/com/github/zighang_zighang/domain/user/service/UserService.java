@@ -60,7 +60,7 @@ public class UserService {
         managedUser.updateOnboardingInfo(
                 request.getInterestedJobs(),
                 request.getInterestedJobCategories(),
-                request.getCareerYears(),
+                request.getCareerYear(),
                 request.getEducationLevel(),
                 request.getGraduationStatus(),
                 request.getPreferredRegion()

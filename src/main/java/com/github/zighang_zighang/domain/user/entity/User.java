@@ -34,7 +34,7 @@ public class User extends BaseSchema {
     private List<JobCategory> interestJobCategories = new ArrayList<>();
 
     // 경력
-    private int careerYears;
+    private int careerYear;
 
     // 최종 학력 - 최종 학교
     @Enumerated(EnumType.STRING)
@@ -61,14 +61,14 @@ public class User extends BaseSchema {
     public void updateOnboardingInfo(
             List<Job> interestedJobs,
             List<JobCategory> interestJobCategories,
-            int careerYears,
+            int careerYear,
             EducationLevel educationLevel,
             GraduationStatus graduationStatus,
             Region preferredRegion
     ) {
         this.interestedJobs = interestedJobs;
         this.interestJobCategories = interestJobCategories;
-        this.careerYears = careerYears;
+        this.careerYear = careerYear;
         this.educationLevel = educationLevel;
         this.graduationStatus = graduationStatus;
         this.preferredRegion = preferredRegion;
