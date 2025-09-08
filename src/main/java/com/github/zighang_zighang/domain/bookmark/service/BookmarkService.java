@@ -71,11 +71,9 @@ public class BookmarkService {
     @RecruitmentExist("#recruitmentId")
     public void removeBookmark(User user, UUID recruitmentId) {
 
-        if (!bookmarkRepository.existsByUserAndRecruitmentId(user, recruitmentId)) {
-
-            throw BookmarkExceptions.NOT_FOUND.toException();
-        }
-
-        bookmarkRepository.deleteByUserAndRecruitmentId(user, recruitmentId);
+        bookmarkRepository.delete(
+                bookmarkRepository.findByUserAndRecruitmentId(user, recruitmentId)
+                        .orElseThrow(BookmarkExceptions.NOT_FOUND::toException)
+        );
     }
 }

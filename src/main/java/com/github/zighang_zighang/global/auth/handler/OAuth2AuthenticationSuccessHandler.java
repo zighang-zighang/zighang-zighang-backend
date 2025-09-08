@@ -7,7 +7,9 @@ import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
+import com.github.zighang_zighang.global.auth.util.RedirectValidator;
 import com.github.zighang_zighang.global.exception.ApiException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -31,6 +34,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final AuthService authService;
     private final TokenStorageService tokenStorageService;
     private final JwtUtil jwtUtil;
+    private final RedirectValidator redirectValidator;
 
     @Value("${frontend.base-url}")
     private String frontendBaseUrl;
@@ -67,11 +71,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 refreshToken, 
                 deviceInfo
             );
+
+            String targetBaseUrl = resolveFrontendBaseUrl(request);
             
             // 프론트엔드로 리다이렉트 (Access Token과 Refresh Token은 fragment로, 세션 ID로 관리)
             String redirectUrl = String.format(
-                "%s/#accessToken=%s&refreshToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
-                frontendBaseUrl,
+                "%s/auth/callback?accessToken=%s&refreshToken=%s&sessionId=%s&userId=%s&name=%s&loginSuccess=true",
+                targetBaseUrl,
                 URLEncoder.encode(accessToken, StandardCharsets.UTF_8),
                 URLEncoder.encode(refreshToken, StandardCharsets.UTF_8),
                 sessionId,
@@ -92,6 +98,22 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             );
             getRedirectStrategy().sendRedirect(request, response, errorRedirectUrl);
         }
+    }
+
+    private String resolveFrontendBaseUrl(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("redirect_uri".equals(cookie.getName())) {
+                    String decoded = URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8);
+                    if (redirectValidator.isAuthorized(decoded)) {
+                        return decoded;
+                    } else {
+                        log.warn("비허용 redirect_uri 요청 차단됨: {}", decoded);
+                    }
+                }
+            }
+        }
+        return frontendBaseUrl; // 기본값 (application.yaml)
     }
 
     // OAuth2 제공자별 이메일 추출
