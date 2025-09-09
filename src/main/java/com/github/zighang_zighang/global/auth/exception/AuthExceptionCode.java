@@ -19,7 +19,8 @@ public enum AuthExceptionCode implements ApiExceptionCode {
     PROVIDER_ID_NOT_FOUND("AUTH-008", "제공자 ID를 찾을 수 없습니다."),
     PROVIDER_TYPE_NOT_FOUND("AUTH-009", "제공자 타입을 찾을 수 없습니다."),
     USER_NOT_FOUND("AUTH-010", "사용자를 찾을 수 없습니다."),
-    INVALID_REFRESH_TOKEN("AUTH-011", "유효하지 않은 refresh token입니다.");
+    INVALID_REFRESH_TOKEN("AUTH-011", "유효하지 않은 refresh token입니다."),
+    UNAUTHORIZED("AUTH-012", "인증되지 않은 유저입니다.");
 
     private final String code;
     private final String message;

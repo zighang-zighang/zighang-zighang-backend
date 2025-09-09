@@ -3,6 +3,8 @@ package com.github.zighang_zighang.domain.bookmark.controller;
 import com.github.zighang_zighang.domain.bookmark.api.BookmarkApi;
 import com.github.zighang_zighang.domain.bookmark.service.BookmarkService;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
+import com.github.zighang_zighang.domain.user.entity.User;
+import com.github.zighang_zighang.global.auth.resolver.CurrentUser;
 import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.response.PageResponse;
@@ -26,22 +28,22 @@ public class BookmarkController implements BookmarkApi {
     @Override
     @GetMapping
     public ApiResponse<PageResponse<RecruitmentResponse>> getBookmarks(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @CurrentUser User user,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "20") Integer size
     ) {
 
-        return ApiResponse.ok(bookmarkService.getBookmarks(user.getUser(), page, size));
+        return ApiResponse.ok(bookmarkService.getBookmarks(user, page, size));
     }
 
     @Override
     @PostMapping("/{recruitmentId}")
     public ApiResponse<Void> addBookmark(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @CurrentUser User user,
             @PathVariable UUID recruitmentId
     ) {
 
-        bookmarkService.addBookmark(user.getUser(), recruitmentId);
+        bookmarkService.addBookmark(user, recruitmentId);
 
         return ApiResponse.ok();
     }
@@ -49,11 +51,11 @@ public class BookmarkController implements BookmarkApi {
     @Override
     @DeleteMapping("/{recruitmentId}")
     public ApiResponse<Void> removeBookmark(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @CurrentUser User user,
             @PathVariable UUID recruitmentId
     ) {
 
-        bookmarkService.removeBookmark(user.getUser(), recruitmentId);
+        bookmarkService.removeBookmark(user, recruitmentId);
 
         return ApiResponse.ok();
     }

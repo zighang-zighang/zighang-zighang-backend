@@ -54,13 +54,10 @@ public class UserService {
 
         validateOnboarding(request);
 
-        User managedUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new ApiException(UserException.NOT_FOUND));
-
         // TODO: 자기소개서 업로드
 
         // 관심 직군/직무, 경력, 학교, 졸업 구분, 지역 저장
-        managedUser.updateOnboardingInfo(
+        user.updateOnboardingInfo(
                 request.getInterestedJobs(),
                 request.getInterestedJobCategories(),
                 request.getCareerYear(),
@@ -69,7 +66,7 @@ public class UserService {
                 request.getPreferredRegion()
         );
 
-        return UserResponse.from(managedUser);
+        return UserResponse.from(user);
     }
 
     public void validateOnboarding(UserOnboardingRequest request) {
@@ -108,9 +105,6 @@ public class UserService {
 
 
     public UserResponse getMyProfile(User user) {
-        User managedUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new ApiException(UserException.NOT_FOUND));
-
-        return UserResponse.from(managedUser);
+        return UserResponse.from(user);
     }
 }

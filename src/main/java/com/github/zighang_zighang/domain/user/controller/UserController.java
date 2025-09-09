@@ -3,18 +3,18 @@ package com.github.zighang_zighang.domain.user.controller;
 import com.github.zighang_zighang.domain.user.api.UserApi;
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
 import com.github.zighang_zighang.domain.user.dto.response.UserResponse;
+import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.domain.user.service.UserService;
-import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
+import com.github.zighang_zighang.global.auth.resolver.CurrentUser;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
 @PreAuthorize("isAuthenticated()")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController implements UserApi {
 
@@ -22,17 +22,17 @@ public class UserController implements UserApi {
 
     @PostMapping("/filter")
     public ApiResponse<UserResponse> addOnboarding(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @CurrentUser User user,
             @RequestBody @Valid UserOnboardingRequest userOnboardingRequest
             ) {
-        return ApiResponse.ok(userService.addOnboarding(user.getUser(), userOnboardingRequest));
+        return ApiResponse.ok(userService.addOnboarding(user, userOnboardingRequest));
     }
 
     @GetMapping("/me")
     public ApiResponse<UserResponse> getUser(
-            @AuthenticationPrincipal CustomUserDetails user
+            @CurrentUser User user
     ) {
-        return ApiResponse.ok(userService.getMyProfile(user.getUser()));
+        return ApiResponse.ok(userService.getMyProfile(user));
     }
 
 }

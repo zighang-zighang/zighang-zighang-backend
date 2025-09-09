@@ -5,11 +5,11 @@ import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
 import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemosResponse;
 import com.github.zighang_zighang.domain.memo.service.MemoService;
-import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
+import com.github.zighang_zighang.domain.user.entity.User;
+import com.github.zighang_zighang.global.auth.resolver.CurrentUser;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,41 +27,41 @@ public class MemoController implements MemoApi {
     @Override
     @GetMapping
     public ApiResponse<MemosResponse> getMemos(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @CurrentUser User user,
             @RequestParam(required = false) UUID recruitmentId
     ) {
 
-        return ApiResponse.ok(memoService.getMemos(user.getUser(), recruitmentId));
+        return ApiResponse.ok(memoService.getMemos(user, recruitmentId));
     }
 
     @Override
     @PostMapping
     public ApiResponse<MemoResponse> createMemo(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @CurrentUser User user,
             @RequestParam UUID recruitmentId,
             @RequestBody @Validated UpsertMemoRequest request
     ) {
 
-        return ApiResponse.ok(memoService.createMemo(user.getUser(), recruitmentId, request));
+        return ApiResponse.ok(memoService.createMemo(user, recruitmentId, request));
     }
 
     @Override
     @PutMapping("/{memoId}")
     public ApiResponse<MemoResponse> updateMemo(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @CurrentUser User user,
             @PathVariable UUID memoId,
             @RequestBody @Validated UpsertMemoRequest request
     ) {
-        return ApiResponse.ok(memoService.updateMemo(user.getUser(), memoId, request));
+        return ApiResponse.ok(memoService.updateMemo(user, memoId, request));
     }
 
     @Override
     @DeleteMapping("/{memoId}")
     public ApiResponse<Void> deleteMemo(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @CurrentUser User user,
             @PathVariable UUID memoId
     ) {
-        memoService.deleteMemo(user.getUser(), memoId);
+        memoService.deleteMemo(user, memoId);
 
         return ApiResponse.ok();
     }
