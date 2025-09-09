@@ -44,7 +44,4 @@ public class UserOnboardingRequest {
     @Schema(description = "선호 근무지")
     Region preferredRegion;
 
-    @Schema(description = "자기소개서 url (최대 1개)")
-    String resumeUrl;
-
 }

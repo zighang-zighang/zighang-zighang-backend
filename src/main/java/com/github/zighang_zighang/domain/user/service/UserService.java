@@ -11,9 +11,11 @@ import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
 import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.classification.JobCategory;
+import com.github.zighang_zighang.global.infra.storage.uploader.NcpObjectUploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +29,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
+    private final NcpObjectUploader ncpObjectUploader;
 
     @Transactional
     public User createUser(String email, String name) {
@@ -50,11 +53,9 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse addOnboarding(User user, UserOnboardingRequest request) {
+    public UserResponse addOnboarding(User user, UserOnboardingRequest request, MultipartFile resumeFile) {
 
         validateOnboarding(request);
-
-        // TODO: 자기소개서 업로드
 
         // 관심 직군/직무, 경력, 학교, 졸업 구분, 지역 저장
         user.updateOnboardingInfo(
@@ -66,10 +67,12 @@ public class UserService {
                 request.getPreferredRegion()
         );
 
+        // 자기소개서 업로드
+        String uploadedResumeUrl = ncpObjectUploader.uploadFile(resumeFile);
 
-        if(request.getResumeUrl() != null && !request.getResumeUrl().isBlank()) {
+        if(uploadedResumeUrl!= null && !uploadedResumeUrl.isBlank()) {
             Resume resume = Resume.builder()
-                    .resumeUrl(request.getResumeUrl())
+                    .resumeUrl(uploadedResumeUrl)
                     .user(user)
                     .build();
 
