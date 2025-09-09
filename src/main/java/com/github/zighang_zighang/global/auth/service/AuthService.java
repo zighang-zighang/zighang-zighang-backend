@@ -11,12 +11,9 @@ import com.github.zighang_zighang.global.auth.dto.TokenRefreshResponse;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
 import com.github.zighang_zighang.global.config.JwtConfig;
-import com.github.zighang_zighang.global.exception.ApiException;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +33,7 @@ public class AuthService {
 
     public ApiResponse<LoginResponse> handleRefreshToken(String refreshTokenHeader) {
         if (refreshTokenHeader == null || refreshTokenHeader.isBlank()) {
-            throw new ApiException(AuthExceptionCode.TOKEN_NOT_FOUND);
+            throw AuthExceptionCode.TOKEN_NOT_FOUND.toException();
         }
 
         TokenRefreshResponse tokenResponse = this.refreshToken(refreshTokenHeader);
@@ -49,7 +46,7 @@ public class AuthService {
     public LoginResponse oauth2Login(String email, String name, ProviderType providerType, Object providerId) {
         // 입력 검증 및 이메일 정규화
         if (email == null || email.isBlank() || providerType == null) {
-            throw new ApiException(AuthExceptionCode.OAUTH2_FAILURE);
+            throw AuthExceptionCode.OAUTH2_FAILURE.toException();
         }
         String normalizedEmail = email.trim().toLowerCase(java.util.Locale.ROOT);
         
@@ -59,14 +56,14 @@ public class AuthService {
 
         // OAuth2 제공자 정보를 user_provider 테이블에 저장 (보안 검증 포함)
         if (providerId == null) {
-            throw new ApiException(AuthExceptionCode.OAUTH2_FAILURE);
+            throw AuthExceptionCode.OAUTH2_FAILURE.toException();
         }
         String providerIdStr = providerId.toString();
         Optional<UserProvider> upOpt = userProviderRepository.findByProviderIdAndType(providerIdStr, providerType);
         UserProvider userProvider = upOpt
                 .map(up -> {
                     if (!up.getUser().getId().equals(user.getId())) {
-                        throw new ApiException(AuthExceptionCode.AUTHENTICATION_FAILED); // 교차 링크 차단
+                        throw AuthExceptionCode.AUTHENTICATION_FAILED.toException(); // 교차 링크 차단
                     }
                     return up;
                 })
@@ -89,20 +86,20 @@ public class AuthService {
     public TokenRefreshResponse refreshToken(String refreshToken) {
         // 1. refresh token 타입 검증 (typ=refresh 강제)
         if (!jwtUtil.validateRefreshToken(refreshToken)) {
-            throw new ApiException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
+            throw AuthExceptionCode.INVALID_REFRESH_TOKEN.toException();
         }
 
         String email = jwtUtil.getEmailFromToken(refreshToken);
         String userId = jwtUtil.getUserIdFromToken(refreshToken);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiException(AuthExceptionCode.USER_NOT_FOUND));
+                .orElseThrow(AuthExceptionCode.USER_NOT_FOUND::toException);
 
         // 2. 세션 바인딩: Redis에 저장된 refresh token과 대조
         boolean matched = tokenStorageService.getUserActiveSessions(userId)
                 .stream().anyMatch(rt -> refreshToken.equals(rt.token()));
         if (!matched) {
             log.warn("Redis에 저장되지 않은 refresh token 사용 시도: userId={}, email={}", userId, email);
-            throw new ApiException(AuthExceptionCode.INVALID_REFRESH_TOKEN);
+            throw AuthExceptionCode.INVALID_REFRESH_TOKEN.toException();
         }
 
         // 3. 토큰 회전: 새로운 access token과 refresh token 생성
