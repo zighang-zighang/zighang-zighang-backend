@@ -34,7 +34,7 @@ public class UserResponse {
     List<JobCategory> interestedJobCategories;
 
     @Schema(description = "경력")
-    int careerYears;
+    int careerYear;
 
     @Schema(description = "최종 학력")
     EducationLevel educationLevel;
@@ -50,7 +50,7 @@ public class UserResponse {
                 user.getName(),
                 user.getInterestedJobs(),
                 user.getInterestJobCategories(),
-                user.getCareerYears(),
+                user.getCareerYear(),
                 user.getEducationLevel(),
                 user.getPreferredRegion()
         );

@@ -3,7 +3,7 @@ package com.github.zighang_zighang.domain.memo.api;
 import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
 import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemosResponse;
-import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
+import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,7 +22,7 @@ public interface MemoApi {
             description = "사용자의 메모 목록을 조회합니다. recruitmentId 파라미터로 특정 공고의 메모만 조회할 수 있습니다."
     )
     ApiResponse<MemosResponse> getMemos(
-            CustomUserDetails user,
+            User user,
             @Parameter(description = "공고 ID") UUID recruitmentId
     );
 
@@ -31,7 +31,7 @@ public interface MemoApi {
             description = "특정 공고에 대한 메모를 생성합니다."
     )
     ApiResponse<MemoResponse> createMemo(
-            CustomUserDetails user,
+            User user,
             @Parameter(description = "공고 ID", required = true) UUID recruitmentId,
             UpsertMemoRequest request
     );
@@ -41,7 +41,7 @@ public interface MemoApi {
             description = "메모를 수정합니다."
     )
     ApiResponse<MemoResponse> updateMemo(
-            CustomUserDetails user,
+            User user,
             @Parameter(description = "메모 ID", required = true) UUID memoId,
             UpsertMemoRequest request
     );
@@ -51,7 +51,7 @@ public interface MemoApi {
             description = "메모를 삭제합니다."
     )
     ApiResponse<Void> deleteMemo(
-            CustomUserDetails user,
+            User user,
             @Parameter(description = "메모 ID", required = true) UUID memoId
     );
 }

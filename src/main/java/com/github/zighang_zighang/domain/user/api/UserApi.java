@@ -2,7 +2,7 @@ package com.github.zighang_zighang.domain.user.api;
 
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
 import com.github.zighang_zighang.domain.user.dto.response.UserResponse;
-import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
+import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,7 +19,7 @@ public interface UserApi {
             description = "직군, 직무, 경력, 학력, 지역, 자기소개서 URL을 포함한 온보딩/최근 설정한 필터 정보를 등록하거나 수정합니다."
     )
     ApiResponse<UserResponse> addOnboarding(
-            @Parameter(hidden = true) CustomUserDetails user,
+            @Parameter(hidden = true) User user,
 
             @Parameter(description = "유저 온보딩 요청 정보")
             UserOnboardingRequest userOnboardingRequest
@@ -30,6 +30,6 @@ public interface UserApi {
             description = "로그인한 사용자의 기본 정보 및 온보딩/최근 필터 정보를 조회합니다."
     )
     ApiResponse<UserResponse> getUser(
-            @Parameter(hidden = true) CustomUserDetails user
+            @Parameter(hidden = true) User user
     );
 }

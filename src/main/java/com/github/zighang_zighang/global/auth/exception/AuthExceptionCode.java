@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 public enum AuthExceptionCode implements ApiExceptionCode {
 
     OAUTH2_FAILURE("AUTH-001", "OAuth2 인증에 실패했습니다."),
-    OAUTH2_LOGIN_FAILED("AUTH-012", "OAuth2 로그인 처리 중 오류가 발생했습니다."),
     TOKEN_NOT_FOUND("AUTH-002", "토큰을 찾을 수 없습니다."),
     TOKEN_EXPIRED("AUTH-003", "토큰이 만료되었습니다."),
     INVALID_TOKEN("AUTH-004", "유효하지 않은 토큰입니다."),
@@ -19,7 +18,9 @@ public enum AuthExceptionCode implements ApiExceptionCode {
     PROVIDER_ID_NOT_FOUND("AUTH-008", "제공자 ID를 찾을 수 없습니다."),
     PROVIDER_TYPE_NOT_FOUND("AUTH-009", "제공자 타입을 찾을 수 없습니다."),
     USER_NOT_FOUND("AUTH-010", "사용자를 찾을 수 없습니다."),
-    INVALID_REFRESH_TOKEN("AUTH-011", "유효하지 않은 refresh token입니다.");
+    INVALID_REFRESH_TOKEN("AUTH-011", "유효하지 않은 refresh token입니다."),
+    OAUTH2_LOGIN_FAILED("AUTH-012", "OAuth2 로그인 처리 중 오류가 발생했습니다."),
+    UNAUTHORIZED("AUTH-013", "인증되지 않은 유저입니다.");
 
     private final String code;
     private final String message;

@@ -5,6 +5,8 @@ import com.github.zighang_zighang.domain.resume.entity.Resume;
 import com.github.zighang_zighang.global.classification.*;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -25,17 +27,21 @@ public class User extends BaseSchema {
     private String name;
 
     // 직군
+    @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     private List<Job> interestedJobs = new ArrayList<>();
 
     // 직무
+    @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     private List<JobCategory> interestJobCategories = new ArrayList<>();
 
     // 경력
-    private int careerYears;
+    @Min(0)
+    @Max(10)
+    private int careerYear;
 
     // 최종 학력 - 최종 학교
     @Enumerated(EnumType.STRING)
@@ -65,14 +71,16 @@ public class User extends BaseSchema {
     public void updateOnboardingInfo(
             List<Job> interestedJobs,
             List<JobCategory> interestJobCategories,
-            int careerYears,
+            int careerYear,
             EducationLevel educationLevel,
             GraduationStatus graduationStatus,
             Region preferredRegion
     ) {
-        this.interestedJobs = interestedJobs;
-        this.interestJobCategories = interestJobCategories;
-        this.careerYears = careerYears;
+        this.interestedJobs.clear();
+        if (interestedJobs != null) this.interestedJobs.addAll(interestedJobs);
+        this.interestJobCategories.clear();
+        if (interestJobCategories != null) this.interestJobCategories.addAll(interestJobCategories);
+        this.careerYear = careerYear;
         this.educationLevel = educationLevel;
         this.graduationStatus = graduationStatus;
         this.preferredRegion = preferredRegion;
