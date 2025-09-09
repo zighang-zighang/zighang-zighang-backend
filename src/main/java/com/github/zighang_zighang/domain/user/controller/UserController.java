@@ -8,11 +8,13 @@ import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
+@PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
 public class UserController implements UserApi {
 
