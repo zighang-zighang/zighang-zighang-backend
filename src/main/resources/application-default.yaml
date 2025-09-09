@@ -78,3 +78,11 @@ frontend:
 app:
   oauth2:
     authorized-redirect-uris: ${FRONTEND_BASE_URL:https://zighang-zighang-frontend.vercel.app},${FRONTEND_DEVELOP_URL:http://localhost:3000},${FRONTEND_STAGING_URL:https://zighang.daehyeon.cloud}
+
+ncp:
+  storage:
+    region: kr-standard
+    endpoint: https://kr.object.ncloudstorage.com
+    access-key: ${NCP_ACCESS_KEY}
+    secret-key: ${NCP_SECRET_KEY}
+    bucket-name: ${NCP_BUCKET_NAME}

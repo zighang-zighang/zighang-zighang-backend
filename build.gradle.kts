@@ -54,6 +54,8 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
 
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
+
+    implementation("software.amazon.awssdk:s3:2.20.50")
 }
 
 tasks.withType<JavaCompile> {

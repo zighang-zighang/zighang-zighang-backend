@@ -24,7 +24,7 @@ public class UserController implements UserApi {
     public ApiResponse<UserResponse> addOnboarding(
             @CurrentUser User user,
             @RequestBody @Valid UserOnboardingRequest userOnboardingRequest
-            ) {
+    ) {
         return ApiResponse.ok(userService.addOnboarding(user, userOnboardingRequest));
     }
 
