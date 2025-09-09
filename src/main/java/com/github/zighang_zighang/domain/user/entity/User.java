@@ -1,8 +1,11 @@
 package com.github.zighang_zighang.domain.user.entity;
 
 import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentView;
+import com.github.zighang_zighang.global.classification.*;
 import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -17,10 +20,41 @@ import java.util.List;
 public class User extends BaseSchema {
 
     @Column(nullable = false, unique = true)
-    String email;
+    private String email;
 
     @Column(nullable = false)
-    String name;
+    private String name;
+
+    // 직군
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    private List<Job> interestedJobs = new ArrayList<>();
+
+    // 직무
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    private List<JobCategory> interestJobCategories = new ArrayList<>();
+
+    // 경력
+    @Min(0)
+    @Max(10)
+    private int careerYear;
+
+    // 최종 학력 - 최종 학교
+    @Enumerated(EnumType.STRING)
+    private EducationLevel educationLevel;
+
+    // 최종 학력 - 졸업 구분
+    @Enumerated(EnumType.STRING)
+    private GraduationStatus graduationStatus;
+
+    // 선호 근무 지역
+    @Enumerated(EnumType.STRING)
+    private Region preferredRegion;
+
+    // 자기소개서
 
     @Builder.Default
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -29,5 +63,24 @@ public class User extends BaseSchema {
     @Builder.Default
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<RecruitmentView> recruitmentViews = new ArrayList<>();
+
+    public void updateOnboardingInfo(
+            List<Job> interestedJobs,
+            List<JobCategory> interestJobCategories,
+            int careerYear,
+            EducationLevel educationLevel,
+            GraduationStatus graduationStatus,
+            Region preferredRegion
+    ) {
+        this.interestedJobs.clear();
+        if (interestedJobs != null) this.interestedJobs.addAll(interestedJobs);
+        this.interestJobCategories.clear();
+        if (interestJobCategories != null) this.interestJobCategories.addAll(interestJobCategories);
+        this.careerYear = careerYear;
+        this.educationLevel = educationLevel;
+        this.graduationStatus = graduationStatus;
+        this.preferredRegion = preferredRegion;
+    }
+
 }
 

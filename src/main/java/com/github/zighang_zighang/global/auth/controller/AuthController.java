@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.global.auth.controller;
 
+import com.github.zighang_zighang.global.auth.api.AuthApi;
 import com.github.zighang_zighang.global.auth.dto.LoginResponse;
 import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.response.ApiResponse;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
 
     private final AuthService authService;
 
