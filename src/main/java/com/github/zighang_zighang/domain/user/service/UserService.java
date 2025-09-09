@@ -11,7 +11,6 @@ import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
 import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.classification.JobCategory;
-import com.github.zighang_zighang.global.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,12 +90,12 @@ public class UserService {
                 .count();
 
         if (distinctJobCount > 3) {
-            throw new ApiException(UserException.EXCEEDED_MAX_JOB_SELECTION);
+            throw UserException.EXCEEDED_MAX_JOB_SELECTION.toException();
         }
 
         // 경력 (0-10년+) 검증
         if (request.getCareerYear() < 0 || request.getCareerYear() > 10) {
-            throw new ApiException(UserException.INVALID_CAREER_YEAR);
+            throw UserException.INVALID_CAREER_YEAR.toException();
         }
 
         // 선택한 직무 중에서, 직군에 속하지 않는 항목을 필터링
@@ -110,7 +109,7 @@ public class UserService {
                 .toList();
 
         if (!invalidCategories.isEmpty()) {
-            throw new ApiException(UserException.INVALID_JOB_CATEGORY_SELECTION);
+            throw UserException.INVALID_JOB_CATEGORY_SELECTION.toException();
         }
     }
 

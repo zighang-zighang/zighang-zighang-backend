@@ -4,7 +4,6 @@ import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
-import com.github.zighang_zighang.global.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -37,16 +36,16 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ApiException(AuthExceptionCode.UNAUTHORIZED);
+            throw AuthExceptionCode.UNAUTHORIZED.toException();
         }
 
         Object principal = authentication.getPrincipal();
 
         if (!(principal instanceof CustomUserDetails cud)) {
-            throw new ApiException(AuthExceptionCode.UNAUTHORIZED);
+            throw AuthExceptionCode.UNAUTHORIZED.toException();
         }
 
         return userRepository.findById(cud.getUser().getId())
-                .orElseThrow(() -> new ApiException(AuthExceptionCode.USER_NOT_FOUND)); // 혹은 UserException.NOT_FOUND
+                .orElseThrow(AuthExceptionCode.USER_NOT_FOUND::toException);
     }
 }

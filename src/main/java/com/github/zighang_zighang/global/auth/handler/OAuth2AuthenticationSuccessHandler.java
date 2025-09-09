@@ -8,7 +8,6 @@ import com.github.zighang_zighang.global.auth.service.AuthService;
 import com.github.zighang_zighang.global.auth.service.TokenStorageService;
 import com.github.zighang_zighang.global.auth.util.JwtUtil;
 import com.github.zighang_zighang.global.auth.util.RedirectValidator;
-import com.github.zighang_zighang.global.exception.ApiException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -130,7 +129,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
 
         if (email == null) {
-            throw new ApiException(AuthExceptionCode.EMAIL_NOT_PROVIDED);
+            throw AuthExceptionCode.EMAIL_NOT_PROVIDED.toException();
         }
 
         return email;
@@ -190,7 +189,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return sub;
         }
         
-        throw new ApiException(AuthExceptionCode.PROVIDER_ID_NOT_FOUND);
+        throw AuthExceptionCode.PROVIDER_ID_NOT_FOUND.toException();
     }
 
     // OAuth2 제공자 타입 추출 (우선순위: registrationId > provider 속성)
@@ -227,7 +226,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             }
         }
         
-        throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
+        throw AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND.toException();
     }
 
     // OAuth2 제공자 타입 추출 (기존 방식 - 하위 호환성)
@@ -247,7 +246,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             }
         }
 
-        throw new ApiException(AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND);
+        throw AuthExceptionCode.PROVIDER_TYPE_NOT_FOUND.toException();
     }
     
     /**
