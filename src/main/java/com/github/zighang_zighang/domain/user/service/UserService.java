@@ -68,9 +68,9 @@ public class UserService {
         );
 
         // 자기소개서 업로드
-        String uploadedResumeUrl = ncpObjectUploader.uploadFile(resumeFile);
+        if (resumeFile != null && !resumeFile.isEmpty()) {
+            String uploadedResumeUrl = ncpObjectUploader.uploadFile(resumeFile);
 
-        if(uploadedResumeUrl!= null && !uploadedResumeUrl.isBlank()) {
             Resume resume = Resume.builder()
                     .resumeUrl(uploadedResumeUrl)
                     .user(user)
