@@ -25,6 +25,7 @@ public interface RecruitmentApi {
             description = "공고 ID를 통해 특정 공고의 상세 정보를 조회합니다."
     )
     ApiResponse<RecruitmentResponse> getRecruitment(
+            @Parameter(hidden = true)
             User user,
 
             @Parameter(description = "공고 ID")
@@ -36,6 +37,9 @@ public interface RecruitmentApi {
             description = "조건으로 공고 목록을 필터링하여 조회합니다. 페이지네이션이 적용됩니다."
     )
     ApiResponse<PageResponse<RecruitmentResponse>> getRecruitments(
+            @Parameter(hidden = true)
+            User user,
+
             @Parameter(description = "직무 필터 (복수 선택 가능)")
             List<Job> jobs,
 

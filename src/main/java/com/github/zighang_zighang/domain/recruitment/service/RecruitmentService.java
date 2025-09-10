@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.recruitment.service;
 
+import com.github.zighang_zighang.domain.bookmark.repository.BookmarkRepository;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
@@ -13,9 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
 
@@ -25,6 +24,7 @@ public class RecruitmentService {
 
     private final RecruitmentRepository recruitmentRepository;
     private final RecruitmentViewRepository recruitmentViewRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public RecruitmentResponse getRecruitment(User user, UUID id) {
@@ -47,7 +47,9 @@ public class RecruitmentService {
             view.addViewCount();
         }
 
-        return RecruitmentResponse.from(recruitment);
+        Boolean isBookmarked = Objects.nonNull(user) && bookmarkRepository.existsByUserAndRecruitmentId(user, id);
+
+        return RecruitmentResponse.from(recruitment, isBookmarked);
     }
 
     @Cacheable(
@@ -56,6 +58,7 @@ public class RecruitmentService {
                     "#minExperience, #maxExperience, #locations, #deadlineTypes, #page, #size)"
     )
     public PageResponse<RecruitmentResponse> getRecruitments(
+            User user,
             List<Job> jobs,
             List<JobCategory> jobCategories,
             List<EmploymentType> employmentTypes,
@@ -73,6 +76,13 @@ public class RecruitmentService {
                 minExperience, maxExperience, locations, deadlineTypes, page, size
         );
 
-        return recruitments.map(RecruitmentResponse::from);
+        Set<UUID> bookmarked = Optional.ofNullable(user)
+                .map((u) -> {
+                    List<UUID> ids = recruitments.getContent().stream().map(Recruitment::getId).toList();
+                    return bookmarkRepository.findBookmarkedRecruitmentIds(u, ids);
+                })
+                .orElseGet(Collections::emptySet);
+
+        return recruitments.map(r -> RecruitmentResponse.from(r, bookmarked.contains(r.getId())));
     }
 }

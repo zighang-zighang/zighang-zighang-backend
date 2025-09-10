@@ -22,8 +22,11 @@ public interface MemoApi {
             description = "사용자의 메모 목록을 조회합니다. recruitmentId 파라미터로 특정 공고의 메모만 조회할 수 있습니다."
     )
     ApiResponse<MemosResponse> getMemos(
+            @Parameter(hidden = true)
             User user,
-            @Parameter(description = "공고 ID") UUID recruitmentId
+
+            @Parameter(description = "공고 ID")
+            UUID recruitmentId
     );
 
     @Operation(
@@ -31,7 +34,9 @@ public interface MemoApi {
             description = "특정 공고에 대한 메모를 생성합니다."
     )
     ApiResponse<MemoResponse> createMemo(
+            @Parameter(hidden = true)
             User user,
+
             @Parameter(description = "공고 ID", required = true) UUID recruitmentId,
             UpsertMemoRequest request
     );
@@ -41,7 +46,9 @@ public interface MemoApi {
             description = "메모를 수정합니다."
     )
     ApiResponse<MemoResponse> updateMemo(
+            @Parameter(hidden = true)
             User user,
+
             @Parameter(description = "메모 ID", required = true) UUID memoId,
             UpsertMemoRequest request
     );
@@ -51,7 +58,10 @@ public interface MemoApi {
             description = "메모를 삭제합니다."
     )
     ApiResponse<Void> deleteMemo(
+            @Parameter(hidden = true)
             User user,
-            @Parameter(description = "메모 ID", required = true) UUID memoId
+
+            @Parameter(description = "메모 ID", required = true)
+            UUID memoId
     );
 }
