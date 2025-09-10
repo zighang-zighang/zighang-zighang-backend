@@ -58,7 +58,7 @@ public class RecruitmentService {
                         .build()
         );
 
-        int views = recruitmentViewRepository.findByRecruitmentId(id).size();
+        int views = recruitmentViewRepository.countByRecruitmentId(id);
         boolean bookmarked = Objects.nonNull(user) && bookmarkRepository.existsByUserAndRecruitmentId(user, id);
 
         return RecruitmentResponse.from(recruitment, views, bookmarked);

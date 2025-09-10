@@ -62,7 +62,7 @@ public class BookmarkService {
         );
     }
 
-    @CacheEvict(value = "bookmarks", key = "#user.id + '-*'")
+    @CacheEvict(value = "bookmarks", allEntries = true)
     @Transactional
     @RecruitmentExist("#recruitmentId")
     public void addBookmark(User user, UUID recruitmentId) {
