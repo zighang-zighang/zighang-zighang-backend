@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.recruitment.service;
 
+import com.github.zighang_zighang.domain.bookmark.repository.BookmarkRepository;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
@@ -25,6 +26,7 @@ public class RecruitmentService {
 
     private final RecruitmentRepository recruitmentRepository;
     private final RecruitmentViewRepository recruitmentViewRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public RecruitmentResponse getRecruitment(User user, UUID id) {
@@ -47,7 +49,9 @@ public class RecruitmentService {
             view.addViewCount();
         }
 
-        return RecruitmentResponse.from(recruitment);
+        Boolean isBookmarked = Objects.nonNull(user) && bookmarkRepository.existsByUserAndRecruitmentId(user, id);
+
+        return RecruitmentResponse.from(recruitment, isBookmarked);
     }
 
     @Cacheable(
@@ -56,6 +60,7 @@ public class RecruitmentService {
                     "#minExperience, #maxExperience, #locations, #deadlineTypes, #page, #size)"
     )
     public PageResponse<RecruitmentResponse> getRecruitments(
+            User user,
             List<Job> jobs,
             List<JobCategory> jobCategories,
             List<EmploymentType> employmentTypes,
@@ -73,6 +78,9 @@ public class RecruitmentService {
                 minExperience, maxExperience, locations, deadlineTypes, page, size
         );
 
-        return recruitments.map(RecruitmentResponse::from);
+        return recruitments.map(recruitment -> {
+            Boolean isBookmarked = Objects.nonNull(user) && bookmarkRepository.existsByUserAndRecruitmentId(user, recruitment.getId());
+            return RecruitmentResponse.from(recruitment, isBookmarked);
+        });
     }
 }
