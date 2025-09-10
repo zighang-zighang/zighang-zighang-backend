@@ -26,6 +26,7 @@ public class RecruitmentService {
     private final RecruitmentViewRepository recruitmentViewRepository;
 
     @Transactional
+    @Cacheable(value = "recruitment", key = "#id")
     public RecruitmentResponse getRecruitment(UUID id) {
 
         Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
@@ -34,6 +35,7 @@ public class RecruitmentService {
     }
 
     @Transactional
+    @Cacheable(value = "recruitment-view", key = "T(java.util.Objects).hash(#id, #ipAddress, #userAgent)")
     public RecruitmentResponse getRecruitment(User user, UUID id, String ipAddress, String userAgent) {
 
         RecruitmentResponse recruitment = getRecruitment(id);
