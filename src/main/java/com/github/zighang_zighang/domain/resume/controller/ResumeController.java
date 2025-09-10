@@ -20,8 +20,6 @@ public class ResumeController {
 
     private final ResumeService resumeService;
 
-    // TODO: Resume 파일 업로드(+text extractor), 파일 삭제하기, 파일 업로드 시 인코딩해서 url 생성
-
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ResumeResponse> uploadResume(
             @CurrentUser User user,

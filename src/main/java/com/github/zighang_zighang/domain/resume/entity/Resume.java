@@ -30,4 +30,7 @@ public class Resume extends BaseSchema {
     @Column(nullable = false)
     private long size;
 
+    @Lob
+    private String content;
+
 }

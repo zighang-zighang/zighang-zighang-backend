@@ -56,6 +56,9 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
 
     implementation("software.amazon.awssdk:s3:2.20.50")
+
+    implementation("org.apache.pdfbox:pdfbox:2.0.30")
+    implementation("kr.dogfoot:hwplib:1.1.4")
 }
 
 tasks.withType<JavaCompile> {
