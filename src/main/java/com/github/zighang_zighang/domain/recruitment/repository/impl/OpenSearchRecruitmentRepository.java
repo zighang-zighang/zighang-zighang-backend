@@ -3,6 +3,8 @@ package com.github.zighang_zighang.domain.recruitment.repository.impl;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
+import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentViewRepository;
+import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.response.PageInfo;
 import com.github.zighang_zighang.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ import org.opensearch.client.opensearch.core.search.Hit;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,8 +39,8 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
     private static final Class<Recruitment> CLASS = Recruitment.class;
 
     private final OpenSearchClient client;
+    private final RecruitmentViewRepository recruitmentViewRepository;
 
-    @Override
     @SneakyThrows(IOException.class)
     public Optional<Recruitment> findById(UUID id) {
 
@@ -89,5 +93,37 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
                 response.hits().hits().stream().map(Hit::source).toList(),
                 PageInfo.of(size, page, response.hits().total() != null ? response.hits().total().value() : 0)
         );
+    }
+
+    @Override
+    public List<Recruitment> findPopularRecruitmentIds(
+            Job job,
+            LocalDateTime viewCutoff,
+            LocalDateTime bookmarkCutoff,
+            LocalDateTime applicationCutoff,
+            double viewWeight,
+            double bookmarkWeight,
+            double applicationWeight,
+            int limit
+    ) {
+
+        return recruitmentViewRepository.findPopularRecruitmentIds(
+                        viewCutoff, bookmarkCutoff, applicationCutoff,
+                        viewWeight, bookmarkWeight, applicationWeight
+                ).stream()
+                .map((id) -> {
+                    ByteBuffer bb = ByteBuffer.wrap(id);
+                    long high = bb.getLong();
+                    long low = bb.getLong();
+                    return new UUID(high, low);
+                })
+                .peek(System.out::println)
+                .map(this::findById)
+                .peek(System.out::println)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(r -> job == null || r.getJobs().stream().anyMatch(job1 -> job1.name().equals(job.name())))
+                .limit(limit)
+                .toList();
     }
 }

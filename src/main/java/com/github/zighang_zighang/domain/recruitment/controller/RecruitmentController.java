@@ -6,6 +6,7 @@ import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentRes
 import com.github.zighang_zighang.domain.recruitment.service.RecruitmentService;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.auth.resolver.CurrentUser;
+import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.response.PageResponse;
 import com.github.zighang_zighang.global.util.RequestParser;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -59,5 +61,14 @@ public class RecruitmentController implements RecruitmentApi {
         recruitmentService.logApplication(user, recruitmentId);
 
         return ApiResponse.ok();
+    }
+
+    @GetMapping("/popular")
+    public ApiResponse<List<RecruitmentResponse>> getPopularRecruitments(
+            @CurrentUser User user,
+            @RequestParam(required = false) Job job
+    ) {
+
+        return ApiResponse.ok(recruitmentService.getPopularRecruitments(user, job));
     }
 }

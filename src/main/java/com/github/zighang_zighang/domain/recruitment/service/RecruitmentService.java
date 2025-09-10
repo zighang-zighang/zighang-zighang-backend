@@ -1,7 +1,6 @@
 package com.github.zighang_zighang.domain.recruitment.service;
 
 import com.github.zighang_zighang.domain.bookmark.repository.BookmarkRepository;
-import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.request.RecruitmentSearchRequest;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
@@ -11,6 +10,8 @@ import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentAppli
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentViewRepository;
 import com.github.zighang_zighang.domain.user.entity.User;
+import com.github.zighang_zighang.global.classification.Job;
+import com.github.zighang_zighang.global.property.PopularRecruitmentProperty;
 import com.github.zighang_zighang.global.response.PageResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
 
@@ -30,6 +33,7 @@ public class RecruitmentService {
     private final RecruitmentViewRepository recruitmentViewRepository;
     private final BookmarkRepository bookmarkRepository;
     private final RecruitmentApplicationRepository recruitmentApplicationRepository;
+    private final PopularRecruitmentProperty popularRecruitmentProperty;
 
     @Transactional
     @Cacheable(value = "recruitment", key = "#id", sync = true)
@@ -100,5 +104,38 @@ public class RecruitmentService {
             );
         } catch (DataIntegrityViolationException ignored) {
         }
+    }
+
+    @Cacheable(value = "popular-recruitments", key = "#job?.name() ?: 'all'")
+    public List<RecruitmentResponse> getPopularRecruitments(User user, Job job) {
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime viewCutoff = now.minusHours(popularRecruitmentProperty.getViewHours());
+        LocalDateTime bookmarkCutoff = now.minusHours(popularRecruitmentProperty.getBookmarkHours());
+        LocalDateTime applicationCutoff = now.minusHours(popularRecruitmentProperty.getApplicationHours());
+
+        List<Recruitment> recruitments = recruitmentRepository.findPopularRecruitmentIds(
+                job,
+                viewCutoff, bookmarkCutoff, applicationCutoff,
+                popularRecruitmentProperty.getViewWeight(),
+                popularRecruitmentProperty.getBookmarkWeight(),
+                popularRecruitmentProperty.getApplicationWeight(),
+                20
+        );
+
+        Set<UUID> recruitmentIds = recruitments.stream().map(Recruitment::getId).collect(Collectors.toSet());
+
+        Map<UUID, Recruitment> recruitmentMap = recruitments.stream()
+                .collect(Collectors.toMap(Recruitment::getId, recruitment -> recruitment));
+
+        Set<UUID> bookmarked = Optional.ofNullable(user)
+                .map((u) -> bookmarkRepository.findBookmarkedRecruitmentIds(u, recruitmentIds))
+                .orElseGet(Collections::emptySet);
+
+        return recruitmentIds.stream()
+                .map(recruitmentMap::get)
+                .filter(Objects::nonNull)
+                .map(recruitment -> RecruitmentResponse.from(recruitment, bookmarked.contains(recruitment.getId())))
+                .collect(Collectors.toList());
     }
 }

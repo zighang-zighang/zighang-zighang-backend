@@ -3,6 +3,7 @@ package com.github.zighang_zighang.domain.recruitment.api;
 import com.github.zighang_zighang.domain.recruitment.dto.request.RecruitmentSearchRequest;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.user.entity.User;
+import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(
@@ -54,5 +56,17 @@ public interface RecruitmentApi {
 
             @Parameter(description = "공고 ID")
             UUID recruitmentId
+    );
+
+    @Operation(
+            summary = "인기 공고 조회",
+            description = "특정 직무에 대한 인기 공고 목록을 조회합니다."
+    )
+    ApiResponse<List<RecruitmentResponse>> getPopularRecruitments(
+            @Parameter(hidden = true)
+            User user,
+
+            @Parameter(description = "직무")
+            Job job
     );
 }

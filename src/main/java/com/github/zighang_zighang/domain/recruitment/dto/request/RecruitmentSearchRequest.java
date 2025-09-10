@@ -1,14 +1,11 @@
 package com.github.zighang_zighang.domain.recruitment.dto.request;
 
 import com.github.zighang_zighang.domain.recruitment.constant.*;
+import com.github.zighang_zighang.global.classification.Job;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
 import java.util.List;
 
