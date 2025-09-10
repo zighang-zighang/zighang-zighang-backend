@@ -12,6 +12,7 @@ import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.classification.JobCategory;
 import com.github.zighang_zighang.global.infra.storage.uploader.NcpObjectUploader;
+import com.github.zighang_zighang.global.infra.storage.util.FileValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +55,6 @@ public class UserService {
 
     @Transactional
     public UserResponse addOnboarding(User user, UserOnboardingRequest request, MultipartFile resumeFile) {
-
         validateOnboarding(request);
 
         // 관심 직군/직무, 경력, 학교, 졸업 구분, 지역 저장
@@ -69,6 +69,8 @@ public class UserService {
 
         // 자기소개서 업로드
         if (resumeFile != null && !resumeFile.isEmpty()) {
+            FileValidator.validateResumeExtension(resumeFile);
+
             String uploadedResumeUrl = ncpObjectUploader.uploadFile(resumeFile);
 
             Resume resume = Resume.builder()
