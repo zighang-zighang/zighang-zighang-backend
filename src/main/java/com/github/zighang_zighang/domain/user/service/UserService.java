@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.domain.user.service;
 
 import com.github.zighang_zighang.domain.resume.entity.Resume;
+import com.github.zighang_zighang.domain.resume.service.ResumeService;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
 import com.github.zighang_zighang.domain.user.dto.response.UserResponse;
@@ -32,6 +33,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
     private final NcpObjectUploader ncpObjectUploader;
+    private final ResumeService resumeService;
 
     @Transactional
     public User createUser(String email, String name) {
@@ -70,16 +72,7 @@ public class UserService {
 
         // 자기소개서 업로드
         if (resumeFile != null && !resumeFile.isEmpty()) {
-            FileValidator.validateResumeExtension(resumeFile);
-
-            StorageResponse uploadedResume = ncpObjectUploader.uploadFile(resumeFile);
-
-            Resume resume = Resume.builder()
-                    .resumeUrl(uploadedResume.getFileUrl())
-                    .user(user)
-                    .build();
-
-            user.getResumes().add(resume);
+            resumeService.uploadResume(user, resumeFile);
         }
 
         return UserResponse.from(user);

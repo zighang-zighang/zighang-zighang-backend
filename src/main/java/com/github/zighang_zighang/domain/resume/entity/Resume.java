@@ -17,6 +17,12 @@ public class Resume extends BaseSchema {
     private User user;
 
     @Column(nullable = false)
-    private String resumeUrl;
+    private String name;
+
+    @Column(nullable = false)
+    private String url;
+
+    @Column(nullable = false)
+    private long size;
 
 }
