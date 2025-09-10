@@ -9,6 +9,7 @@ import com.github.zighang_zighang.global.auth.resolver.CurrentUser;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +22,7 @@ public class UserController implements UserApi {
 
     private final UserService userService;
 
-    @PostMapping("/filter")
+    @PostMapping(value = "/filter", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<UserResponse> addOnboarding(
             @CurrentUser User user,
             @RequestPart("request") @Valid UserOnboardingRequest userOnboardingRequest,
