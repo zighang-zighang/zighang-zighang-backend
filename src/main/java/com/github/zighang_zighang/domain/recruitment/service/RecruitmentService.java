@@ -45,7 +45,7 @@ public class RecruitmentService {
                         .recruitmentId(id)
                         .user(user)
                         .ipAddress(ipAddress)
-                        .userAgent(userAgent)
+                        .userAgent(userAgent.substring(0, Math.min(userAgent.length(), 1000)))
                         .build()
         );
 

@@ -29,6 +29,6 @@ public class RecruitmentView extends BaseSchema {
     @Column(nullable = false)
     String ipAddress;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     String userAgent;
 }
