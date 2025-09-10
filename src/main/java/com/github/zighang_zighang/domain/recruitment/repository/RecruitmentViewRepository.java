@@ -50,4 +50,5 @@ public interface RecruitmentViewRepository extends JpaRepository<RecruitmentView
             @Param("bookmarkWeight") double bookmarkWeight,
             @Param("applicationWeight") double applicationWeight
     );
+    int countByRecruitmentId(UUID recruitmentId);
 }

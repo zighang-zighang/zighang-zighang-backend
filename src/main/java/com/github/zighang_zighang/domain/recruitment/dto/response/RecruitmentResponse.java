@@ -67,15 +67,13 @@ public class RecruitmentResponse {
     @Schema(description = "회사 규모")
     CompanySize companySize;
 
+    @Schema(description = "조회수")
+    Integer views;
+
     @Schema(description = "북마크 여부")
     Boolean isBookmarked;
 
-    public static RecruitmentResponse from(Recruitment recruitment) {
-
-        return from(recruitment, false);
-    }
-
-    public static RecruitmentResponse from(Recruitment recruitment, Boolean isBookmarked) {
+    public static RecruitmentResponse from(Recruitment recruitment, int views, boolean bookmarked) {
 
         return RecruitmentResponse.of(
                 recruitment.getId(),
@@ -95,7 +93,8 @@ public class RecruitmentResponse {
                 recruitment.getCompanyName(),
                 recruitment.getCompanyImageUrl(),
                 recruitment.getCompanySize(),
-                isBookmarked
+                views,
+                bookmarked
         );
     }
 }

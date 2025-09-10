@@ -41,7 +41,7 @@ public class RecruitmentService {
 
         Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
 
-        return RecruitmentResponse.from(recruitment);
+        return RecruitmentResponse.from(recruitment, 0, false);
     }
 
     @Transactional
@@ -62,9 +62,10 @@ public class RecruitmentService {
                         .build()
         );
 
-        Boolean isBookmarked = Objects.nonNull(user) && bookmarkRepository.existsByUserAndRecruitmentId(user, id);
+        int views = recruitmentViewRepository.countByRecruitmentId(id);
+        boolean bookmarked = Objects.nonNull(user) && bookmarkRepository.existsByUserAndRecruitmentId(user, id);
 
-        return RecruitmentResponse.from(recruitment, isBookmarked);
+        return RecruitmentResponse.from(recruitment, views, bookmarked);
     }
 
     @Cacheable(
@@ -82,14 +83,17 @@ public class RecruitmentService {
                 request.getMinExperience(), request.getMaxExperience(), request.getLocations(), request.getDeadlineTypes(), request.getPage(), request.getSize()
         );
 
+        Set<UUID> ids = recruitments.getContent().stream().map(Recruitment::getId).collect(Collectors.toSet());
+
         Set<UUID> bookmarked = Optional.ofNullable(user)
-                .map((u) -> {
-                    List<UUID> ids = recruitments.getContent().stream().map(Recruitment::getId).toList();
-                    return bookmarkRepository.findBookmarkedRecruitmentIds(u, ids);
-                })
+                .map((u) -> bookmarkRepository.findBookmarkedRecruitmentIds(u, ids))
                 .orElseGet(Collections::emptySet);
 
-        return recruitments.map(r -> RecruitmentResponse.from(r, bookmarked.contains(r.getId())));
+        Map<UUID, Long> count = recruitmentViewRepository.findAll().stream()
+                .filter(rv -> ids.contains(rv.getRecruitmentId()))
+                .collect(Collectors.groupingBy(RecruitmentView::getRecruitmentId, Collectors.counting()));
+
+        return recruitments.map(r -> RecruitmentResponse.from(r, count.getOrDefault(r.getId(), 0L).intValue(), bookmarked.contains(r.getId())));
     }
 
     @Transactional
