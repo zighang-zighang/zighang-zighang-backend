@@ -19,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class RecruitmentView extends BaseSchema {
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "BINARY(16)")
     UUID recruitmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
