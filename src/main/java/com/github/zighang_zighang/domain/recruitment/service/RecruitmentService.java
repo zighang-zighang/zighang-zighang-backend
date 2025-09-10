@@ -2,6 +2,7 @@ package com.github.zighang_zighang.domain.recruitment.service;
 
 import com.github.zighang_zighang.domain.bookmark.repository.BookmarkRepository;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
+import com.github.zighang_zighang.domain.recruitment.dto.request.RecruitmentSearchRequest;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
 import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentApplication;
@@ -17,9 +18,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
 
@@ -48,7 +47,7 @@ public class RecruitmentService {
     )
     public RecruitmentResponse getRecruitment(User user, UUID id, String ipAddress, String userAgent) {
 
-        RecruitmentResponse recruitment = getRecruitment(id);
+        Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
 
         recruitmentViewRepository.save(
                 RecruitmentView.builder()
@@ -66,26 +65,17 @@ public class RecruitmentService {
 
     @Cacheable(
             value = "recruitments",
-            key = "T(java.util.Objects).hash(#jobs, #jobCategories, #employmentTypes, #educations," +
-                    "#minExperience, #maxExperience, #locations, #deadlineTypes, #page, #size)"
+            key = "T(java.util.Objects).hash(#request.jobs, #request.jobCategories, #request.employmentTypes, #request.educations," +
+                    "#request.minExperience, #request.maxExperience, #request.locations, #request.deadlineTypes, #request.page, #request.size)"
     )
     public PageResponse<RecruitmentResponse> getRecruitments(
             User user,
-            List<Job> jobs,
-            List<JobCategory> jobCategories,
-            List<EmploymentType> employmentTypes,
-            List<Education> educations,
-            Integer minExperience,
-            Integer maxExperience,
-            List<Location> locations,
-            List<DeadlineType> deadlineTypes,
-            Integer page,
-            Integer size
+            RecruitmentSearchRequest request
     ) {
 
         PageResponse<Recruitment> recruitments = recruitmentRepository.findByFilters(
-                jobs, jobCategories, employmentTypes, educations,
-                minExperience, maxExperience, locations, deadlineTypes, page, size
+                request.getJobs(), request.getJobCategories(), request.getEmploymentTypes(), request.getEducations(),
+                request.getMinExperience(), request.getMaxExperience(), request.getLocations(), request.getDeadlineTypes(), request.getPage(), request.getSize()
         );
 
         Set<UUID> bookmarked = Optional.ofNullable(user)

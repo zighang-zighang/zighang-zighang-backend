@@ -1,20 +1,20 @@
 package com.github.zighang_zighang.domain.recruitment.controller;
 
 import com.github.zighang_zighang.domain.recruitment.api.RecruitmentApi;
-import com.github.zighang_zighang.domain.recruitment.constant.*;
+import com.github.zighang_zighang.domain.recruitment.dto.request.RecruitmentSearchRequest;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.service.RecruitmentService;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.auth.resolver.CurrentUser;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.response.PageResponse;
+import com.github.zighang_zighang.global.util.RequestParser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -32,46 +32,20 @@ public class RecruitmentController implements RecruitmentApi {
             @CurrentUser User user,
             @PathVariable UUID recruitmentId
     ) {
-        String ipAddress = getClientIpAddress(request);
+        String ipAddress = RequestParser.getClientIpAddress(request);
         String userAgent = request.getHeader("User-Agent");
 
         return ApiResponse.ok(recruitmentService.getRecruitment(user, recruitmentId, ipAddress, userAgent));
-    }
-
-    private String getClientIpAddress(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp;
-        }
-
-        return request.getRemoteAddr();
     }
 
     @Override
     @GetMapping
     public ApiResponse<PageResponse<RecruitmentResponse>> getRecruitments(
             @CurrentUser User user,
-            @RequestParam(required = false) List<Job> jobs,
-            @RequestParam(required = false) List<JobCategory> jobCategories,
-            @RequestParam(required = false) List<EmploymentType> employmentTypes,
-            @RequestParam(required = false) List<Education> educations,
-            @RequestParam(required = false) Integer minExperience,
-            @RequestParam(required = false) Integer maxExperience,
-            @RequestParam(required = false) List<Location> locations,
-            @RequestParam(required = false) List<DeadlineType> deadlineTypes,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "20") Integer size
+            @ModelAttribute RecruitmentSearchRequest request
     ) {
 
-        return ApiResponse.ok(recruitmentService.getRecruitments(
-                user, jobs, jobCategories, employmentTypes, educations,
-                minExperience, maxExperience, locations, deadlineTypes, page, size
-        ));
+        return ApiResponse.ok(recruitmentService.getRecruitments(user, request));
     }
 
     @Override

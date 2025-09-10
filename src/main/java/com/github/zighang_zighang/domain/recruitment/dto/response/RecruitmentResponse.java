@@ -72,26 +72,7 @@ public class RecruitmentResponse {
 
     public static RecruitmentResponse from(Recruitment recruitment) {
 
-        return RecruitmentResponse.of(
-                recruitment.getId(),
-                recruitment.getTitle(),
-                recruitment.getRecruitmentUrl(),
-                recruitment.getImageUrl(),
-                recruitment.getLocations(),
-                recruitment.getMinExperience(),
-                recruitment.getMaxExperience(),
-                recruitment.getEducations(),
-                recruitment.getStartDate(),
-                recruitment.getEndDate(),
-                recruitment.getDeadlineType(),
-                recruitment.getEmploymentTypes(),
-                recruitment.getJobs(),
-                recruitment.getJobCategories(),
-                recruitment.getCompanyName(),
-                recruitment.getCompanyImageUrl(),
-                recruitment.getCompanySize(),
-                false
-        );
+        return from(recruitment, false);
     }
 
     public static RecruitmentResponse from(Recruitment recruitment, Boolean isBookmarked) {
