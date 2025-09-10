@@ -2,10 +2,11 @@ package com.github.zighang_zighang.domain.resume.service;
 
 import com.github.zighang_zighang.domain.resume.dto.response.ResumeResponse;
 import com.github.zighang_zighang.domain.resume.entity.Resume;
+import com.github.zighang_zighang.domain.resume.exception.ResumeException;
 import com.github.zighang_zighang.domain.resume.repository.ResumeRepository;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.infra.storage.dto.response.StorageResponse;
-import com.github.zighang_zighang.global.infra.storage.uploader.NcpObjectUploader;
+import com.github.zighang_zighang.global.infra.storage.service.StorageService;
 import com.github.zighang_zighang.global.infra.storage.util.FileValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import java.util.UUID;
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
-    private final NcpObjectUploader ncpObjectUploader;
+    private final StorageService storageService;
 
     @Transactional
     public ResumeResponse uploadResume(User user, MultipartFile resumeFile) {
@@ -32,7 +33,7 @@ public class ResumeService {
 
         UUID resumeKey = UUID.randomUUID();
 
-        StorageResponse uploadedResume = ncpObjectUploader.uploadFile(resumeFile, resumeKey);
+        StorageResponse uploadedResume = storageService.uploadFile(resumeFile, resumeKey);
 
         Resume resume = Resume.builder()
                 .url(uploadedResume.getFileUrl())
@@ -54,5 +55,19 @@ public class ResumeService {
         return user.getResumes().stream()
                 .map(ResumeResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public void deleteResume(User user, UUID resumeId) {
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(ResumeException.NOT_FOUND::toException);
+
+        if (!resume.getUser().equals(user)) {
+            throw ResumeException.FORBIDDEN.toException();
+        }
+
+        storageService.deleteFile(resume.getName(), resume.getStorageKey());
+
+        resumeRepository.delete(resume);
     }
 }

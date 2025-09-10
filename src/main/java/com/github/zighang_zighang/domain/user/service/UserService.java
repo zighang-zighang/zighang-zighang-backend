@@ -1,6 +1,5 @@
 package com.github.zighang_zighang.domain.user.service;
 
-import com.github.zighang_zighang.domain.resume.entity.Resume;
 import com.github.zighang_zighang.domain.resume.service.ResumeService;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
@@ -12,9 +11,6 @@ import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
 import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.classification.JobCategory;
-import com.github.zighang_zighang.global.infra.storage.dto.response.StorageResponse;
-import com.github.zighang_zighang.global.infra.storage.uploader.NcpObjectUploader;
-import com.github.zighang_zighang.global.infra.storage.util.FileValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +28,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
-    private final NcpObjectUploader ncpObjectUploader;
     private final ResumeService resumeService;
 
     @Transactional

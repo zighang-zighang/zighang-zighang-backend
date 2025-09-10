@@ -1,4 +1,4 @@
-package com.github.zighang_zighang.global.infra.storage.uploader;
+package com.github.zighang_zighang.global.infra.storage.service;
 
 import com.github.zighang_zighang.global.infra.storage.dto.response.StorageResponse;
 import com.github.zighang_zighang.global.infra.storage.exception.StorageException;
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class NcpObjectUploader {
+public class NcpStorageService implements StorageService {
 
     private final S3Client s3Client;
 
@@ -60,4 +61,17 @@ public class NcpObjectUploader {
         }
     }
 
+    public void deleteFile(String fileName, UUID storageKey) {
+        try {
+            String uploadedFileName = storageKey.toString() + "_" + fileName;
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(uploadedFileName)
+                    .build();
+
+            s3Client.deleteObject(deleteObjectRequest);
+        } catch (Exception e) {
+            throw StorageException.DELETE_FAILED.toException();
+        }
+    }
 }

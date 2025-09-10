@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/resumes")
@@ -34,5 +35,14 @@ public class ResumeController {
             @CurrentUser User user
     ) {
         return ApiResponse.ok(resumeService.getAllResumes(user));
+    }
+
+    @DeleteMapping("/{resumeId}")
+    public ApiResponse<Void> deleteResume(
+            @CurrentUser User user,
+            @PathVariable UUID resumeId
+    ) {
+        resumeService.deleteResume(user, resumeId);
+        return ApiResponse.ok(null);
     }
 }
