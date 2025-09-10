@@ -14,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
 
@@ -79,8 +76,12 @@ public class RecruitmentService {
                 minExperience, maxExperience, locations, deadlineTypes, page, size
         );
 
-        List<UUID> ids = recruitments.getContent().stream().map(Recruitment::getId).toList();
-        Set<UUID> bookmarked = bookmarkRepository.findBookmarkedRecruitmentIds(user, ids);
+        Set<UUID> bookmarked = Optional.ofNullable(user)
+                .map((u) -> {
+                    List<UUID> ids = recruitments.getContent().stream().map(Recruitment::getId).toList();
+                    return bookmarkRepository.findBookmarkedRecruitmentIds(u, ids);
+                })
+                .orElseGet(Collections::emptySet);
 
         return recruitments.map(r -> RecruitmentResponse.from(r, bookmarked.contains(r.getId())));
     }
