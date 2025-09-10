@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.resume.controller;
 
+import com.github.zighang_zighang.domain.resume.api.ResumeApi;
 import com.github.zighang_zighang.domain.resume.dto.response.ResumeResponse;
 import com.github.zighang_zighang.domain.resume.service.ResumeService;
 import com.github.zighang_zighang.domain.user.entity.User;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/resumes")
 @RequiredArgsConstructor
-public class ResumeController {
+public class ResumeController implements ResumeApi {
 
     private final ResumeService resumeService;
 
