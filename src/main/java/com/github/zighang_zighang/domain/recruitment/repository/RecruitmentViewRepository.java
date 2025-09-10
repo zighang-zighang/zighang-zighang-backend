@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface RecruitmentViewRepository extends JpaRepository<RecruitmentView, UUID> {
 
+    int countByRecruitmentId(UUID recruitmentId);
 }

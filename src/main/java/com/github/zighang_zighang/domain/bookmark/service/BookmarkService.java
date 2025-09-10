@@ -4,7 +4,9 @@ import com.github.zighang_zighang.domain.bookmark.entity.Bookmark;
 import com.github.zighang_zighang.domain.bookmark.exceptions.BookmarkExceptions;
 import com.github.zighang_zighang.domain.bookmark.repository.BookmarkRepository;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
+import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentView;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
+import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentViewRepository;
 import com.github.zighang_zighang.domain.recruitment.util.aspect.RecruitmentExist;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.response.PageInfo;
@@ -18,14 +20,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class BookmarkService {
 
     private final RecruitmentRepository recruitmentRepository;
+    private final RecruitmentViewRepository recruitmentViewRepository;
     private final BookmarkRepository bookmarkRepository;
 
     @Cacheable(value = "bookmarks", key = "#user.id + '-' + #page + '-' + #size")
@@ -36,19 +42,27 @@ public class BookmarkService {
 
         Page<Bookmark> bookmarkPage = bookmarkRepository.findAllByUser(user, pageRequest);
 
+        Set<UUID> ids = bookmarkPage.getContent().stream()
+                .map(Bookmark::getRecruitmentId)
+                .collect(Collectors.toSet());
+
+        Map<UUID, Long> count = recruitmentViewRepository.findAll().stream()
+                .filter(rv -> ids.contains(rv.getRecruitmentId()))
+                .collect(Collectors.groupingBy(RecruitmentView::getRecruitmentId, Collectors.counting()));
+
         return PageResponse.of(
                 bookmarkPage.stream()
                         .map(Bookmark::getRecruitmentId)
                         .map(recruitmentRepository::findById)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .map(RecruitmentResponse::from)
+                        .map(r -> RecruitmentResponse.from(r, count.getOrDefault(r.getId(), 0L).intValue(), true))
                         .toList(),
                 PageInfo.of(size, page, bookmarkPage.getTotalElements())
         );
     }
 
-    @CacheEvict(value = "bookmarks", key = "#user.id + '-*'")
+    @CacheEvict(value = "bookmarks", allEntries = true)
     @Transactional
     @RecruitmentExist("#recruitmentId")
     public void addBookmark(User user, UUID recruitmentId) {
