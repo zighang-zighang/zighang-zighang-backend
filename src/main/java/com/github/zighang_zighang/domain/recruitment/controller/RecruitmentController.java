@@ -9,6 +9,7 @@ import com.github.zighang_zighang.global.auth.resolver.CurrentUser;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import com.github.zighang_zighang.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +56,8 @@ public class RecruitmentController implements RecruitmentApi {
     }
 
     @Override
+    @PostMapping("/{recruitmentId}/applications/log")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> logApplication(User user, UUID recruitmentId) {
 
         recruitmentService.logApplication(user, recruitmentId);

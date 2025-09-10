@@ -11,9 +11,9 @@ import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentViewR
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.response.PageResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -83,17 +83,14 @@ public class RecruitmentService {
     @Transactional
     public void logApplication(User user, UUID recruitmentId) {
 
-        if (!recruitmentApplicationRepository.existsByUserAndRecruitmentId(user, recruitmentId)) {
-
-            try {
-                recruitmentApplicationRepository.save(
-                        RecruitmentApplication.builder()
-                                .user(user)
-                                .recruitmentId(recruitmentId)
-                                .build()
-                );
-            } catch (ConstraintViolationException ignored) {
-            }
+        try {
+            recruitmentApplicationRepository.save(
+                    RecruitmentApplication.builder()
+                            .user(user)
+                            .recruitmentId(recruitmentId)
+                            .build()
+            );
+        } catch (DataIntegrityViolationException ignored) {
         }
     }
 }
