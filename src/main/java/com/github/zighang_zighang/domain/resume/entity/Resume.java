@@ -5,6 +5,8 @@ import com.github.zighang_zighang.global.infra.database.BaseSchema;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Getter
 @Builder
@@ -19,8 +21,11 @@ public class Resume extends BaseSchema {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String url;
+
+    @Column(nullable = false)
+    private UUID storageKey;
 
     @Column(nullable = false)
     private long size;

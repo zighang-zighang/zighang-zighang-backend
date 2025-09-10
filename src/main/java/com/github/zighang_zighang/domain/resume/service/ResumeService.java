@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +30,15 @@ public class ResumeService {
         // 확장자 + null/blank 검증
         FileValidator.validateResumeExtension(resumeFile);
 
-        StorageResponse uploadedResume = ncpObjectUploader.uploadFile(resumeFile);
+        UUID resumeKey = UUID.randomUUID();
+
+        StorageResponse uploadedResume = ncpObjectUploader.uploadFile(resumeFile, resumeKey);
 
         Resume resume = Resume.builder()
                 .url(uploadedResume.getFileUrl())
                 .name(uploadedResume.getFileName())
                 .size(uploadedResume.getSize())
+                .storageKey(resumeKey)
                 .user(user)
                 .build();
 

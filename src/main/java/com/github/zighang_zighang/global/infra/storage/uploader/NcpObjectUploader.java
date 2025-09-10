@@ -12,6 +12,9 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -26,14 +29,16 @@ public class NcpObjectUploader {
     @Value("${ncp.storage.endpoint}")
     private String endpoint;
 
-    public StorageResponse uploadFile(MultipartFile file) {
+    public StorageResponse uploadFile(MultipartFile file, UUID storageKey) {
         try {
-            String fileName = file.getOriginalFilename();
+            String originalFilename = file.getOriginalFilename() != null
+                    ? file.getOriginalFilename() : "unnamed-file";
+            String uniqueFileName = storageKey.toString() + "_" + originalFilename;
 
             // S3 업로드 요청 생성
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(fileName)
+                    .key(uniqueFileName)
                     .contentType(file.getContentType())
                     .build();
 
@@ -41,10 +46,12 @@ public class NcpObjectUploader {
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
 
             // 업로드된 파일의 URL 반환
-            String uploadedFileUrl = endpoint + "/" + bucketName + "/" + fileName;
+            String encodedFileName = URLEncoder.encode(originalFilename, StandardCharsets.UTF_8)
+                    .replace("+", "%20");
+            String uploadedFileUrl = endpoint + "/" + bucketName + "/" + encodedFileName;
 
             return StorageResponse.from(
-                    fileName,
+                    originalFilename,
                     uploadedFileUrl,
                     file.getSize()
             );
