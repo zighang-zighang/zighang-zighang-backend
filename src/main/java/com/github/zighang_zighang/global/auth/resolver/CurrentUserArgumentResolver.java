@@ -35,14 +35,13 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw AuthExceptionCode.UNAUTHORIZED.toException();
-        }
+        if (
+                authentication == null
+                        || !authentication.isAuthenticated()
+                        || !(authentication.getPrincipal() instanceof CustomUserDetails cud)
+        ) {
 
-        Object principal = authentication.getPrincipal();
-
-        if (!(principal instanceof CustomUserDetails cud)) {
-            throw AuthExceptionCode.UNAUTHORIZED.toException();
+            return null;
         }
 
         return userRepository.findById(cud.getUser().getId())

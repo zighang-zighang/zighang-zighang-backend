@@ -8,27 +8,26 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(indexes = {
-        @Index(columnList = "user_id"),
-        @Index(columnList = "recruitment_id")
-})
+@Table(
+        indexes = {
+                @Index(columnList = "user_id"),
+                @Index(columnList = "recruitment_id")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "recruitment_id"})
+        }
+)
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class RecruitmentView extends BaseSchema {
+public class RecruitmentApplication extends BaseSchema {
 
-    @Column(nullable = false, columnDefinition = "BINARY(16)")
+    @Column(nullable = false)
     UUID recruitmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     User user;
-
-    @Column(nullable = false)
-    String ipAddress;
-
-    @Column(nullable = false, length = 1000)
-    String userAgent;
 }
