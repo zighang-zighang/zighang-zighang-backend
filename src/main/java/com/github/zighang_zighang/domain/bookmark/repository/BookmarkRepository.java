@@ -5,8 +5,11 @@ import com.github.zighang_zighang.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, UUID> {
@@ -16,4 +19,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, UUID> {
     Optional<Bookmark> findByUserAndRecruitmentId(User user, UUID recruitmentId);
 
     boolean existsByUserAndRecruitmentId(User user, UUID recruitmentId);
+
+    @Query("select b.recruitmentId from Bookmark b where b.user = :user and b.recruitmentId in :recruitmentIds")
+    Set<UUID> findBookmarkedRecruitmentIds(User user, Collection<UUID> recruitmentIds);
 }

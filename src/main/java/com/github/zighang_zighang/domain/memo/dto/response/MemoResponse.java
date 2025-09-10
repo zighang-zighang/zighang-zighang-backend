@@ -30,7 +30,7 @@ public class MemoResponse {
                 .id(memo.getId())
                 .createdAt(memo.getCreatedAt())
                 .updatedAt(memo.getUpdatedAt())
-                .recruitment(service.getRecruitment(null, memo.getRecruitmentId()))
+                .recruitment(service.getRecruitment(memo.getRecruitmentId()))
                 .title(memo.getTitle())
                 .content(memo.getContent())
                 .build();
