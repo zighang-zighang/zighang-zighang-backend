@@ -3,12 +3,15 @@ package com.github.zighang_zighang.domain.recruitment.service;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
+import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentApplication;
 import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentView;
+import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentApplicationRepository;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentViewRepository;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.response.PageResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class RecruitmentService {
 
     private final RecruitmentRepository recruitmentRepository;
     private final RecruitmentViewRepository recruitmentViewRepository;
+    private final RecruitmentApplicationRepository recruitmentApplicationRepository;
 
     @Transactional
     public RecruitmentResponse getRecruitment(User user, UUID id) {
@@ -74,5 +78,22 @@ public class RecruitmentService {
         );
 
         return recruitments.map(RecruitmentResponse::from);
+    }
+
+    @Transactional
+    public void logApplication(User user, UUID recruitmentId) {
+
+        if (!recruitmentApplicationRepository.existsByUserAndRecruitmentId(user, recruitmentId)) {
+
+            try {
+                recruitmentApplicationRepository.save(
+                        RecruitmentApplication.builder()
+                                .user(user)
+                                .recruitmentId(recruitmentId)
+                                .build()
+                );
+            } catch (ConstraintViolationException ignored) {
+            }
+        }
     }
 }

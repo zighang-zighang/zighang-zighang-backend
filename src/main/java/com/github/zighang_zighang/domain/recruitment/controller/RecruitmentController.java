@@ -53,4 +53,12 @@ public class RecruitmentController implements RecruitmentApi {
                 minExperience, maxExperience, locations, deadlineTypes, page, size
         ));
     }
+
+    @Override
+    public ApiResponse<Void> logApplication(User user, UUID recruitmentId) {
+
+        recruitmentService.logApplication(user, recruitmentId);
+
+        return ApiResponse.ok();
+    }
 }
