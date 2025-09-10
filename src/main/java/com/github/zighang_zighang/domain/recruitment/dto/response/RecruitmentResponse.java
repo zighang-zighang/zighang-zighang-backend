@@ -67,6 +67,9 @@ public class RecruitmentResponse {
     @Schema(description = "회사 규모")
     CompanySize companySize;
 
+    @Schema(description = "북마크 여부")
+    Boolean isBookmarked;
+
     public static RecruitmentResponse from(Recruitment recruitment) {
 
         return RecruitmentResponse.of(
@@ -86,7 +89,32 @@ public class RecruitmentResponse {
                 recruitment.getJobCategories(),
                 recruitment.getCompanyName(),
                 recruitment.getCompanyImageUrl(),
-                recruitment.getCompanySize()
+                recruitment.getCompanySize(),
+                false
+        );
+    }
+
+    public static RecruitmentResponse from(Recruitment recruitment, Boolean isBookmarked) {
+
+        return RecruitmentResponse.of(
+                recruitment.getId(),
+                recruitment.getTitle(),
+                recruitment.getRecruitmentUrl(),
+                recruitment.getImageUrl(),
+                recruitment.getLocations(),
+                recruitment.getMinExperience(),
+                recruitment.getMaxExperience(),
+                recruitment.getEducations(),
+                recruitment.getStartDate(),
+                recruitment.getEndDate(),
+                recruitment.getDeadlineType(),
+                recruitment.getEmploymentTypes(),
+                recruitment.getJobs(),
+                recruitment.getJobCategories(),
+                recruitment.getCompanyName(),
+                recruitment.getCompanyImageUrl(),
+                recruitment.getCompanySize(),
+                isBookmarked
         );
     }
 }

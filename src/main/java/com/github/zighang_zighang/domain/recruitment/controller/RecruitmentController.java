@@ -54,6 +54,7 @@ public class RecruitmentController implements RecruitmentApi {
     @Override
     @GetMapping
     public ApiResponse<PageResponse<RecruitmentResponse>> getRecruitments(
+            @CurrentUser User user,
             @RequestParam(required = false) List<Job> jobs,
             @RequestParam(required = false) List<JobCategory> jobCategories,
             @RequestParam(required = false) List<EmploymentType> employmentTypes,
@@ -67,7 +68,7 @@ public class RecruitmentController implements RecruitmentApi {
     ) {
 
         return ApiResponse.ok(recruitmentService.getRecruitments(
-                jobs, jobCategories, employmentTypes, educations,
+                user, jobs, jobCategories, employmentTypes, educations,
                 minExperience, maxExperience, locations, deadlineTypes, page, size
         ));
     }
