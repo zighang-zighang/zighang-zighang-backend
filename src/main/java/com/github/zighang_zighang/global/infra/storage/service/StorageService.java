@@ -18,9 +18,7 @@ public class StorageService {
 
     public StorageResponse uploadFile(MultipartFile file) {
 
-        String uploadedFileUrl = ncpObjectUploader.uploadFile(file);
-
-        return StorageResponse.from(uploadedFileUrl);
+        return ncpObjectUploader.uploadFile(file);
     }
 
 }

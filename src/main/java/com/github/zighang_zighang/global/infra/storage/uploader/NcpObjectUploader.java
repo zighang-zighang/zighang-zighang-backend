@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.global.infra.storage.uploader;
 
+import com.github.zighang_zighang.global.infra.storage.dto.response.StorageResponse;
 import com.github.zighang_zighang.global.infra.storage.exception.StorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ public class NcpObjectUploader {
     @Value("${ncp.storage.endpoint}")
     private String endpoint;
 
-    public String uploadFile(MultipartFile file) {
+    public StorageResponse uploadFile(MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
 
@@ -40,7 +41,13 @@ public class NcpObjectUploader {
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
 
             // 업로드된 파일의 URL 반환
-            return endpoint + "/" + bucketName + "/" + fileName;
+            String uploadedFileUrl = endpoint + "/" + bucketName + "/" + fileName;
+
+            return StorageResponse.from(
+                    fileName,
+                    uploadedFileUrl,
+                    file.getSize()
+            );
         } catch (IOException e) {
             throw StorageException.UPLOAD_FAILED.toException();
         }

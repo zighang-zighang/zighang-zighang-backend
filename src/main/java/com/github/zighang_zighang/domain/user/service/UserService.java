@@ -11,6 +11,7 @@ import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
 import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.classification.JobCategory;
+import com.github.zighang_zighang.global.infra.storage.dto.response.StorageResponse;
 import com.github.zighang_zighang.global.infra.storage.uploader.NcpObjectUploader;
 import com.github.zighang_zighang.global.infra.storage.util.FileValidator;
 import lombok.RequiredArgsConstructor;
@@ -71,10 +72,10 @@ public class UserService {
         if (resumeFile != null && !resumeFile.isEmpty()) {
             FileValidator.validateResumeExtension(resumeFile);
 
-            String uploadedResumeUrl = ncpObjectUploader.uploadFile(resumeFile);
+            StorageResponse uploadedResume = ncpObjectUploader.uploadFile(resumeFile);
 
             Resume resume = Resume.builder()
-                    .resumeUrl(uploadedResumeUrl)
+                    .resumeUrl(uploadedResume.getFileUrl())
                     .user(user)
                     .build();
 
