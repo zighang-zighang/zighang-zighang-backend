@@ -58,7 +58,10 @@ public class RecruitmentController implements RecruitmentApi {
     @Override
     @PostMapping("/{recruitmentId}/applications/log")
     @PreAuthorize("isAuthenticated()")
-    public ApiResponse<Void> logApplication(User user, UUID recruitmentId) {
+    public ApiResponse<Void> logApplication(
+            @CurrentUser User user,
+            @PathVariable UUID recruitmentId
+    ) {
 
         recruitmentService.logApplication(user, recruitmentId);
 
