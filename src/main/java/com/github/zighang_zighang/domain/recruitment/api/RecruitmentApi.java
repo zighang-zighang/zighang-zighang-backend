@@ -80,4 +80,16 @@ public interface RecruitmentApi {
             @Parameter(description = "페이지 크기")
             Integer size
     );
+
+    @Operation(
+            summary = "지원하기 (로깅용)",
+            description = "사용자가 특정 공고에 지원했음을 기록합니다."
+    )
+    ApiResponse<Void> logApplication(
+            @Parameter(hidden = true)
+            User user,
+
+            @Parameter(description = "공고 ID")
+            UUID recruitmentId
+    );
 }

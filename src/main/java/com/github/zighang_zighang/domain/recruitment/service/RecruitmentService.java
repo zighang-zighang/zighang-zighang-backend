@@ -4,7 +4,9 @@ import com.github.zighang_zighang.domain.bookmark.repository.BookmarkRepository;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
+import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentApplication;
 import com.github.zighang_zighang.domain.recruitment.entity.RecruitmentView;
+import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentApplicationRepository;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentViewRepository;
 import com.github.zighang_zighang.domain.user.entity.User;
@@ -12,9 +14,12 @@ import com.github.zighang_zighang.global.response.PageResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
 
@@ -25,6 +30,7 @@ public class RecruitmentService {
     private final RecruitmentRepository recruitmentRepository;
     private final RecruitmentViewRepository recruitmentViewRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final RecruitmentApplicationRepository recruitmentApplicationRepository;
 
     @Transactional
     @Cacheable(value = "recruitment", key = "#id", sync = true)
@@ -90,5 +96,19 @@ public class RecruitmentService {
                 .orElseGet(Collections::emptySet);
 
         return recruitments.map(r -> RecruitmentResponse.from(r, bookmarked.contains(r.getId())));
+    }
+
+    @Transactional
+    public void logApplication(User user, UUID recruitmentId) {
+
+        try {
+            recruitmentApplicationRepository.save(
+                    RecruitmentApplication.builder()
+                            .user(user)
+                            .recruitmentId(recruitmentId)
+                            .build()
+            );
+        } catch (DataIntegrityViolationException ignored) {
+        }
     }
 }
