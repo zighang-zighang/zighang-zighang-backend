@@ -14,7 +14,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import static com.github.zighang_zighang.domain.recruitment.exception.RecruitmentExceptions.NOT_FOUND;
@@ -27,27 +26,28 @@ public class RecruitmentService {
     private final RecruitmentViewRepository recruitmentViewRepository;
 
     @Transactional
-    public RecruitmentResponse getRecruitment(User user, UUID id) {
+    public RecruitmentResponse getRecruitment(UUID id) {
 
         Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
 
-        if (Objects.nonNull(user)) {
-
-            RecruitmentView view = recruitmentViewRepository.findByUserAndRecruitmentId(user, id)
-                    .orElseGet(() ->
-                            recruitmentViewRepository.save(
-                                    RecruitmentView.builder()
-                                            .user(user)
-                                            .recruitmentId(id)
-                                            .viewCount(0)
-                                            .build()
-                            )
-                    );
-
-            view.addViewCount();
-        }
-
         return RecruitmentResponse.from(recruitment);
+    }
+
+    @Transactional
+    public RecruitmentResponse getRecruitment(User user, UUID id, String ipAddress, String userAgent) {
+
+        RecruitmentResponse recruitment = getRecruitment(id);
+
+        recruitmentViewRepository.save(
+                RecruitmentView.builder()
+                        .recruitmentId(id)
+                        .user(user)
+                        .ipAddress(ipAddress)
+                        .userAgent(userAgent)
+                        .build()
+        );
+
+        return recruitment;
     }
 
     @Cacheable(

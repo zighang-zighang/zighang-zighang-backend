@@ -8,6 +8,7 @@ import com.github.zighang_zighang.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
@@ -25,6 +26,8 @@ public interface RecruitmentApi {
             description = "공고 ID를 통해 특정 공고의 상세 정보를 조회합니다."
     )
     ApiResponse<RecruitmentResponse> getRecruitment(
+            HttpServletRequest request,
+
             User user,
 
             @Parameter(description = "공고 ID")

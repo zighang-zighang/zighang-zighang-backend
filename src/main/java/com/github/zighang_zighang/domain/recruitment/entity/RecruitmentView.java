@@ -23,6 +23,12 @@ public class RecruitmentView extends BaseSchema {
     UUID recruitmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     User user;
+
+    @Column(nullable = false)
+    String ipAddress;
+
+    @Column(nullable = false)
+    String userAgent;
 }
