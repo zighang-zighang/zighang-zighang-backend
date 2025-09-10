@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -43,4 +45,10 @@ public class ResumeService {
         return ResumeResponse.from(savedResume);
     }
 
+    public List<ResumeResponse> getAllResumes(User user) {
+
+        return user.getResumes().stream()
+                .map(ResumeResponse::from)
+                .toList();
+    }
 }
