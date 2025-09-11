@@ -110,7 +110,11 @@ public class RecruitmentService {
         }
     }
 
-    @Cacheable(value = "popular-recruitments", key = "#job?.name() ?: 'all'")
+    @Cacheable(
+            value = "popular-recruitments",
+            key = "(#job?.name() ?: 'all') + ':' + (#user?.id ?: 'anonymous')",
+            sync = true
+    )
     public List<RecruitmentResponse> getPopularRecruitments(User user, Job job) {
         LocalDateTime now = LocalDateTime.now();
 
