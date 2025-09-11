@@ -1,6 +1,12 @@
 package com.github.zighang_zighang.domain.recruitment.entity;
 
-import com.github.zighang_zighang.domain.recruitment.constant.*;
+import com.github.zighang_zighang.domain.recruitment.constant.CompanySize;
+import com.github.zighang_zighang.domain.recruitment.constant.DeadlineType;
+import com.github.zighang_zighang.domain.recruitment.constant.Education;
+import com.github.zighang_zighang.domain.recruitment.constant.EmploymentType;
+import com.github.zighang_zighang.global.classification.Job;
+import com.github.zighang_zighang.global.classification.JobCategory;
+import com.github.zighang_zighang.global.classification.Location;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.AccessLevel;

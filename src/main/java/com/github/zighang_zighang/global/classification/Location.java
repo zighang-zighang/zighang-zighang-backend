@@ -1,6 +1,9 @@
 package com.github.zighang_zighang.global.classification;
 
-public enum Region {
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.STRING)
+public enum Location {
     서울,
     경기,
     인천,
@@ -19,5 +22,5 @@ public enum Region {
     충북,
     제주,
     해외,
-    기타
+    기타,
 }

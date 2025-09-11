@@ -4,7 +4,7 @@ import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.classification.EducationLevel;
 import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.classification.JobCategory;
-import com.github.zighang_zighang.global.classification.Region;
+import com.github.zighang_zighang.global.classification.Location;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -40,7 +40,7 @@ public class UserResponse {
     EducationLevel educationLevel;
 
     @Schema(description = "선호 근무지")
-    Region preferredRegion;
+    Location preferredRegion;
 
     public static UserResponse from(User user) {
 

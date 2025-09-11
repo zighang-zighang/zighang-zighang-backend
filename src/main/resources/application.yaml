@@ -15,6 +15,15 @@ spring:
       hibernate:
         default_batch_fetch_size: 100
 
+popular:
+  recruitment:
+    view-weight: 0.2
+    bookmark-weight: 0.3
+    application-weight: 0.5
+    view-hours: 24
+    bookmark-hours: 48
+    application-hours: 72
+
 springdoc:
   default-consumes-media-type: application/json
   default-produces-media-type: application/json

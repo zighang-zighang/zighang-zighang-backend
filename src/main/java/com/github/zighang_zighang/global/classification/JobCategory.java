@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.global.classification;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
+@JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum JobCategory {
     // IT_개발
     서버_백엔드(Job.IT_개발),
@@ -358,13 +360,13 @@ public enum JobCategory {
 
     private final Job parent;
 
-    public Job parent() {
-        return parent;
-    }
-
     public static List<JobCategory> of(Job job) {
         return Arrays.stream(values())
                 .filter(r -> r.parent == job)
                 .collect(Collectors.toList());
+    }
+
+    public Job parent() {
+        return parent;
     }
 }

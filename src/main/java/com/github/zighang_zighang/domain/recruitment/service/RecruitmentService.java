@@ -10,6 +10,8 @@ import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentAppli
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentViewRepository;
 import com.github.zighang_zighang.domain.user.entity.User;
+import com.github.zighang_zighang.global.classification.Job;
+import com.github.zighang_zighang.global.property.PopularRecruitmentProperty;
 import com.github.zighang_zighang.global.response.PageResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +33,7 @@ public class RecruitmentService {
     private final RecruitmentViewRepository recruitmentViewRepository;
     private final BookmarkRepository bookmarkRepository;
     private final RecruitmentApplicationRepository recruitmentApplicationRepository;
+    private final PopularRecruitmentProperty popularRecruitmentProperty;
 
     @Transactional
     @Cacheable(value = "recruitment", key = "#id", sync = true)
@@ -104,5 +108,42 @@ public class RecruitmentService {
             );
         } catch (DataIntegrityViolationException ignored) {
         }
+    }
+
+    @Cacheable(
+            value = "popular-recruitments",
+            key = "(#job?.name() ?: 'all') + ':' + (#user?.id ?: 'anonymous')",
+            sync = true
+    )
+    public List<RecruitmentResponse> getPopularRecruitments(User user, Job job) {
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime viewCutoff = now.minusHours(popularRecruitmentProperty.getViewHours());
+        LocalDateTime bookmarkCutoff = now.minusHours(popularRecruitmentProperty.getBookmarkHours());
+        LocalDateTime applicationCutoff = now.minusHours(popularRecruitmentProperty.getApplicationHours());
+
+        List<Recruitment> recruitments = recruitmentRepository.findPopularRecruitmentIds(
+                job,
+                viewCutoff, bookmarkCutoff, applicationCutoff,
+                popularRecruitmentProperty.getViewWeight(),
+                popularRecruitmentProperty.getBookmarkWeight(),
+                popularRecruitmentProperty.getApplicationWeight(),
+                20
+        );
+
+        Set<UUID> ids = recruitments.stream().map(Recruitment::getId).collect(Collectors.toSet());
+
+        Set<UUID> bookmarked = Optional.ofNullable(user)
+                .map((u) -> bookmarkRepository.findBookmarkedRecruitmentIds(u, ids))
+                .orElseGet(Collections::emptySet);
+
+        Map<UUID, Long> count = recruitmentViewRepository.findAll().stream()
+                .filter(rv -> ids.contains(rv.getRecruitmentId()))
+                .collect(Collectors.groupingBy(RecruitmentView::getRecruitmentId, Collectors.counting()));
+
+        return recruitments.stream()
+                .filter(Objects::nonNull)
+                .map(recruitment -> RecruitmentResponse.from(recruitment, count.getOrDefault(recruitment.getId(), 0L).intValue(), bookmarked.contains(recruitment.getId())))
+                .toList();
     }
 }

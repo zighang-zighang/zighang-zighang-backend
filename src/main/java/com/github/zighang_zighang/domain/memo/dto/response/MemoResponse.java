@@ -1,9 +1,14 @@
 package com.github.zighang_zighang.domain.memo.dto.response;
 
 import com.github.zighang_zighang.domain.memo.entity.Memo;
-import com.github.zighang_zighang.domain.recruitment.constant.*;
+import com.github.zighang_zighang.domain.recruitment.constant.DeadlineType;
+import com.github.zighang_zighang.domain.recruitment.constant.Education;
+import com.github.zighang_zighang.domain.recruitment.constant.EmploymentType;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.recruitment.service.RecruitmentService;
+import com.github.zighang_zighang.global.classification.Job;
+import com.github.zighang_zighang.global.classification.JobCategory;
+import com.github.zighang_zighang.global.classification.Location;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

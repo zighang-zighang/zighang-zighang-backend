@@ -14,6 +14,7 @@ import com.github.zighang_zighang.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -62,9 +63,13 @@ public class BookmarkService {
         );
     }
 
-    @CacheEvict(value = "bookmarks", allEntries = true)
     @Transactional
     @RecruitmentExist("#recruitmentId")
+    @Caching(evict = {
+            @CacheEvict(value = "bookmarks", allEntries = true),
+            @CacheEvict(value = "popular-recruitments", allEntries = true),
+            @CacheEvict(value = "recruitments", allEntries = true)
+    })
     public void addBookmark(User user, UUID recruitmentId) {
 
         if (bookmarkRepository.existsByUserAndRecruitmentId(user, recruitmentId)) {
@@ -80,7 +85,11 @@ public class BookmarkService {
         );
     }
 
-    @CacheEvict(value = "bookmarks", key = "#user.id + '-*'")
+    @Caching(evict = {
+            @CacheEvict(value = "bookmarks", allEntries = true),
+            @CacheEvict(value = "popular-recruitments", allEntries = true),
+            @CacheEvict(value = "recruitments", allEntries = true)
+    })
     @Transactional
     @RecruitmentExist("#recruitmentId")
     public void removeBookmark(User user, UUID recruitmentId) {

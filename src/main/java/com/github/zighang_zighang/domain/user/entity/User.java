@@ -20,40 +20,42 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseSchema {
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    List<UserProvider> providers = new ArrayList<>();
+    @Builder.Default
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    List<RecruitmentView> recruitmentViews = new ArrayList<>();
     @Column(nullable = false, unique = true)
     private String email;
-
     @Column(nullable = false)
     private String name;
-
     // 직군
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     private List<Job> interestedJobs = new ArrayList<>();
-
     // 직무
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     private List<JobCategory> interestJobCategories = new ArrayList<>();
-
     // 경력
     @Min(0)
     @Max(10)
     private int careerYear;
-
     // 최종 학력 - 최종 학교
     @Enumerated(EnumType.STRING)
     private EducationLevel educationLevel;
 
+    // 자기소개서
     // 최종 학력 - 졸업 구분
     @Enumerated(EnumType.STRING)
     private GraduationStatus graduationStatus;
-
     // 선호 근무 지역
     @Enumerated(EnumType.STRING)
-    private Region preferredRegion;
+
+    private Location preferredRegion;
 
     // 자기소개서
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -74,7 +76,7 @@ public class User extends BaseSchema {
             int careerYear,
             EducationLevel educationLevel,
             GraduationStatus graduationStatus,
-            Region preferredRegion
+            Location preferredRegion
     ) {
         this.interestedJobs.clear();
         if (interestedJobs != null) this.interestedJobs.addAll(interestedJobs);
