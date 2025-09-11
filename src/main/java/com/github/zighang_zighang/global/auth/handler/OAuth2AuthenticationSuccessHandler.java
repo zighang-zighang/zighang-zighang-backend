@@ -100,6 +100,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     }
 
     private String resolveFrontendBaseUrl(HttpServletRequest request) {
+        String redirectUriParam = request.getParameter("redirect_uri");
+        if (redirectUriParam != null) {
+            String decoded = URLDecoder.decode(redirectUriParam, StandardCharsets.UTF_8);
+            if (redirectValidator.isAuthorized(decoded)) {
+                return decoded;
+            } else {
+                log.warn("비허용 redirect_uri 요청 차단됨: {}", decoded);
+            }
+        }
+
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("redirect_uri".equals(cookie.getName())) {
@@ -112,6 +122,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 }
             }
         }
+
         return frontendBaseUrl; // 기본값 (application.yaml)
     }
 
