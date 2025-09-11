@@ -15,7 +15,6 @@ import com.github.zighang_zighang.global.property.PopularRecruitmentProperty;
 import com.github.zighang_zighang.global.response.PageResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +35,6 @@ public class RecruitmentService {
     private final PopularRecruitmentProperty popularRecruitmentProperty;
 
     @Transactional
-    @Cacheable(value = "recruitment", key = "#id", sync = true)
     public RecruitmentResponse getRecruitment(UUID id) {
 
         Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
@@ -45,10 +43,6 @@ public class RecruitmentService {
     }
 
     @Transactional
-    @Cacheable(
-            value = "recruitment-view",
-            key = "#id + ':' + #ipAddress + ':' + T(java.lang.String).valueOf(#userAgent)"
-    )
     public RecruitmentResponse getRecruitment(User user, UUID id, String ipAddress, String userAgent) {
 
         Recruitment recruitment = recruitmentRepository.findById(id).orElseThrow(NOT_FOUND::toException);
@@ -68,11 +62,6 @@ public class RecruitmentService {
         return RecruitmentResponse.from(recruitment, views, bookmarked);
     }
 
-    @Cacheable(
-            value = "recruitments",
-            key = "T(java.util.Objects).hash(#request.jobs, #request.jobCategories, #request.employmentTypes, #request.educations," +
-                    "#request.minExperience, #request.maxExperience, #request.locations, #request.deadlineTypes, #request.page, #request.size)"
-    )
     public PageResponse<RecruitmentResponse> getRecruitments(
             User user,
             RecruitmentSearchRequest request
@@ -110,11 +99,6 @@ public class RecruitmentService {
         }
     }
 
-    @Cacheable(
-            value = "popular-recruitments",
-            key = "(#job?.name() ?: 'all') + ':' + (#user?.id ?: 'anonymous')",
-            sync = true
-    )
     public List<RecruitmentResponse> getPopularRecruitments(User user, Job job) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -127,8 +111,7 @@ public class RecruitmentService {
                 viewCutoff, bookmarkCutoff, applicationCutoff,
                 popularRecruitmentProperty.getViewWeight(),
                 popularRecruitmentProperty.getBookmarkWeight(),
-                popularRecruitmentProperty.getApplicationWeight(),
-                20
+                popularRecruitmentProperty.getApplicationWeight()
         );
 
         Set<UUID> ids = recruitments.stream().map(Recruitment::getId).collect(Collectors.toSet());

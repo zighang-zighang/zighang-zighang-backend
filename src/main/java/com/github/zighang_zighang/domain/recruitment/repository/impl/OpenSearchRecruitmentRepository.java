@@ -107,14 +107,14 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
             LocalDateTime applicationCutoff,
             double viewWeight,
             double bookmarkWeight,
-            double applicationWeight,
-            int limit
+            double applicationWeight
     ) {
 
         return recruitmentViewRepository.findPopularRecruitmentIds(
                         viewCutoff, bookmarkCutoff, applicationCutoff,
                         viewWeight, bookmarkWeight, applicationWeight
                 ).stream()
+                .filter((id) -> id.length == 16)
                 .map((id) -> {
                     ByteBuffer bb = ByteBuffer.wrap(id);
                     long high = bb.getLong();
@@ -125,7 +125,7 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(r -> job == null || r.getJobs().stream().anyMatch(job1 -> job1.name().equals(job.name())))
-                .limit(limit)
+                .limit(5)
                 .toList();
     }
 }

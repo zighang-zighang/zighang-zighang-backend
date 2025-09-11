@@ -38,7 +38,6 @@ public interface RecruitmentRepository {
             LocalDateTime applicationCutoff,
             double viewWeight,
             double bookmarkWeight,
-            double applicationWeight,
-            int limit
+            double applicationWeight
     );
 }

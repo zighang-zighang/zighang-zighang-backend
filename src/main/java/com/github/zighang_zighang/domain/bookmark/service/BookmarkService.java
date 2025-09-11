@@ -13,7 +13,6 @@ import com.github.zighang_zighang.global.response.PageInfo;
 import com.github.zighang_zighang.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +34,6 @@ public class BookmarkService {
     private final RecruitmentViewRepository recruitmentViewRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    @Cacheable(value = "bookmarks", key = "#user.id + '-' + #page + '-' + #size")
     @Transactional(readOnly = true)
     public PageResponse<RecruitmentResponse> getBookmarks(User user, Integer page, Integer size) {
 
@@ -65,11 +63,7 @@ public class BookmarkService {
 
     @Transactional
     @RecruitmentExist("#recruitmentId")
-    @Caching(evict = {
-            @CacheEvict(value = "bookmarks", allEntries = true),
-            @CacheEvict(value = "popular-recruitments", allEntries = true),
-            @CacheEvict(value = "recruitments", allEntries = true)
-    })
+    @CacheEvict(value = "recruitments", allEntries = true)
     public void addBookmark(User user, UUID recruitmentId) {
 
         if (bookmarkRepository.existsByUserAndRecruitmentId(user, recruitmentId)) {
