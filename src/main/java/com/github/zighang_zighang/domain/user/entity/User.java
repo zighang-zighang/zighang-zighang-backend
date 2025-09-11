@@ -20,12 +20,6 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseSchema {
 
-    @Builder.Default
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    List<UserProvider> providers = new ArrayList<>();
-    @Builder.Default
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    List<RecruitmentView> recruitmentViews = new ArrayList<>();
     @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
