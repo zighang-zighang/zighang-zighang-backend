@@ -26,9 +26,9 @@ public class Memo extends BaseSchema {
     @Column(nullable = false, columnDefinition = "BINARY(16)")
     UUID recruitmentId;
 
-    @Column(length = 255)
+    @Column
     String title;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT")
     String content;
 }

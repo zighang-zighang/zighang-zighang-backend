@@ -3,6 +3,7 @@ package com.github.zighang_zighang.global.exception;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.global.auth.exception.AuthExceptionCode;
 import com.github.zighang_zighang.global.auth.service.CustomUserDetails;
+import com.github.zighang_zighang.global.infra.storage.exception.StorageException;
 import com.github.zighang_zighang.global.response.ApiResponse;
 import io.sentry.Sentry;
 import io.sentry.protocol.Request;
@@ -15,6 +16,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
@@ -62,6 +64,13 @@ public class ApiExceptionHandler {
         String errorMessage = String.format("%s은(는) %s", field, message);
 
         return ApiResponse.error(GlobalExceptionCode.BODY_VALIDATION_FAILED.getCode(), errorMessage);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ApiResponse<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e, HttpServletRequest request) {
+
+        sentry(e, request);
+        return StorageException.FILE_SIZE_EXCEEDED.toResponse();
     }
 
     @ExceptionHandler(ApiException.class)

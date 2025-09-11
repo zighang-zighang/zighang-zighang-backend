@@ -7,6 +7,7 @@ import com.github.zighang_zighang.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(
         name = "[유저]",
@@ -22,7 +23,10 @@ public interface UserApi {
             @Parameter(hidden = true) User user,
 
             @Parameter(description = "유저 온보딩 요청 정보")
-            UserOnboardingRequest userOnboardingRequest
+            UserOnboardingRequest userOnboardingRequest,
+
+            @Parameter(description = "유저 자기소개서 (최대 1개)")
+            MultipartFile resumeFile
     );
 
     @Operation(
