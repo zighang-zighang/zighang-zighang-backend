@@ -3,49 +3,48 @@ package com.github.zighang_zighang.domain.recruitment.dto.request;
 import com.github.zighang_zighang.domain.recruitment.constant.*;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springdoc.core.annotations.ParameterObject;
 
 import java.util.List;
 
 @Schema
 @Getter
-@Setter(AccessLevel.PROTECTED)
+@Setter
+@ParameterObject
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(staticName = "of")
 public class RecruitmentSearchRequest {
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     List<Job> jobs;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     List<JobCategory> jobCategories;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     List<EmploymentType> employmentTypes;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     List<Education> educations;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     Integer minExperience;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     Integer maxExperience;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     List<Location> locations;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     List<DeadlineType> deadlineTypes;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     Integer page = 0;
 
-    @Parameter(in = ParameterIn.QUERY)
+    @Parameter
     Integer size = 20;
 }
