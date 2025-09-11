@@ -42,6 +42,6 @@ public class UserOnboardingRequest {
 
     @NotNull
     @Schema(description = "선호 근무지")
-    Region preferredRegion;
+    Location preferredRegion;
 
 }

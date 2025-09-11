@@ -1,5 +1,8 @@
 package com.github.zighang_zighang.global.classification;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum EducationLevel {
     초등학교,
     중학교,
