@@ -131,19 +131,19 @@ public class RecruitmentService {
                 20
         );
 
-        Set<UUID> recruitmentIds = recruitments.stream().map(Recruitment::getId).collect(Collectors.toSet());
-
-        Map<UUID, Recruitment> recruitmentMap = recruitments.stream()
-                .collect(Collectors.toMap(Recruitment::getId, recruitment -> recruitment));
+        Set<UUID> ids = recruitments.stream().map(Recruitment::getId).collect(Collectors.toSet());
 
         Set<UUID> bookmarked = Optional.ofNullable(user)
-                .map((u) -> bookmarkRepository.findBookmarkedRecruitmentIds(u, recruitmentIds))
+                .map((u) -> bookmarkRepository.findBookmarkedRecruitmentIds(u, ids))
                 .orElseGet(Collections::emptySet);
 
-        return recruitmentIds.stream()
-                .map(recruitmentMap::get)
+        Map<UUID, Long> count = recruitmentViewRepository.findAll().stream()
+                .filter(rv -> ids.contains(rv.getRecruitmentId()))
+                .collect(Collectors.groupingBy(RecruitmentView::getRecruitmentId, Collectors.counting()));
+
+        return recruitments.stream()
                 .filter(Objects::nonNull)
-                .map(recruitment -> RecruitmentResponse.from(recruitment, bookmarked.contains(recruitment.getId())))
-                .collect(Collectors.toList());
+                .map(recruitment -> RecruitmentResponse.from(recruitment, count.getOrDefault(recruitment.getId(), 0L).intValue(), bookmarked.contains(recruitment.getId())))
+                .toList();
     }
 }
