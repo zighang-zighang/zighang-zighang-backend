@@ -40,7 +40,6 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                         || !authentication.isAuthenticated()
                         || !(authentication.getPrincipal() instanceof CustomUserDetails cud)
         ) {
-
             return null;
         }
 

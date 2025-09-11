@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.user.service;
 
+import com.github.zighang_zighang.domain.resume.service.ResumeService;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
 import com.github.zighang_zighang.domain.user.dto.response.UserResponse;
@@ -13,6 +14,7 @@ import com.github.zighang_zighang.global.classification.JobCategory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +28,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
+    private final ResumeService resumeService;
 
     @Transactional
     public User createUser(String email, String name) {
@@ -33,7 +36,7 @@ public class UserService {
                 .email(email)
                 .name(name)
                 .build();
-        
+
         return userRepository.save(user);
     }
 
@@ -44,16 +47,13 @@ public class UserService {
                 .type(providerType)
                 .providerId(providerId)
                 .build();
-        
+
         return userProviderRepository.save(userProvider);
     }
 
     @Transactional
-    public UserResponse addOnboarding(User user, UserOnboardingRequest request) {
-
+    public UserResponse addOnboarding(User user, UserOnboardingRequest request, MultipartFile resumeFile) {
         validateOnboarding(request);
-
-        // TODO: 자기소개서 업로드
 
         // 관심 직군/직무, 경력, 학교, 졸업 구분, 지역 저장
         user.updateOnboardingInfo(
@@ -64,6 +64,11 @@ public class UserService {
                 request.getGraduationStatus(),
                 request.getPreferredRegion()
         );
+
+        // 자기소개서 업로드
+        if (resumeFile != null && !resumeFile.isEmpty()) {
+            resumeService.uploadResume(user, resumeFile);
+        }
 
         return UserResponse.from(user);
     }
