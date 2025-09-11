@@ -47,7 +47,7 @@ public class NcpStorageService implements StorageService {
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
 
             // 업로드된 파일의 URL 반환
-            String encodedFileName = URLEncoder.encode(originalFilename, StandardCharsets.UTF_8)
+            String encodedFileName = URLEncoder.encode(uniqueFileName, StandardCharsets.UTF_8)
                     .replace("+", "%20");
             String uploadedFileUrl = endpoint + "/" + bucketName + "/" + encodedFileName;
 

@@ -31,6 +31,7 @@ public class Resume extends BaseSchema {
     private long size;
 
     @Lob
+    @Basic(fetch = FetchType.LAZY)
     private String content;
 
 }
