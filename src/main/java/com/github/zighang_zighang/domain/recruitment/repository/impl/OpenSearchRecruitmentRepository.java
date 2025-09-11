@@ -121,9 +121,7 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
                     long low = bb.getLong();
                     return new UUID(high, low);
                 })
-                .peek(System.out::println)
                 .map(this::findById)
-                .peek(System.out::println)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(r -> job == null || r.getJobs().stream().anyMatch(job1 -> job1.name().equals(job.name())))
