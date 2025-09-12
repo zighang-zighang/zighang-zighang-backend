@@ -58,6 +58,9 @@ dependencies {
 
     implementation("org.apache.pdfbox:pdfbox:2.0.30")
     implementation("kr.dogfoot:hwplib:1.1.4")
+
+    implementation("com.konghq:unirest-java-core:4.5.1")
+    implementation("com.konghq:unirest-objectmapper-jackson:4.2.9")
 }
 
 tasks.withType<JavaCompile> {
