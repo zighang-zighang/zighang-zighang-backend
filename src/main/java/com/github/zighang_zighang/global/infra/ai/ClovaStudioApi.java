@@ -1,15 +1,17 @@
 package com.github.zighang_zighang.global.infra.ai;
 
+import com.github.zighang_zighang.global.exception.ApiException;
+import com.github.zighang_zighang.global.exception.ApiExceptionCode;
+import com.github.zighang_zighang.global.exception.GlobalExceptionCode;
+import com.github.zighang_zighang.global.infra.ai.util.ClovaCompletionRequest;
+import com.github.zighang_zighang.global.infra.ai.util.Sliding;
 import com.github.zighang_zighang.global.property.ClovaProperty;
-import kong.unirest.core.ContentType;
-import kong.unirest.core.HttpResponse;
-import kong.unirest.core.JsonNode;
-import kong.unirest.core.Unirest;
+import jakarta.annotation.PostConstruct;
+import kong.unirest.core.*;
+import kong.unirest.core.json.JSONObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -18,51 +20,72 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class ClovaStudioApi {
 
-    private static final String BASE_URL = "https://clovastudio.stream.ntruss.com/v1/api-tools";
-    private static final int MAX_LENGTH = 8192;
-    private static final int OVERLAP = 256;
-
     private final ClovaProperty clovaProperty;
+
+    private static final UnirestInstance instance = Unirest.spawnInstance();
+
+    @PostConstruct
+    public void initializeInstance() {
+
+        instance.config()
+                .defaultBaseUrl("https://clovastudio.stream.ntruss.com")
+                .addDefaultHeader("Authorization", "Bearer " + clovaProperty.getApiKey())
+                .addDefaultHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
+    }
+
+    public String completion(ClovaCompletionRequest request) {
+
+        JSONObject node = instance.post("/v3/chat-completions/HCX-007")
+                .body(request)
+                .asJsonAsync()
+                .thenApply(HttpResponse::getBody)
+                .thenApply(JsonNode::getObject)
+                .join();
+
+        assertApiSuccess(node);
+
+        return node.getJSONObject("result")
+                .getJSONObject("message")
+                .getString("content");
+    }
 
     public List<List<Double>> embed(String text) {
 
-        List<CompletableFuture<HttpResponse<JsonNode>>> futures = sliding(text).stream()
+        //noinspection unchecked
+        return Sliding.slide(text, 8192, 256)
+                .stream()
                 .map(content ->
-                        Unirest.post(BASE_URL + "/embedding/v2")
-                                .header("Authorization", "Bearer " + clovaProperty.getApiKey())
-                                .header("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
+                        instance.post("/v1/api-tools/embedding/v2")
                                 .body(Map.ofEntries(Map.entry("text", content)))
                                 .asJsonAsync()
+                                .thenApply(HttpResponse::getBody)
+                                .thenApply(JsonNode::getObject)
                 )
-                .toList();
-
-        //noinspection unchecked
-        return futures.stream()
+                .toList()
+                .stream()
                 .map(CompletableFuture::join)
-                .filter(HttpResponse::isSuccess)
-                .map(HttpResponse::getBody)
-                .map(JsonNode::getObject)
-                .filter(node -> node.getJSONObject("status").getString("code").equals("20000"))
+                .peek(this::assertApiSuccess)
                 .map(node -> node.getJSONObject("result"))
                 .map(node -> node.getJSONArray("embedding"))
                 .map(node -> (List<Double>) node.toList())
                 .toList();
     }
 
-    private List<String> sliding(String text) {
+    private void assertApiSuccess(JSONObject node) {
 
-        List<String> segments = new ArrayList<>();
-        int start = 0;
+        if (!node.getJSONObject("status").getString("code").equals("20000")) {
 
-        char[] chars = text.toCharArray();
+            throw new ApiException(new ApiExceptionCode() {
+                @Override
+                public String getCode() {
+                    return GlobalExceptionCode.EXTERNAL_API_ERROR.getCode();
+                }
 
-        while (start < chars.length) {
-            int end = Math.min(start + MAX_LENGTH, chars.length);
-            segments.add(new String(Arrays.copyOfRange(chars, start, end)));
-            if (end == chars.length) break;
-            start += (MAX_LENGTH - OVERLAP);
+                @Override
+                public String getMessage() {
+                    return GlobalExceptionCode.EXTERNAL_API_ERROR.getMessage() + " : " + node.getJSONObject("status").getString("message");
+                }
+            });
         }
-
-        return segments;
     }
 }
