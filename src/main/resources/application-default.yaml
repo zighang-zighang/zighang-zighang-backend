@@ -90,3 +90,6 @@ ncp:
     access-key: ${NCP_ACCESS_KEY}
     secret-key: ${NCP_SECRET_KEY}
     bucket-name: ${NCP_BUCKET_NAME}
+
+clova:
+  api-key: ${CLOVA_API_KEY}
