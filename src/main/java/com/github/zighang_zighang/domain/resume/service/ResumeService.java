@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.resume.service;
 
+import com.github.zighang_zighang.domain.resume.__keyword.service.ResumeKeywordService;
 import com.github.zighang_zighang.domain.resume.dto.response.ResumeResponse;
 import com.github.zighang_zighang.domain.resume.entity.Resume;
 import com.github.zighang_zighang.domain.resume.exception.ResumeException;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
+    private final ResumeKeywordService resumeKeywordService;
     private final StorageService storageService;
     private final ResumeTextExtractor textExtractor;
 
@@ -49,6 +51,8 @@ public class ResumeService {
 
         Resume savedResume = resumeRepository.save(resume);
 
+        resumeKeywordService.updateKeywords(user);
+
         return ResumeResponse.from(savedResume);
     }
 
@@ -71,5 +75,7 @@ public class ResumeService {
         storageService.deleteFile(resume.getName(), resume.getStorageKey());
 
         resumeRepository.delete(resume);
+
+        resumeKeywordService.updateKeywords(user);
     }
 }
