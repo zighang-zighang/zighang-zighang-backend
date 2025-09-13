@@ -7,6 +7,9 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_resume_embedding__resume_id", columnList = "resume_id")
+})
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

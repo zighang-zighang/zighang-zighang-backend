@@ -96,6 +96,8 @@ public class ResumeService {
 
         storageService.deleteFile(resume.getName(), resume.getStorageKey());
 
+        resumeEmbeddingRepository.deleteAllByResume(resume);
+
         resumeRepository.delete(resume);
 
         resumeKeywordService.updateKeywords(user);
