@@ -1,5 +1,7 @@
 package com.github.zighang_zighang.domain.resume.service;
 
+import com.github.zighang_zighang.domain.resume.__embedding.entity.ResumeEmbedding;
+import com.github.zighang_zighang.domain.resume.__embedding.repository.ResumeEmbeddingRepository;
 import com.github.zighang_zighang.domain.resume.__keyword.service.ResumeKeywordService;
 import com.github.zighang_zighang.domain.resume.dto.response.ResumeResponse;
 import com.github.zighang_zighang.domain.resume.entity.Resume;
@@ -7,6 +9,8 @@ import com.github.zighang_zighang.domain.resume.exception.ResumeException;
 import com.github.zighang_zighang.domain.resume.repository.ResumeRepository;
 import com.github.zighang_zighang.domain.resume.util.ResumeTextExtractor;
 import com.github.zighang_zighang.domain.user.entity.User;
+import com.github.zighang_zighang.global.infra.ai.ClovaStudioApi;
+import com.github.zighang_zighang.global.infra.opensearch.service.OpenSearchService;
 import com.github.zighang_zighang.global.infra.storage.dto.response.StorageResponse;
 import com.github.zighang_zighang.global.infra.storage.service.StorageService;
 import com.github.zighang_zighang.global.infra.storage.util.FileValidator;
@@ -24,9 +28,12 @@ import java.util.UUID;
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
+    private final ResumeEmbeddingRepository resumeEmbeddingRepository;
     private final ResumeKeywordService resumeKeywordService;
     private final StorageService storageService;
     private final ResumeTextExtractor textExtractor;
+    private final ClovaStudioApi clovaStudioApi;
+    private final OpenSearchService openSearchService;
 
     @Transactional
     public ResumeResponse uploadResume(User user, MultipartFile resumeFile) {
@@ -53,6 +60,21 @@ public class ResumeService {
 
         resumeKeywordService.updateKeywords(user);
 
+        // 임베딩 생성
+        List<List<Double>> embeddings = clovaStudioApi.embed(extractedContent);
+
+        // DB + OpenSearch 저장
+        embeddings.forEach(vec -> {
+            ResumeEmbedding re = ResumeEmbedding.builder()
+                    .resume(savedResume)
+                    .embedding(vec.toString()) // JSON처럼 저장
+                    .build();
+            resumeEmbeddingRepository.save(re);
+
+            // OpenSearch에 인덱싱
+            openSearchService.indexResumeEmbedding(savedResume.getId(), vec);
+        });
+
         return ResumeResponse.from(savedResume);
     }
 
@@ -73,6 +95,8 @@ public class ResumeService {
         }
 
         storageService.deleteFile(resume.getName(), resume.getStorageKey());
+
+        resumeEmbeddingRepository.deleteAllByResume(resume);
 
         resumeRepository.delete(resume);
 
