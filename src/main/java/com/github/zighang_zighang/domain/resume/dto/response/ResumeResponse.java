@@ -9,12 +9,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Schema
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(staticName = "of")
 public class ResumeResponse {
+
+    @Schema
+    private UUID id;
 
     @Schema(description = "파일명")
     private String fileName;
@@ -32,6 +36,7 @@ public class ResumeResponse {
     public static ResumeResponse from(Resume resume) {
 
         return ResumeResponse.of(
+                resume.getId(),
                 resume.getName(),
                 resume.getUrl(),
                 resume.getSize(),
