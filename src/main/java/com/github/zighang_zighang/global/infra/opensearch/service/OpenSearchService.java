@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.global.infra.opensearch.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.zighang_zighang.global.infra.opensearch.exception.OpenSearchException;
 import lombok.RequiredArgsConstructor;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch.core.IndexRequest;
@@ -35,7 +36,7 @@ public class OpenSearchService {
 
         } catch (IOException e) {
 //            e.printStackTrace();
-            throw new RuntimeException("OpenSearch 인덱싱 실패", e);
+            throw OpenSearchException.EXTRACT_FAILED.toException();
         }
     }
 }
