@@ -1,5 +1,7 @@
 package com.github.zighang_zighang.domain.user.service;
 
+import com.github.zighang_zighang.domain.recruitment.dto.response.RecommendedRecruitmentResponse;
+import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
 import com.github.zighang_zighang.domain.resume.service.ResumeService;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
@@ -11,11 +13,13 @@ import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
 import com.github.zighang_zighang.domain.user.repository.UserRepository;
 import com.github.zighang_zighang.global.classification.Job;
 import com.github.zighang_zighang.global.classification.JobCategory;
+import com.github.zighang_zighang.global.infra.opensearch.service.OpenSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -29,6 +33,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
     private final ResumeService resumeService;
+    private final OpenSearchService openSearchService;
+    private final RecruitmentRepository recruitmentRepository;
 
     @Transactional
     public User createUser(String email, String name) {
@@ -110,5 +116,21 @@ public class UserService {
 
     public UserResponse getMyProfile(User user) {
         return UserResponse.from(user);
+    }
+
+    public List<RecommendedRecruitmentResponse> recommendJobs(User user) {
+        // 1. 자소서 임베딩 조회
+        float[] resumeEmbedding = openSearchService.getLatestResumeEmbedding(user);
+
+        // 2. float[] → List<Double> 변환
+        List<Double> embeddingList = new ArrayList<>();
+        for (float v : resumeEmbedding) {
+            embeddingList.add((double) v);
+        }
+
+        // 3. OpenSearch에서 유사한 공고 _source 바로 가져오기
+        List<RecommendedRecruitmentResponse> responses = openSearchService.searchSimilarRecruitmentsWithSource(embeddingList, 10);
+
+        return responses;
     }
 }

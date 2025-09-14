@@ -1,5 +1,7 @@
 package com.github.zighang_zighang.domain.user.controller;
 
+import com.github.zighang_zighang.domain.recruitment.dto.response.RecommendedRecruitmentResponse;
+import com.github.zighang_zighang.domain.recruitment.dto.response.RecruitmentResponse;
 import com.github.zighang_zighang.domain.user.api.UserApi;
 import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
 import com.github.zighang_zighang.domain.user.dto.response.UserResponse;
@@ -13,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
@@ -36,6 +40,14 @@ public class UserController implements UserApi {
             @CurrentUser User user
     ) {
         return ApiResponse.ok(userService.getMyProfile(user));
+    }
+
+    // TODO: User 도메인이 아닌 더 적합한 도메인으로 컨트롤러 변경
+    @GetMapping("/recommend")
+    public ApiResponse<List<RecommendedRecruitmentResponse>> recommendJobs(
+            @CurrentUser User user
+    ) {
+       return ApiResponse.ok(userService.recommendJobs(user));
     }
 
 }

@@ -61,6 +61,8 @@ dependencies {
 
     implementation("com.konghq:unirest-java-core:4.5.1")
     implementation("com.konghq:unirest-objectmapper-jackson:4.2.9")
+
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 tasks.withType<JavaCompile> {
