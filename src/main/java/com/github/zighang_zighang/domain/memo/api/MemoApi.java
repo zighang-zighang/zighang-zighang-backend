@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.domain.memo.api;
 
 import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
+import com.github.zighang_zighang.domain.memo.dto.response.AllMemosResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemosResponse;
 import com.github.zighang_zighang.domain.user.entity.User;
@@ -16,6 +17,15 @@ import java.util.UUID;
         description = "메모 API"
 )
 public interface MemoApi {
+
+    @Operation(
+            summary = "전체 메모 목록 조회 (공고별 그룹)",
+            description = "사용자의 전체 메모 목록을 공고별로 그룹화하여 조회합니다."
+    )
+    ApiResponse<AllMemosResponse> getAllMemos(
+            @Parameter(hidden = true)
+            User user
+    );
 
     @Operation(
             summary = "메모 목록 조회",

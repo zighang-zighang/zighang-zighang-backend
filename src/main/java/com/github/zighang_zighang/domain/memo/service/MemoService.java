@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.domain.memo.service;
 
 import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
+import com.github.zighang_zighang.domain.memo.dto.response.AllMemosResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemosResponse;
 import com.github.zighang_zighang.domain.memo.entity.Memo;
@@ -27,6 +28,13 @@ public class MemoService {
 
     private final RecruitmentRepository recruitmentRepository;
     private final MemoRepository memoRepository;
+
+    public AllMemosResponse getAllMemos(User user) {
+
+        List<Memo> memos = memoRepository.findAllByUserOrderByCreatedAtDesc(user);
+
+        return AllMemosResponse.from(memos, recruitmentService);
+    }
 
     public MemosResponse getMemos(User user, UUID recruitmentId) {
 
@@ -72,6 +80,8 @@ public class MemoService {
 
         Memo memo = memoRepository.findByIdAndUser(memoId, user)
                 .orElseThrow(MemoExceptions.NOT_FOUND::toException);
+
+        System.out.println(memo);
 
         memoRepository.delete(memo);
     }

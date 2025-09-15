@@ -2,6 +2,7 @@ package com.github.zighang_zighang.domain.memo.controller;
 
 import com.github.zighang_zighang.domain.memo.api.MemoApi;
 import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
+import com.github.zighang_zighang.domain.memo.dto.response.AllMemosResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemosResponse;
 import com.github.zighang_zighang.domain.memo.service.MemoService;
@@ -23,6 +24,13 @@ import java.util.UUID;
 public class MemoController implements MemoApi {
 
     private final MemoService memoService;
+
+    @Override
+    @GetMapping("/all")
+    public ApiResponse<AllMemosResponse> getAllMemos(@CurrentUser User user) {
+
+        return ApiResponse.ok(memoService.getAllMemos(user));
+    }
 
     @Override
     @GetMapping
