@@ -1,6 +1,8 @@
 package com.github.zighang_zighang.domain.user.service;
 
+import com.github.zighang_zighang.domain.bookmark.repository.BookmarkRepository;
 import com.github.zighang_zighang.domain.recruitment.dto.response.RecommendedRecruitmentResponse;
+import com.github.zighang_zighang.domain.recruitment.entity.Recruitment;
 import com.github.zighang_zighang.domain.recruitment.repository.RecruitmentRepository;
 import com.github.zighang_zighang.domain.resume.service.ResumeService;
 import com.github.zighang_zighang.domain.user.constant.ProviderType;
@@ -35,6 +37,7 @@ public class UserService {
     private final ResumeService resumeService;
     private final OpenSearchService openSearchService;
     private final RecruitmentRepository recruitmentRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public User createUser(String email, String name) {
@@ -124,13 +127,19 @@ public class UserService {
 
         // 2. float[] → List<Double> 변환
         List<Double> embeddingList = new ArrayList<>();
-        for (float v : resumeEmbedding) {
-            embeddingList.add((double) v);
+        for (float f : resumeEmbedding) {
+            embeddingList.add((double) f);
         }
 
-        // 3. OpenSearch에서 유사한 공고 _source 바로 가져오기
-        List<RecommendedRecruitmentResponse> responses = openSearchService.searchSimilarRecruitmentsWithSource(embeddingList, 10);
+        // 3. OpenSearch에서 유사한 공고 조회 (엔티티 기반)
+        List<Recruitment> recruitments = recruitmentRepository.findSimilarRecruitments(embeddingList, 10);
 
-        return responses;
+        // 4. DTO 변환 (Bookmark 여부 체크)
+        return recruitments.stream()
+                .map(r -> {
+                    boolean bookmarked = bookmarkRepository.existsByUserAndRecruitmentId(user, r.getId());
+                    return RecommendedRecruitmentResponse.from(r, bookmarked);
+                })
+                .toList();
     }
 }

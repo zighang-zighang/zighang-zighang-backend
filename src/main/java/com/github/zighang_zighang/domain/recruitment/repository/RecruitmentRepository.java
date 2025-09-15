@@ -40,4 +40,6 @@ public interface RecruitmentRepository {
             double bookmarkWeight,
             double applicationWeight
     );
+
+    List<Recruitment> findSimilarRecruitments(List<Double> embedding, int topK);
 }

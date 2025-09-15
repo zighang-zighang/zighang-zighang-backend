@@ -9,10 +9,7 @@ import com.github.zighang_zighang.global.classification.JobCategory;
 import com.github.zighang_zighang.global.classification.Location;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +17,7 @@ import java.util.UUID;
 
 @Getter
 @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Recruitment {
 

@@ -29,21 +29,6 @@ public class OpenSearchService {
     private final WebClient.Builder webClientBuilder;
     private final ResumeEmbeddingRepository resumeEmbeddingRepository;
 
-    @Value("${spring.opensearch.scheme}")
-    private String scheme;
-
-    @Value("${spring.opensearch.host}")
-    private String host;
-
-    @Value("${spring.opensearch.port}")
-    private int port;
-
-    @Value("${spring.opensearch.username}")
-    private String username;
-
-    @Value("${spring.opensearch.password}")
-    private String password;
-
     public void indexResumeEmbedding(UUID resumeId, Object embedding) {
         try {
             Map<String, Object> source = Map.of(
@@ -60,61 +45,6 @@ public class OpenSearchService {
             IndexResponse response = client.index(request);
 
         } catch (IOException e) {
-//            e.printStackTrace();
-            throw OpenSearchException.EXTRACT_FAILED.toException();
-        }
-    }
-
-    public List<RecommendedRecruitmentResponse> searchSimilarRecruitmentsWithSource(List<Double> resumeEmbedding, int topK) {
-        try {
-            String query = """
-        {
-          "size": %d,
-          "query": {
-            "knn": {
-              "vector": {
-                "vector": %s,
-                "k": %d
-              }
-            }
-          }
-        }
-        """.formatted(topK, resumeEmbedding.toString(), topK);
-
-            String url = String.format("%s://%s:%d/recruitments/_search", scheme, host, port);
-
-            String basicAuth = username + ":" + password;
-
-            String responseJson = webClientBuilder.build()
-                    .post()
-                    .uri(url)
-                    .header("Authorization", "Basic " + Base64.getEncoder().encodeToString(basicAuth.getBytes()))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(query)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-
-//            System.out.println(responseJson);
-
-            // Jackson으로 _source 리스트 파싱
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-            JsonNode root = mapper.readTree(responseJson);
-            JsonNode hits = root.path("hits").path("hits");
-
-            List<RecommendedRecruitmentResponse> results = new ArrayList<>();
-            for (JsonNode hit : hits) {
-                JsonNode source = hit.path("_source");
-                RecommendedRecruitmentResponse dto = mapper.treeToValue(source, RecommendedRecruitmentResponse.class);
-                results.add(dto);
-            }
-
-            return results;
-
-        } catch (Exception e) {
 //            e.printStackTrace();
             throw OpenSearchException.EXTRACT_FAILED.toException();
         }
