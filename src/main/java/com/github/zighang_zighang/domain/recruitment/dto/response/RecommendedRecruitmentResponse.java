@@ -51,7 +51,10 @@ public class RecommendedRecruitmentResponse {
     @Schema(description = "북마크 여부")
     private Boolean isBookmarked;
 
-    public static RecommendedRecruitmentResponse from(Recruitment recruitment, boolean bookmarked) {
+    @Schema(description = "추천 이유 (59자 이내)")
+    private String reason;
+
+    public static RecommendedRecruitmentResponse from(Recruitment recruitment, boolean bookmarked, String reason) {
         return RecommendedRecruitmentResponse.of(
                 recruitment.getId(),
                 recruitment.getTitle(),
@@ -68,7 +71,8 @@ public class RecommendedRecruitmentResponse {
                 recruitment.getCompanyName(),
                 recruitment.getCompanyDescription(),
                 recruitment.getCompanyImageUrl(),
-                bookmarked
+                bookmarked,
+                reason
         );
     }
 
