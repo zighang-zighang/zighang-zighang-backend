@@ -93,7 +93,7 @@ public class UserService {
                 request.getCareerYear(),
                 request.getEducationLevel(),
                 request.getGraduationStatus(),
-                request.getPreferredRegion()
+                request.getPreferredRegions()
         );
 
         // 자기소개서 업로드

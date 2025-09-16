@@ -40,7 +40,7 @@ public class UserResponse {
     EducationLevel educationLevel;
 
     @Schema(description = "선호 근무지")
-    Location preferredRegion;
+    List<Location> preferredRegions;
 
     public static UserResponse from(User user) {
 
@@ -52,7 +52,7 @@ public class UserResponse {
                 user.getInterestJobCategories(),
                 user.getCareerYear(),
                 user.getEducationLevel(),
-                user.getPreferredRegion()
+                user.getPreferredRegions()
         );
     }
 

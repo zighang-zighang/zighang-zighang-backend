@@ -47,9 +47,10 @@ public class User extends BaseSchema {
     @Enumerated(EnumType.STRING)
     private GraduationStatus graduationStatus;
     // 선호 근무 지역
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
-
-    private Location preferredRegion;
+    private List<Location> preferredRegions = new ArrayList<>();
 
     // 자기소개서
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -70,7 +71,7 @@ public class User extends BaseSchema {
             int careerYear,
             EducationLevel educationLevel,
             GraduationStatus graduationStatus,
-            Location preferredRegion
+            List<Location> preferredRegions
     ) {
         this.interestedJobs.clear();
         if (interestedJobs != null) this.interestedJobs.addAll(interestedJobs);
@@ -79,7 +80,8 @@ public class User extends BaseSchema {
         this.careerYear = careerYear;
         this.educationLevel = educationLevel;
         this.graduationStatus = graduationStatus;
-        this.preferredRegion = preferredRegion;
+        this.preferredRegions.clear();
+        if (preferredRegions != null) this.preferredRegions.addAll(preferredRegions);
     }
 
 }
