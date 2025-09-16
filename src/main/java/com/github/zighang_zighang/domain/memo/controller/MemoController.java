@@ -1,6 +1,7 @@
 package com.github.zighang_zighang.domain.memo.controller;
 
 import com.github.zighang_zighang.domain.memo.api.MemoApi;
+import com.github.zighang_zighang.domain.memo.dto.request.DeleteMemosByRecruitmentIdsRequest;
 import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
 import com.github.zighang_zighang.domain.memo.dto.response.AllMemosResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
@@ -70,6 +71,18 @@ public class MemoController implements MemoApi {
             @PathVariable UUID memoId
     ) {
         memoService.deleteMemo(user, memoId);
+
+        return ApiResponse.ok();
+    }
+
+    @Override
+    @DeleteMapping("/bulk")
+    public ApiResponse<Void> deleteMemosByRecruitmentIds(
+            @CurrentUser User user,
+            @RequestBody @Validated DeleteMemosByRecruitmentIdsRequest request
+    ) {
+
+        memoService.deleteMemosByRecruitmentIds(user, request);
 
         return ApiResponse.ok();
     }

@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.memo.api;
 
+import com.github.zighang_zighang.domain.memo.dto.request.DeleteMemosByRecruitmentIdsRequest;
 import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
 import com.github.zighang_zighang.domain.memo.dto.response.AllMemosResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
@@ -73,5 +74,16 @@ public interface MemoApi {
 
             @Parameter(description = "메모 ID", required = true)
             UUID memoId
+    );
+
+    @Operation(
+            summary = "공고별 메모 일괄 삭제",
+            description = "여러 공고 ID에 연관된 메모를 일괄 삭제합니다."
+    )
+    ApiResponse<Void> deleteMemosByRecruitmentIds(
+            @Parameter(hidden = true)
+            User user,
+
+            DeleteMemosByRecruitmentIdsRequest request
     );
 }

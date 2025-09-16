@@ -1,5 +1,6 @@
 package com.github.zighang_zighang.domain.memo.service;
 
+import com.github.zighang_zighang.domain.memo.dto.request.DeleteMemosByRecruitmentIdsRequest;
 import com.github.zighang_zighang.domain.memo.dto.request.UpsertMemoRequest;
 import com.github.zighang_zighang.domain.memo.dto.response.AllMemosResponse;
 import com.github.zighang_zighang.domain.memo.dto.response.MemoResponse;
@@ -84,5 +85,11 @@ public class MemoService {
         System.out.println(memo);
 
         memoRepository.delete(memo);
+    }
+
+    @Transactional
+    public void deleteMemosByRecruitmentIds(User user, DeleteMemosByRecruitmentIdsRequest request) {
+
+        memoRepository.deleteByUserAndRecruitmentIdIn(user, request.getRecruitments());
     }
 }

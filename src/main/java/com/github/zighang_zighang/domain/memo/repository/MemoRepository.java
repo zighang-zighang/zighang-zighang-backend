@@ -14,4 +14,6 @@ public interface MemoRepository extends JpaRepository<Memo, UUID> {
     List<Memo> findAllByUserOrderByCreatedAtDesc(User user);
 
     Optional<Memo> findByIdAndUser(UUID id, User user);
+
+    void deleteByUserAndRecruitmentIdIn(User user, List<UUID> recruitmentIds);
 }
