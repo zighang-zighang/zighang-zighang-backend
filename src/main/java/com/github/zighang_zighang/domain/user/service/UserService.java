@@ -154,7 +154,7 @@ public class UserService {
         }
 
         // 3. OpenSearch에서 유사한 공고 조회 (엔티티 기반)
-        List<Recruitment> recruitments = recruitmentRepository.findSimilarRecruitments(embeddingList, 10);
+        List<Recruitment> recruitments = recruitmentRepository.findSimilarRecruitments(embeddingList, 9);
 
         // 4. DTO 변환 (Bookmark 여부 체크)
         return recruitments.stream()
