@@ -27,32 +27,38 @@ import java.util.Objects;
 public class ApiExceptionHandler {
 
     @ExceptionHandler({NoResourceFoundException.class, HttpRequestMethodNotSupportedException.class})
-    public ApiResponse<?> noResourceFoundException(Exception ignored) {
+    public ApiResponse<?> noResourceFoundException(Exception e) {
 
+        e.printStackTrace();
         return GlobalExceptionCode.NOT_FOUND.toResponse();
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ApiResponse<?> authorizationDeniedException(AuthorizationDeniedException ignored) {
+    public ApiResponse<?> authorizationDeniedException(AuthorizationDeniedException e) {
 
+        e.printStackTrace();
         return GlobalExceptionCode.NOT_PERMITTED.toResponse();
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ApiResponse<?> authenticationException(AuthenticationException e, HttpServletRequest request) {
-        
+
+        e.printStackTrace();
         sentry(e, request);
         return AuthExceptionCode.OAUTH2_FAILURE.toResponse();
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ApiResponse<?> httpMessageNotReadableException(HttpMessageNotReadableException ignored) {
+    public ApiResponse<?> httpMessageNotReadableException(HttpMessageNotReadableException e) {
 
+        e.printStackTrace();
         return GlobalExceptionCode.BODY_NOT_READABLE.toResponse();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<?> methodArgumentNotValidException(MethodArgumentNotValidException e) {
+
+        e.printStackTrace();
 
         if (Objects.isNull(e.getBindingResult().getFieldError())) {
 
@@ -69,6 +75,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ApiResponse<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e, HttpServletRequest request) {
 
+        e.printStackTrace();
         sentry(e, request);
         return StorageException.FILE_SIZE_EXCEEDED.toResponse();
     }
@@ -76,6 +83,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ApiResponse<?> apiException(ApiException e, HttpServletRequest request) {
 
+        e.printStackTrace();
         sentry(e, request);
         return e.toResponse();
     }
@@ -83,6 +91,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ApiResponse<?> exception(Exception e, HttpServletRequest request) {
 
+        e.printStackTrace();
         sentry(e, request);
         return GlobalExceptionCode.EXCEPTION.toResponse();
     }

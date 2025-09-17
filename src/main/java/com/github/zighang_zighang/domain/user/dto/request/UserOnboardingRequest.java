@@ -18,8 +18,8 @@ import java.util.List;
 public class UserOnboardingRequest {
 
     @NotNull
-    @Size(min = 1, max = 3)
-    @Schema(description = "선호 직군 (최대 3개)")
+    @Size(min = 1)
+    @Schema(description = "선호 직군")
     List<Job> interestedJobs;
 
     @NotNull

@@ -11,11 +11,8 @@ import com.github.zighang_zighang.domain.user.dto.request.UserOnboardingRequest;
 import com.github.zighang_zighang.domain.user.dto.response.UserResponse;
 import com.github.zighang_zighang.domain.user.entity.User;
 import com.github.zighang_zighang.domain.user.entity.UserProvider;
-import com.github.zighang_zighang.domain.user.exception.UserException;
 import com.github.zighang_zighang.domain.user.repository.UserProviderRepository;
 import com.github.zighang_zighang.domain.user.repository.UserRepository;
-import com.github.zighang_zighang.global.classification.Job;
-import com.github.zighang_zighang.global.classification.JobCategory;
 import com.github.zighang_zighang.global.infra.ai.ClovaStudioApi;
 import com.github.zighang_zighang.global.infra.ai.util.ClovaCompletionRequest;
 import com.github.zighang_zighang.global.infra.opensearch.service.OpenSearchService;
@@ -26,9 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,8 +78,6 @@ public class UserService {
 
     @Transactional
     public UserResponse addOnboarding(User user, UserOnboardingRequest request, MultipartFile resumeFile) {
-        validateOnboarding(request);
-
         // 관심 직군/직무, 경력, 학교, 졸업 구분, 지역 저장
         user.updateOnboardingInfo(
                 request.getInterestedJobs(),
@@ -103,41 +95,6 @@ public class UserService {
 
         return UserResponse.from(user);
     }
-
-    public void validateOnboarding(UserOnboardingRequest request) {
-        List<Job> selectedJobs = request.getInterestedJobs() != null ? request.getInterestedJobs() : List.of();
-        List<JobCategory> selectedCategories = request.getInterestedJobCategories() != null ? request.getInterestedJobCategories() : List.of();
-
-        // 직군 최대 3개인지 검증
-        int distinctJobCount = (int) selectedJobs.stream()
-                .filter(Objects::nonNull)
-                .distinct()
-                .count();
-
-        if (distinctJobCount > 3) {
-            throw UserException.EXCEEDED_MAX_JOB_SELECTION.toException();
-        }
-
-        // 경력 (0-10년+) 검증
-        if (request.getCareerYear() < 0 || request.getCareerYear() > 10) {
-            throw UserException.INVALID_CAREER_YEAR.toException();
-        }
-
-        // 선택한 직무 중에서, 직군에 속하지 않는 항목을 필터링
-        Set<Job> selectedJobSet = selectedJobs.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        List<JobCategory> invalidCategories = selectedCategories.stream()
-                .filter(Objects::nonNull)
-                .filter(category -> !selectedJobSet.contains(category.parent()))
-                .toList();
-
-        if (!invalidCategories.isEmpty()) {
-            throw UserException.INVALID_JOB_CATEGORY_SELECTION.toException();
-        }
-    }
-
 
     public UserResponse getMyProfile(User user) {
         return UserResponse.from(user);
