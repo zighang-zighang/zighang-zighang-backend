@@ -32,7 +32,7 @@ public interface RecruitmentRepository {
     );
 
     List<Recruitment> findPopularRecruitmentIds(
-            Job job,
+            List<Job> jobs,
             LocalDateTime viewCutoff,
             LocalDateTime bookmarkCutoff,
             LocalDateTime applicationCutoff,

@@ -66,9 +66,9 @@ public class RecruitmentController implements RecruitmentApi {
     @GetMapping("/popular")
     public ApiResponse<List<RecruitmentResponse>> getPopularRecruitments(
             @CurrentUser User user,
-            @RequestParam(required = false) Job job
+            @RequestParam(required = false) List<Job> jobs
     ) {
 
-        return ApiResponse.ok(recruitmentService.getPopularRecruitments(user, job));
+        return ApiResponse.ok(recruitmentService.getPopularRecruitments(user, jobs));
     }
 }

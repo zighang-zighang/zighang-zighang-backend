@@ -99,7 +99,7 @@ public class RecruitmentService {
         }
     }
 
-    public List<RecruitmentResponse> getPopularRecruitments(User user, Job job) {
+    public List<RecruitmentResponse> getPopularRecruitments(User user, List<Job> jobs) {
         LocalDateTime now = LocalDateTime.now();
 
         LocalDateTime viewCutoff = now.minusHours(popularRecruitmentProperty.getViewHours());
@@ -107,7 +107,7 @@ public class RecruitmentService {
         LocalDateTime applicationCutoff = now.minusHours(popularRecruitmentProperty.getApplicationHours());
 
         List<Recruitment> recruitments = recruitmentRepository.findPopularRecruitmentIds(
-                job,
+                jobs,
                 viewCutoff, bookmarkCutoff, applicationCutoff,
                 popularRecruitmentProperty.getViewWeight(),
                 popularRecruitmentProperty.getBookmarkWeight(),

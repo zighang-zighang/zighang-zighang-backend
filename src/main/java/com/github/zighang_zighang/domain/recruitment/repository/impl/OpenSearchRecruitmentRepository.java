@@ -123,7 +123,7 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
 
     @Override
     public List<Recruitment> findPopularRecruitmentIds(
-            Job job,
+            List<Job> jobs,
             LocalDateTime viewCutoff,
             LocalDateTime bookmarkCutoff,
             LocalDateTime applicationCutoff,
@@ -146,8 +146,10 @@ public class OpenSearchRecruitmentRepository implements RecruitmentRepository {
                 .map(this::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .filter(r -> job == null || r.getJobs().stream().anyMatch(job1 -> job1.name().equals(job.name())))
-                .limit(5)
+                .filter(r -> jobs == null || jobs.isEmpty() || 
+                        r.getJobs().stream().anyMatch(recruitmentJob -> 
+                                jobs.stream().anyMatch(filterJob -> filterJob.name().equals(recruitmentJob.name()))))
+                .limit(20)
                 .toList();
     }
 

@@ -60,13 +60,13 @@ public interface RecruitmentApi {
 
     @Operation(
             summary = "인기 공고 조회",
-            description = "특정 직무에 대한 인기 공고 목록을 조회합니다."
+            description = "특정 직무들에 대한 인기 공고 목록을 조회합니다."
     )
     ApiResponse<List<RecruitmentResponse>> getPopularRecruitments(
             @Parameter(hidden = true)
             User user,
 
-            @Parameter(description = "직무")
-            Job job
+            @Parameter(description = "직무 목록")
+            List<Job> jobs
     );
 }
